@@ -1,0 +1,50 @@
+Package: comparsR
+Title: Read Quansys Q-View ELISA Project Files
+Version: 1.0.0
+Authors@R:
+    person("Raban", "Heller",
+           email = "raban.heller@charite.de",
+           role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0000-0001-8006-9742"))
+Description: Pure-R parser for the binary '.Q-View' project file format
+    produced by Quansys Biosciences Q-View Software (v3.x). Reads the
+    embedded H2 database container and CSV report, and returns project
+    metadata, the analyte panel with units and detection limits, sample
+    well-group assignments, per-well pixel-intensity replicates, summary
+    statistics, optional back-calculated concentrations, and a plate
+    layout, all as tidy tibbles. No Java runtime or H2 database driver
+    is required.
+License: MIT + file LICENSE
+URL: https://github.com/r-heller/comparsR,
+    https://r-heller.github.io/comparsR/
+BugReports: https://github.com/r-heller/comparsR/issues
+Depends:
+    R (>= 4.1.0)
+Imports:
+    cli,
+    dplyr,
+    openxlsx2,
+    readr,
+    rlang,
+    stats,
+    stringr,
+    tibble,
+    tidyr,
+    tools,
+    utils
+Suggests:
+    bslib,
+    DT,
+    ggplot2,
+    knitr,
+    rmarkdown,
+    shiny,
+    testthat (>= 3.0.0),
+    withr
+VignetteBuilder:
+    knitr
+Config/testthat/edition: 3
+Encoding: UTF-8
+Language: en-US
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3

@@ -1,0 +1,127 @@
+---
+title: "Reading Q-View project files with comparsR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reading Q-View project files with comparsR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(comparsR)
+```
+
+`comparsR` is a pure-R parser for `.Q-View` binary project files. The
+file format is a single-file container that bundles an embedded H2 SQL
+database with binary plate-image data; the rendered CSV report is
+stored as a CLOB inside the database. `read_qview()` extracts that
+report without needing a Java runtime or H2 driver.
+
+## Reading a project file
+
+```{r, eval = FALSE}
+qv <- read_qview("path/to/project.Q-View")
+qv
+```
+
+The returned object has class `qview` and contains:
+
+```{r, eval = FALSE}
+str(qv, max.level = 1)
+#> List of 11
+#>  $ metadata          :List of 12
+#>  $ manifest          : tibble [4 x 3]
+#>  $ segments          : tibble [3 x 4]
+#>  $ analytes          : tibble [<n_analytes> x 8]
+#>  $ well_groups       : tibble [<n_groups> x 7]
+#>  $ pixel_intensities : tibble [<n_rows> x 8]
+#>  $ summary_statistics: tibble [<n_rows> x 6]
+#>  $ concentrations    : NULL or tibble
+#>  $ curve_fit         : NULL or tibble
+#>  $ report_csv        : character vector
+#>  $ plate_layout      : tibble [96 x 7]
+#>  - attr(*, "class") = "qview"
+```
+
+## Output tibbles
+
+The shape of each table (with placeholder analyte names):
+
+### `analytes`
+
+```
+spot_number | analyte    | unit  | lod | lloq | uloq | assay_control_low | assay_control_high
+-----------------------------------------------------------------------------------------
+1           | analyte_1  | ng/ml | NA  | NA   | NA   | NA                | NA
+2           | analyte_2  | ug/ml | NA  | NA   | NA   | NA                | NA
+...
+```
+
+### `well_groups`
+
+```
+well_group | sample_id | is_standard | is_negative | is_sample | is_control | well_type
+----------------------------------------------------------------------------------------
+Cal 1      | Cal 1     | TRUE        | FALSE       | FALSE     | FALSE      | standard
+Low        | Low       | FALSE       | TRUE        | FALSE     | FALSE      | negative
+sample_a   | sample_a  | FALSE       | FALSE       | TRUE      | FALSE      | sample
+...
+```
+
+### `pixel_intensities`
+
+```
+well_group | sample_id | well | replicate | analyte   | unit  | pixel_intensity | dilution
+-------------------------------------------------------------------------------------------
+sample_a   | sample_a  | C3   | 1         | analyte_1 | ng/ml | 12345           | 100
+sample_a   | sample_a  | C3   | 1         | analyte_2 | ug/ml |  4567           | 100
+...
+```
+
+## The naming convention
+
+When Q-View imports a plate-template CSV it rewrites the identifiers:
+
+* `Cal 1` -> `ICal 1`
+* `Low`   -> `GLow`
+* `High`  -> `HHigh`
+* `FD...` and any all-digit ID -> a single `N` prefix.
+
+Pass `strip_prefix = TRUE` to undo the rewrite:
+
+```{r, eval = FALSE}
+qv <- read_qview("path/to/project.Q-View", strip_prefix = TRUE)
+qv$well_groups$sample_id
+```
+
+## Plotting
+
+```{r, eval = FALSE}
+plot(qv, type = "plate_map")
+plot(qv, type = "intensity_heatmap")
+plot(qv, type = "replicate_scatter")
+```
+
+`plot.qview()` requires `ggplot2`.
+
+## Exporting
+
+```{r, eval = FALSE}
+qview_to_xlsx(qv, "out.xlsx")
+qview_to_csv_dir(qv, "out_csv/")
+saveRDS(qv, "out.rds")
+```
+
+## Interactive front-end
+
+```{r, eval = FALSE}
+qview_app()
+```
+
+Launches a small Shiny app: upload a `.Q-View` file (and optionally a
+plate-template CSV), preview each parsed table, and download the
+result as `xlsx`, `rds`, or a zip of CSVs.

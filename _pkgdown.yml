@@ -1,0 +1,70 @@
+url: https://r-heller.github.io/comparsR/
+
+template:
+  bootstrap: 5
+  bootswatch: flatly
+
+home:
+  title: comparsR
+  description: >
+    Parse and export longitudinal complement and neuroaxonal multiplex
+    immunoassays.
+
+reference:
+  - title: Readers
+    desc: Parse raw instrument output and clinical metadata.
+    contents:
+      - cp_read_complement
+      - cp_read_neuroaxonal
+      - cp_read_metadata
+      - cp_read_controls
+      - cp_read_auto
+
+  - title: Build
+    desc: Assemble the canonical `compars_data` container.
+    contents:
+      - cp_build
+
+  - title: Transform
+    desc: Normalise against controls and compute derived variables.
+    contents:
+      - cp_normalize
+      - cp_derive
+
+  - title: Export
+    desc: Write `compars_data` objects to disk.
+    contents:
+      - cp_export_xlsx
+      - cp_export_csv
+      - cp_export_rds
+
+  - title: Validation and reporting
+    contents:
+      - cp_validate
+      - cp_summary
+      - compars_data-methods
+
+  - title: Reference tables
+    contents:
+      - cp_timepoint_map
+      - cp_analyte_info
+
+  - title: Examples
+    contents:
+      - cp_example_data
+      - cp_example_files
+
+  - title: Package
+    contents:
+      - comparsR-package
+
+articles:
+  - title: Getting started
+    navbar: ~
+    contents:
+      - comparsR
+
+navbar:
+  structure:
+    left:  [intro, reference, articles, news]
+    right: [search, github]

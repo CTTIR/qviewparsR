@@ -1,0 +1,16 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^codecov\.yml$
+^cran-comments\.md$
+^CRAN-SUBMISSION$
+^\.data$
+^\.data/.*$
+^comparsR_icon\.svg$
+^_build\.R$
+^LICENSE\.md$
+^revdep$
+^README\.Rmd$
