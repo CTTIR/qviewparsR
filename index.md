@@ -1,0 +1,148 @@
+# qviewparsR
+
+`qviewparsR` is a pure-R parser for the binary `.Q-View` project files
+produced by Quansys Biosciences Q-View Software (v3.x), used for
+chemiluminescent multiplex ELISA plate imaging and quantification. It
+extracts the embedded report and returns it as tidy tibbles.
+
+No Java runtime, no H2 database driver, no system dependencies beyond a
+working R installation.
+
+## Installation
+
+``` r
+
+# install.packages("pak")
+pak::pak("r-heller/qviewparsR")
+```
+
+## Quick start
+
+``` r
+
+library(qviewparsR)
+
+qv <- read_qview("path/to/project.Q-View")
+qv                                # compact summary
+qv$analytes                       # spot_number, analyte, unit, lod, lloq, ...
+qv$pixel_intensities              # long-format replicate readings
+qv$plate_layout                   # one row per well
+
+plot(qv, type = "plate_map")      # plate visualisation (needs ggplot2)
+plot(qv, type = "intensity_heatmap")
+plot(qv, type = "replicate_scatter")
+
+# Export
+qview_to_xlsx(qv, "out.xlsx")
+qview_to_csv_dir(qv, "out_csv/")
+saveRDS(qv, "out.rds")
+
+# Interactive front-end (upload, visualise, download)
+qview_app()
+```
+
+## What is a `.Q-View` file?
+
+A `.Q-View` file is a single-file **container** that bundles an embedded
+**H2 SQL database** (Java, version `0.5/B`) with binary LOB files
+holding the chemiluminescent plate images. The file is **not** a ZIP
+archive, XML, or CSV — it is a proprietary binary container with a
+plain-text manifest header followed by concatenated H2 segments.
+
+### Container layout
+
+    +-----------------------------------------+
+    | Bytes 0 - ~290:  text manifest header   |
+    |   - container version                   |
+    |   - declared file entries (size + name) |
+    +-----------------------------------------+
+    | Segment 1: main H2 SQL database         |
+    |   - 36 tables (see schema below)        |
+    |   - the rendered CSV report (CLOB)      |
+    +-----------------------------------------+
+    | Segment 2: LOB file 1 (image data)      |
+    +-----------------------------------------+
+    | Segment 3: LOB file 2 (more LOB data)   |
+    +-----------------------------------------+
+
+Each H2 segment starts with a `-- H2 0.5/B --` triplet marker. The
+database uses 2048-byte pages.
+
+### Embedded H2 schema (key tables)
+
+`qviewparsR` recovers data through the embedded CSV report; the table
+diagram below documents the underlying schema for reference.
+
+| Group | Table | Purpose |
+|----|----|----|
+| **Project / plate** | `PROJECT` | Project metadata (creator, version, timezone) |
+|  | `PLATE` | Plate identifiers |
+|  | `PLATEDEFINITION` | Plate geometry (rows, columns, well diameter) |
+|  | `PRODUCT` | Product / lot identifiers, linked plate / plex definitions |
+| **Well & spot layout** | `WELL` | Well coordinates (pixel + row/col) |
+|  | `SPOT` | Per-spot pixel intensity (raw + negative-subtracted), masking flags |
+|  | `PLEXDEFINITION` / `PLEXSPOT` | Spot layout per well |
+| **Analytes / standards** | `ANALYTE` | Analyte names |
+|  | `PRODUCTANALYTE` | Spot number -\> analyte mapping (key table) |
+|  | `ANALYTESTANDARD` / `ANALYTESTANDARDANALYTE` | Standard curve concentrations |
+| **Sample assignment** | `WELLGROUP` | Sample IDs and type flags (standard / negative / sample / control) |
+|  | `WELLGROUPWELL` | Well-to-group mapping with dilution factors |
+| **Pixel-intensity cache** | `SPOTPIXELINTENSITY` | Cached per-image spot intensity |
+|  | `NEGATIVESPOTPIXELINTENSITY` | Negative-spot intensity before subtraction |
+| **Curve fitting** | `CURVEFITOPTION` | Regression model settings (4PL, 5PL, HDR, weighting) |
+|  | `REGRESSIONSOLUTION` | Fitted curve parameters |
+| **Image / camera** | `IMAGE` / `IMAGEDETAILS` / `CAMERA` | Image and imager metadata |
+| **Report** | `REPORTCONFIGURATION` | CSV report column flags |
+|  | `REPORTHISTORY` | The fully rendered CSV report (CLOB) |
+|  | `REPORTINFO` | Signatures and approval state |
+
+### Naming convention
+
+When Q-View imports a well-assignment template CSV it prefixes the
+identifiers internally:
+
+| Template value              | Q-View internal name         |
+|-----------------------------|------------------------------|
+| `Cal 1` … `Cal N`           | `ICal 1` … `ICal N`          |
+| `Low`                       | `GLow`                       |
+| `High`                      | `HHigh`                      |
+| `FD24277364`, all-digit IDs | `NFD24277364`, `N1211498458` |
+
+[`strip_qview_prefix()`](https://r-heller.github.io/qviewparsR/reference/strip_qview_prefix.md)
+reverses this transformation, and
+`read_qview(path, strip_prefix = TRUE)` applies it across the whole
+returned object.
+
+## Output structure
+
+[`read_qview()`](https://r-heller.github.io/qviewparsR/reference/read_qview.md)
+returns a list with class `qview`:
+
+| Slot | Description |
+|----|----|
+| `metadata` | Project, plate, image, imager, product, user, software version, template name, container version, file path, parse timestamp |
+| `manifest` | One row per declared file entry inside the container |
+| `segments` | Byte ranges of the three H2 segments |
+| `analytes` | `spot_number`, `analyte`, `unit`, `lod`, `lloq`, `uloq`, `assay_control_low/high` |
+| `well_groups` | `well_group`, `sample_id`, type flags (`is_standard`, `is_negative`, `is_sample`, `is_control`), `well_type` factor |
+| `pixel_intensities` | Long-format per-well replicate readings |
+| `summary_statistics` | Per-group `average`, `std_dev`, `cv` rows |
+| `concentrations` | Long-format concentrations, or `NULL` if the report is qualitative |
+| `curve_fit` | Per-analyte regression model |
+| `report_csv` | Raw CSV report lines |
+| `plate_layout` | One row per plate well with sample assignment + well type |
+
+## Function reference
+
+| Category | Functions |
+|----|----|
+| Reader | [`read_qview()`](https://r-heller.github.io/qviewparsR/reference/read_qview.md) |
+| Helpers | [`strip_qview_prefix()`](https://r-heller.github.io/qviewparsR/reference/strip_qview_prefix.md), [`well_label()`](https://r-heller.github.io/qviewparsR/reference/well_label.md) |
+| Optional | [`read_qview_template()`](https://r-heller.github.io/qviewparsR/reference/read_qview_template.md) |
+| Methods | [`print.qview()`](https://r-heller.github.io/qviewparsR/reference/print.qview.md), [`plot.qview()`](https://r-heller.github.io/qviewparsR/reference/plot.qview.md) |
+| Export | [`qview_to_xlsx()`](https://r-heller.github.io/qviewparsR/reference/qview_to_xlsx.md), [`qview_to_csv_dir()`](https://r-heller.github.io/qviewparsR/reference/qview_to_csv_dir.md) |
+| Shiny app | [`qview_app()`](https://r-heller.github.io/qviewparsR/reference/qview_app.md) |
+
+## License
+
+MIT (c) 2026 Raban Heller.
