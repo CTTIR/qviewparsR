@@ -209,7 +209,8 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
     ggplot2::geom_tile(colour = "grey30") +
     ggplot2::geom_text(ggplot2::aes(label = .data$sample_id),
                        size = 2.5, na.rm = TRUE) +
-    ggplot2::scale_fill_brewer(palette = "Set2", na.value = "grey95") +
+    ggplot2::scale_fill_viridis_d(option = "D", begin = 0.2, end = 0.85,
+                                  na.value = "grey90") +
     ggplot2::labs(title = paste0("Plate map: ", x$metadata$plate %||% ""),
                   x = NULL, y = NULL, fill = "well type") +
     ggplot2::theme_minimal()

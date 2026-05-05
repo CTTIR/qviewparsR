@@ -45,9 +45,168 @@ qview_app <- function(max_upload_mb = 512, ...) {
 }
 
 
+.qv_theme <- function(dark = FALSE) {
+  if (isTRUE(dark)) {
+    bslib::bs_theme(
+      version    = 5,
+      bg         = "#212121",
+      fg         = "#dadada",
+      primary    = "#dadada",
+      secondary  = "#9e9e9e",
+      success    = "#dadada",
+      info       = "#9e9e9e",
+      warning    = "#9e9e9e",
+      danger     = "#dadada",
+      base_font  = bslib::font_collection(
+        "system-ui", "-apple-system", "BlinkMacSystemFont",
+        "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"
+      ),
+      code_font  = bslib::font_collection(
+        "SF Mono", "Consolas", "Liberation Mono", "Menlo", "monospace"
+      ),
+      "border-color"      = "#424242",
+      "card-border-color" = "#424242",
+      "card-cap-bg"       = "#2a2a2a",
+      "body-bg"           = "#212121",
+      "body-color"        = "#dadada",
+      "link-color"        = "#dadada",
+      "link-hover-color"  = "#ffffff",
+      "border-radius"     = "0.25rem"
+    )
+  } else {
+    bslib::bs_theme(
+      version    = 5,
+      bg         = "#fafafa",
+      fg         = "#212121",
+      primary    = "#212121",
+      secondary  = "#424242",
+      success    = "#212121",
+      info       = "#424242",
+      warning    = "#424242",
+      danger     = "#212121",
+      base_font  = bslib::font_collection(
+        "system-ui", "-apple-system", "BlinkMacSystemFont",
+        "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"
+      ),
+      code_font  = bslib::font_collection(
+        "SF Mono", "Consolas", "Liberation Mono", "Menlo", "monospace"
+      ),
+      "border-color"      = "#e0e0e0",
+      "card-border-color" = "#e0e0e0",
+      "card-cap-bg"       = "#f0f0f0",
+      "body-bg"           = "#fafafa",
+      "body-color"        = "#212121",
+      "link-color"        = "#212121",
+      "link-hover-color"  = "#000000",
+      "border-radius"     = "0.25rem"
+    )
+  }
+}
+
+.qv_css <- "
+:root { --qv-fg:#212121; --qv-bg:#fafafa; --qv-line:#e0e0e0; --qv-mute:#666; }
+body { background: var(--qv-bg); color: var(--qv-fg); }
+.qv-brand {
+  display:flex; align-items:center; gap:.75rem;
+  padding:.6rem 1rem; border-bottom:1px solid var(--qv-line);
+  background:#ffffff;
+}
+.qv-brand img.qv-hex { height:44px; width:auto; }
+.qv-brand .qv-title { font-weight:600; letter-spacing:.02em; }
+.qv-brand .qv-sub   { color:var(--qv-mute); font-size:.85rem; margin-left:.4rem; }
+
+.bslib-sidebar-layout > .sidebar { background:#ffffff; border-right:1px solid var(--qv-line); }
+.card { border:1px solid var(--qv-line); box-shadow:none; }
+.card-header { background:#f0f0f0; border-bottom:1px solid var(--qv-line);
+  font-weight:600; letter-spacing:.02em; }
+
+.btn { border-radius:.25rem; font-weight:500; letter-spacing:.01em; }
+.btn-primary, .btn-default {
+  background:var(--qv-fg); border-color:var(--qv-fg); color:#ffffff;
+}
+.btn-primary:hover, .btn-default:hover {
+  background:#000; border-color:#000; color:#ffffff;
+}
+.btn.btn-outline-secondary, .shiny-download-link {
+  background:#ffffff; color:var(--qv-fg); border:1px solid var(--qv-fg);
+}
+.shiny-download-link:hover { background:var(--qv-fg); color:#ffffff; }
+
+.nav-tabs .nav-link.active { color:var(--qv-fg); border-bottom-color:var(--qv-fg); }
+.nav-tabs .nav-link { color:var(--qv-mute); }
+.nav-tabs .nav-link:hover { color:var(--qv-fg); }
+
+pre, code { background:#ffffff; border:1px solid var(--qv-line); color:var(--qv-fg); }
+hr { border-top:1px solid var(--qv-line); }
+.form-control:focus, .form-check-input:focus {
+  border-color:var(--qv-fg); box-shadow:0 0 0 .15rem rgba(33,33,33,.15);
+}
+table.dataTable thead th { border-bottom:1px solid var(--qv-fg) !important; }
+table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
+
+.qv-about { max-width: 760px; padding: 1rem 0.25rem; }
+.qv-about h2 { letter-spacing:.02em; margin-bottom:.5rem; }
+.qv-about h3 { margin-top:1.4rem; font-weight:600; }
+.qv-about blockquote { border-left:3px solid var(--qv-fg); padding-left:.8rem;
+  color:var(--qv-fg); margin:.5rem 0; }
+.qv-about pre { padding:.75rem 1rem; }
+
+[data-bs-theme=\"dark\"] {
+  --qv-fg:#dadada; --qv-bg:#212121; --qv-line:#424242; --qv-mute:#9e9e9e;
+}
+[data-bs-theme=\"dark\"] body { background:var(--qv-bg); color:var(--qv-fg); }
+[data-bs-theme=\"dark\"] .qv-brand { background:#2a2a2a; border-bottom-color:var(--qv-line); }
+[data-bs-theme=\"dark\"] .bslib-sidebar-layout > .sidebar { background:#2a2a2a; border-right-color:var(--qv-line); }
+[data-bs-theme=\"dark\"] .card { background:#2a2a2a; border-color:var(--qv-line); }
+[data-bs-theme=\"dark\"] .card-header { background:#1a1a1a; border-bottom-color:var(--qv-line); }
+[data-bs-theme=\"dark\"] .btn-primary, [data-bs-theme=\"dark\"] .btn-default {
+  background:var(--qv-fg); border-color:var(--qv-fg); color:#1a1a1a;
+}
+[data-bs-theme=\"dark\"] .btn-primary:hover { background:#fff; border-color:#fff; color:#000; }
+[data-bs-theme=\"dark\"] .shiny-download-link {
+  background:transparent; color:var(--qv-fg); border:1px solid var(--qv-fg);
+}
+[data-bs-theme=\"dark\"] .shiny-download-link:hover { background:var(--qv-fg); color:#1a1a1a; }
+[data-bs-theme=\"dark\"] pre, [data-bs-theme=\"dark\"] code {
+  background:#1a1a1a; color:var(--qv-fg); border-color:var(--qv-line);
+}
+[data-bs-theme=\"dark\"] table.dataTable { color:var(--qv-fg) !important; }
+[data-bs-theme=\"dark\"] table.dataTable thead th { border-bottom-color:var(--qv-fg) !important; }
+[data-bs-theme=\"dark\"] table.dataTable tbody tr { background:#2a2a2a !important; }
+[data-bs-theme=\"dark\"] table.dataTable tbody tr:hover { background:#3a3a3a !important; }
+[data-bs-theme=\"dark\"] .nav-tabs .nav-link.active { color:var(--qv-fg); border-bottom-color:var(--qv-fg); }
+"
+
+.qv_table_panel <- function(slot, dl_id, label) {
+  shiny::tagList(
+    shiny::div(
+      class = "d-flex justify-content-end mb-2",
+      shiny::downloadButton(dl_id, paste0("Download ", label, " (xlsx)"))
+    ),
+    DT::DTOutput(slot)
+  )
+}
+
 .qv_app_ui <- function() {
+  shiny::addResourcePath(
+    "qv_www",
+    system.file("shiny", "qview", "www", package = "qviewparsR")
+  )
   bslib::page_sidebar(
-    title = "qviewparsR - Q-View parser",
+    title = NULL,
+    theme = .qv_theme(dark = FALSE),
+    shiny::tags$head(shiny::tags$style(shiny::HTML(.qv_css))),
+    shiny::div(
+      class = "qv-brand",
+      shiny::tags$img(src = "qv_www/logo_hex.svg",
+                      alt = "qviewparsR hex", class = "qv-hex"),
+      shiny::span(class = "qv-title", "qviewparsR"),
+      shiny::span(class = "qv-sub", "Q-View parser"),
+      shiny::div(
+        class = "ms-auto",
+        bslib::input_dark_mode(id = "dark_mode", mode = "light")
+      )
+    ),
     sidebar = bslib::sidebar(
       width = 360,
       shiny::tags$p(
@@ -68,12 +227,15 @@ qview_app <- function(max_upload_mb = 512, ...) {
         value = FALSE
       ),
       shiny::actionButton("btn_parse", "Parse",
-                          class = "btn-primary"),
+                          class = "btn-primary w-100"),
       shiny::hr(),
-      shiny::tags$strong("Download"),
-      shiny::downloadButton("dl_xlsx", "xlsx"),
-      shiny::downloadButton("dl_rds",  "rds"),
-      shiny::downloadButton("dl_zip",  "csv (zip)")
+      shiny::tags$strong("Whole project"),
+      shiny::downloadButton("dl_xlsx", "All tables (xlsx)",
+                            class = "w-100 mt-1"),
+      shiny::downloadButton("dl_rds",  "Full object (rds)",
+                            class = "w-100 mt-1"),
+      shiny::downloadButton("dl_zip",  "All tables (csv zip)",
+                            class = "w-100 mt-1")
     ),
     bslib::card(
       bslib::card_header("Status"),
@@ -82,14 +244,22 @@ qview_app <- function(max_upload_mb = 512, ...) {
     bslib::navset_card_tab(
       id = "tabs",
       bslib::nav_panel("Metadata",        shiny::verbatimTextOutput("md")),
-      bslib::nav_panel("Analytes",        DT::DTOutput("tbl_analytes")),
-      bslib::nav_panel("Well groups",     DT::DTOutput("tbl_well_groups")),
-      bslib::nav_panel("Plate layout",    DT::DTOutput("tbl_plate")),
-      bslib::nav_panel("Pixel intensities", DT::DTOutput("tbl_pi")),
-      bslib::nav_panel("Summaries",       DT::DTOutput("tbl_summary")),
-      bslib::nav_panel("Concentrations",  DT::DTOutput("tbl_conc")),
-      bslib::nav_panel("Curve fit",       DT::DTOutput("tbl_curve")),
-      bslib::nav_panel("Plate template",  DT::DTOutput("tbl_template")),
+      bslib::nav_panel("Analytes",
+        .qv_table_panel("tbl_analytes",    "dl_tbl_analytes",    "analytes")),
+      bslib::nav_panel("Well groups",
+        .qv_table_panel("tbl_well_groups", "dl_tbl_well_groups", "well_groups")),
+      bslib::nav_panel("Plate layout",
+        .qv_table_panel("tbl_plate",       "dl_tbl_plate",       "plate_layout")),
+      bslib::nav_panel("Pixel intensities",
+        .qv_table_panel("tbl_pi",          "dl_tbl_pi",          "pixel_intensities")),
+      bslib::nav_panel("Summaries",
+        .qv_table_panel("tbl_summary",     "dl_tbl_summary",     "summary_statistics")),
+      bslib::nav_panel("Concentrations",
+        .qv_table_panel("tbl_conc",        "dl_tbl_conc",        "concentrations")),
+      bslib::nav_panel("Curve fit",
+        .qv_table_panel("tbl_curve",       "dl_tbl_curve",       "curve_fit")),
+      bslib::nav_panel("Plate template",
+        .qv_table_panel("tbl_template",    "dl_tbl_template",    "template")),
       bslib::nav_panel(
         "Visualise",
         shiny::fluidRow(
@@ -98,11 +268,88 @@ qview_app <- function(max_upload_mb = 512, ...) {
             choices = c("Plate map"         = "plate_map",
                         "Intensity heatmap" = "intensity_heatmap",
                         "Replicate scatter" = "replicate_scatter"),
-            selected = "plate_map"))
+            selected = "plate_map")),
+          shiny::column(2, shiny::numericInput(
+            "plot_dpi", "DPI", value = 600, min = 72, max = 1200, step = 50)),
+          shiny::column(2, shiny::numericInput(
+            "plot_w_in", "Width (in)", value = 10, min = 3, max = 30, step = 0.5)),
+          shiny::column(2, shiny::numericInput(
+            "plot_h_in", "Height (in)", value = 7, min = 3, max = 30, step = 0.5))
         ),
         shiny::plotOutput("qv_plot", height = "640px"),
-        shiny::downloadButton("dl_plot", "Download plot (PNG)")
-      )
+        shiny::downloadButton("dl_plot", "Download plot (PNG, high-DPI)")
+      ),
+      bslib::nav_panel("About", .qv_about_panel())
+    )
+  )
+}
+
+
+.qv_about_panel <- function() {
+  shiny::tagList(
+    shiny::div(
+      class = "qv-about",
+      shiny::h2("qviewparsR"),
+      shiny::p(shiny::tags$em(
+        "Pure-R parser for the .Q-View binary project file format used in ",
+        "chemiluminescent multiplex ELISA plate imaging and quantification."
+      )),
+      shiny::p(
+        "qviewparsR reads .Q-View files end-to-end without a Java runtime ",
+        "or H2 database driver. The package extracts project metadata, the ",
+        "analyte panel with units and detection limits, sample well-group ",
+        "assignments, per-well replicate pixel intensities, summary ",
+        "statistics, optional back-calculated concentrations, the curve ",
+        "fit, and a plate layout, all as tidy tibbles. Plot, summarise, ",
+        "or pipe-export to xlsx, csv, or rds."
+      ),
+      shiny::h3("Authors"),
+      shiny::tags$ul(
+        shiny::tags$li("Raban Heller (aut, cre, cph)"),
+        shiny::tags$li("Marco Mannes (aut)")
+      ),
+      shiny::h3("License"),
+      shiny::p("MIT (c) 2026 Raban Heller. See ",
+               shiny::tags$code("LICENSE"), " in the repository."),
+      shiny::h3("Project links"),
+      shiny::tags$ul(
+        shiny::tags$li(shiny::tags$a(href = "https://github.com/CTTIR/qviewparsR",
+                                     "GitHub repository", target = "_blank")),
+        shiny::tags$li(shiny::tags$a(href = "https://cttir.github.io/qviewparsR/",
+                                     "pkgdown documentation site",
+                                     target = "_blank")),
+        shiny::tags$li(shiny::tags$a(href = "https://github.com/CTTIR/qviewparsR/issues",
+                                     "Issue tracker", target = "_blank"))
+      ),
+      shiny::h3("Acknowledgements"),
+      shiny::p(
+        "Built on the tidyverse stack (cli, dplyr, lifecycle, openxlsx2, ",
+        "readr, rlang, tibble, tidyr) with bslib + DT for the interactive ",
+        "front-end and ggplot2 for visualisation. The .Q-View container ",
+        "format was reverse-engineered from public binary inspection of ",
+        "exported project files."
+      ),
+      shiny::h3("How to cite"),
+      shiny::p("If qviewparsR contributes to academic work, please cite:"),
+      shiny::tags$blockquote(
+        "Heller R, Mannes M (2026). ",
+        shiny::tags$em("qviewparsR: Read .Q-View Multiplex ELISA Project Files. "),
+        "R package version 1.0.0. https://github.com/CTTIR/qviewparsR"
+      ),
+      shiny::h4("BibTeX"),
+      shiny::tags$pre(
+"@Manual{qviewparsR,
+  title  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},
+  author = {Raban Heller and Marco Mannes},
+  year   = {2026},
+  note   = {R package version 1.0.0},
+  url    = {https://github.com/CTTIR/qviewparsR}
+}"
+      ),
+      shiny::p(shiny::tags$small(
+        "You can always retrieve the up-to-date entry inside R with ",
+        shiny::tags$code('citation("qviewparsR")'), "."
+      ))
     )
   )
 }
@@ -208,9 +455,38 @@ qview_app <- function(max_upload_mb = 512, ...) {
     content = function(file) {
       p <- current_plot()
       shiny::req(p)
-      ggplot2::ggsave(file, p, width = 10, height = 7, dpi = 150)
+      ggplot2::ggsave(
+        file, p,
+        width  = if (is.null(input$plot_w_in)) 10 else input$plot_w_in,
+        height = if (is.null(input$plot_h_in)) 7  else input$plot_h_in,
+        dpi    = if (is.null(input$plot_dpi))  600 else input$plot_dpi,
+        units  = "in"
+      )
     }
   )
+
+  # ---- Per-table xlsx download handlers -----------------------------
+  one_sheet_xlsx <- function(slot_fun, label) {
+    shiny::downloadHandler(
+      filename = function() filename_stamp(paste0("_", label, ".xlsx")),
+      content  = function(file) {
+        d <- slot_fun()
+        shiny::req(!is.null(d), nrow(d) > 0L)
+        wb <- openxlsx2::wb_workbook()
+        wb$add_worksheet(label)
+        wb$add_data(sheet = label, x = d)
+        openxlsx2::wb_save(wb, file = file, overwrite = TRUE)
+      }
+    )
+  }
+  output$dl_tbl_analytes    <- one_sheet_xlsx(function() state$qv$analytes,           "analytes")
+  output$dl_tbl_well_groups <- one_sheet_xlsx(function() state$qv$well_groups,        "well_groups")
+  output$dl_tbl_plate       <- one_sheet_xlsx(function() state$qv$plate_layout,       "plate_layout")
+  output$dl_tbl_pi          <- one_sheet_xlsx(function() state$qv$pixel_intensities,  "pixel_intensities")
+  output$dl_tbl_summary     <- one_sheet_xlsx(function() state$qv$summary_statistics, "summary_statistics")
+  output$dl_tbl_conc        <- one_sheet_xlsx(function() state$qv$concentrations,     "concentrations")
+  output$dl_tbl_curve       <- one_sheet_xlsx(function() state$qv$curve_fit,          "curve_fit")
+  output$dl_tbl_template    <- one_sheet_xlsx(function() state$template,              "template")
 
   output$tbl_template <- DT::renderDT({
     if (is.null(state$template)) return(NULL)
