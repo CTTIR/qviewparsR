@@ -10,7 +10,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/CTTIR/qviewparsR/blob/main/DESCRIPTION)
+[`inst/CITATION`](https://github.com/CTTIR/qviewparsR/blob/main/inst/CITATION)
 
 Heller R, Mannes M (2026). *qviewparsR: Read .Q-View Multiplex ELISA
 Project Files*. R package version 1.0.0,
