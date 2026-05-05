@@ -39,6 +39,7 @@ Suggests:
     DT,
     ggplot2,
     knitr,
+    patchwork,
     rmarkdown,
     shiny,
     testthat (>= 3.0.0),

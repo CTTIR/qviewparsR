@@ -361,6 +361,92 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
     ggplot2::theme_minimal()
 }
 
+.qv_plot_distribution <- function(qv) {
+  d <- qv$pixel_intensities
+  if (is.null(d) || nrow(d) == 0L) return(NULL)
+  d <- d[!is.na(d$pixel_intensity) & d$analyte != "Ref Spot", , drop = FALSE]
+  if (nrow(d) == 0L) return(NULL)
+  d$analyte <- factor(d$analyte, levels = unique(d$analyte))
+  ggplot2::ggplot(d, ggplot2::aes(x = .data$analyte,
+                                  y = .data$pixel_intensity,
+                                  fill = .data$analyte)) +
+    ggplot2::geom_boxplot(outlier.size = 0.6, alpha = 0.85,
+                          colour = "grey20") +
+    ggplot2::scale_fill_viridis_d(option = "D", begin = 0.2, end = 0.85,
+                                  guide = "none") +
+    ggplot2::labs(x = NULL, y = "Pixel intensity") +
+    ggplot2::theme_minimal(base_size = 10) +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 30, hjust = 1))
+}
+
+
+.qv_plot_overview <- function(qv) {
+  if (!requireNamespace("ggplot2", quietly = TRUE)) {
+    cli::cli_abort('Package {.pkg ggplot2} is required. Install with {.code install.packages("ggplot2")}.')
+  }
+  if (!requireNamespace("patchwork", quietly = TRUE)) {
+    cli::cli_abort(c(
+      "Package {.pkg patchwork} is required for the overview figure.",
+      "i" = 'Install with {.code install.packages("patchwork")}.'
+    ))
+  }
+  base_thm <- ggplot2::theme_minimal(base_size = 10) +
+    ggplot2::theme(plot.title = ggplot2::element_text(face = "bold", size = 11),
+                   plot.tag   = ggplot2::element_text(face = "bold", size = 12),
+                   legend.position = "right")
+
+  p1 <- .qv_plot_plate_map(qv)
+  if (!is.null(p1)) p1 <- p1 +
+    ggplot2::labs(title = "Plate layout", subtitle = NULL) +
+    base_thm +
+    ggplot2::theme(axis.text = ggplot2::element_text(size = 7))
+
+  p2 <- .qv_plot_distribution(qv)
+  if (!is.null(p2)) p2 <- p2 +
+    ggplot2::labs(title = "Pixel-intensity distribution") + base_thm +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 30, hjust = 1))
+
+  p3 <- .qv_plot_replicate_scatter(qv)
+  if (!is.null(p3)) p3 <- p3 +
+    ggplot2::labs(title = "Replicate concordance",
+                  x = "Replicate 1 (PI)", y = "Replicate 2 (PI)") + base_thm
+
+  p4 <- .qv_plot_summary(qv)
+  if (!is.null(p4)) p4 <- p4 +
+    ggplot2::labs(title = "Mean PI (+/- SD) by well type") + base_thm
+
+  fallback <- function(label) {
+    ggplot2::ggplot() +
+      ggplot2::annotate("text", x = 0.5, y = 0.5,
+                        label = label, size = 4, colour = "grey50") +
+      ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
+      ggplot2::theme_void()
+  }
+  if (is.null(p1)) p1 <- fallback("Plate layout unavailable")
+  if (is.null(p2)) p2 <- fallback("No pixel intensities to plot")
+  if (is.null(p3)) p3 <- fallback("Replicate scatter requires rep 1 & 2")
+  if (is.null(p4)) p4 <- fallback("No summary statistics available")
+
+  md <- qv$metadata
+  hdr <- paste0(
+    md$project %||% "Q-View project",
+    if (!is.null(md$plate) && !is.na(md$plate)) paste0(" - ", md$plate) else "",
+    if (!is.null(md$image) && !is.na(md$image)) paste0(" (", md$image, ")") else ""
+  )
+
+  patchwork::wrap_plots(p1, p2, p3, p4, ncol = 2L, nrow = 2L) +
+    patchwork::plot_annotation(
+      title    = hdr,
+      subtitle = "Publication overview: layout, distribution, replicate concordance, group means",
+      tag_levels = "A",
+      theme = ggplot2::theme(
+        plot.title    = ggplot2::element_text(face = "bold", size = 13),
+        plot.subtitle = ggplot2::element_text(colour = "grey30", size = 10)
+      )
+    )
+}
+
+
 .qv_blank_plot <- function(text) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) return(invisible())
   ggplot2::ggplot() +

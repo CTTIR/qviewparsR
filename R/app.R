@@ -244,6 +244,25 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
     ),
     bslib::navset_card_tab(
       id = "tabs",
+      bslib::nav_panel(
+        "Overview",
+        shiny::div(
+          class = "d-flex justify-content-end gap-2 mb-2",
+          shiny::downloadButton("dl_overview_png",
+                                "Download overview (PNG, high-DPI)"),
+          shiny::downloadButton("dl_overview_pdf",
+                                "Download overview (PDF, vector)")
+        ),
+        shiny::plotOutput("plt_overview", height = "780px"),
+        shiny::tags$small(class = "text-muted",
+          "Publication-ready 2x2: A. Plate layout - ",
+          "B. Pixel-intensity distribution - ",
+          "C. Replicate concordance - ",
+          "D. Mean PI (+/- SD) by well type. ",
+          "Width / Height / DPI controls (set in the Visualise tab) apply ",
+          "to the PNG download."
+        )
+      ),
       bslib::nav_panel("Metadata",
         shiny::tagList(
           shiny::div(
@@ -446,6 +465,51 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
   output$tbl_conc        <- render_tbl(function() state$qv$concentrations)
   output$tbl_curve       <- render_tbl(function() state$qv$curve_fit)
   output$tbl_template    <- render_tbl(function() state$template)
+
+  # ---- Publication-ready 2x2 overview ------------------------------
+  rx_overview <- shiny::reactive({
+    shiny::req(state$qv)
+    tryCatch(.qv_plot_overview(state$qv),
+             error = function(e) {
+               log_msg("Overview plot error: ", conditionMessage(e))
+               NULL
+             })
+  })
+
+  output$plt_overview <- shiny::renderPlot({
+    p <- rx_overview()
+    if (is.null(p)) return(.qv_blank_plot(
+      "Upload and parse a .Q-View file to see the publication overview."
+    ))
+    p
+  })
+
+  output$dl_overview_png <- shiny::downloadHandler(
+    filename = function() filename_stamp("_overview.png"),
+    content  = function(file) {
+      p <- rx_overview(); shiny::req(p)
+      ggplot2::ggsave(
+        file, p,
+        width  = if (is.null(input$plot_w_in)) 12 else input$plot_w_in,
+        height = if (is.null(input$plot_h_in)) 9  else input$plot_h_in,
+        dpi    = if (is.null(input$plot_dpi))  600 else input$plot_dpi,
+        units  = "in"
+      )
+    }
+  )
+
+  output$dl_overview_pdf <- shiny::downloadHandler(
+    filename = function() filename_stamp("_overview.pdf"),
+    content  = function(file) {
+      p <- rx_overview(); shiny::req(p)
+      ggplot2::ggsave(
+        file, p,
+        width  = if (is.null(input$plot_w_in)) 12 else input$plot_w_in,
+        height = if (is.null(input$plot_h_in)) 9  else input$plot_h_in,
+        units  = "in", device = grDevices::cairo_pdf
+      )
+    }
+  )
 
   # ---- Empty-state messages for tabs that may have no data ---------
   output$msg_conc <- shiny::renderUI({
