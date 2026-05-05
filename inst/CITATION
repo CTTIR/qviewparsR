@@ -1,0 +1,15 @@
+citHeader("To cite qviewparsR in publications, use:")
+
+bibentry(
+  bibtype = "Manual",
+  title   = "qviewparsR: Read .Q-View Multiplex ELISA Project Files",
+  author  = c(
+    person("Raban", "Heller",
+           comment = c(ORCID = "0000-0001-8006-9742")),
+    person("Marco", "Mannes")
+  ),
+  year    = format(Sys.Date(), "%Y"),
+  note    = sprintf("R package version %s",
+                    utils::packageVersion("qviewparsR")),
+  url     = "https://github.com/CTTIR/qviewparsR"
+)

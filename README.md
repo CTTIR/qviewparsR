@@ -151,6 +151,32 @@ returned object.
 | Summary | `summary.qview()` (mean / SD / CV per analyte x well type) |
 | Shiny app | `qview_app()` |
 
+## Citation
+
+If you use `qviewparsR` in academic work, please cite:
+
+> Heller R, Mannes M (2026). _qviewparsR: Read .Q-View Multiplex ELISA
+> Project Files_. R package version 1.0.0.
+> <https://github.com/CTTIR/qviewparsR>
+
+BibTeX:
+
+```bibtex
+@Manual{qviewparsR,
+  title  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},
+  author = {Raban Heller and Marco Mannes},
+  year   = {2026},
+  note   = {R package version 1.0.0},
+  url    = {https://github.com/CTTIR/qviewparsR}
+}
+```
+
+You can always retrieve the up-to-date entry directly from R:
+
+```r
+citation("qviewparsR")
+```
+
 ## License
 
 MIT (c) 2026 Raban Heller.
