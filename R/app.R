@@ -23,7 +23,7 @@
 #' @family qview-app
 #' @export
 qview_app <- function(...) {
-  for (pkg in c("shiny", "bslib", "DT", "ggplot2")) {
+  for (pkg in c("shiny", "bslib", "DT", "ggplot2", "withr")) {
     if (!requireNamespace(pkg, quietly = TRUE)) {
       cli::cli_abort(c(
         "Package {.pkg {pkg}} is required to run {.fn qview_app}.",
@@ -238,8 +238,7 @@ qview_app <- function(...) {
       tmp <- tempfile("qview_csv_")
       dir.create(tmp); on.exit(unlink(tmp, recursive = TRUE), add = TRUE)
       write_qview_csv(state$qv, tmp, template = state$template)
-      old <- setwd(tmp); on.exit(setwd(old), add = TRUE)
-      utils::zip(file, files = list.files(tmp))
+      withr::with_dir(tmp, utils::zip(file, files = list.files(tmp)))
     }
   )
 }
