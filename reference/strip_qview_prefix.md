@@ -1,7 +1,7 @@
 # Reverse the Q-View internal naming convention
 
-On import, Q-View Software prefixes well-assignment template names with
-single-letter codes:
+On import, the producing software prefixes well-assignment template
+names with single-letter codes:
 
 ## Usage
 

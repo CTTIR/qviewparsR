@@ -5,7 +5,7 @@
 Parse a Q-View binary project file.
 
 - [`read_qview()`](https://r-heller.github.io/qviewparsR/reference/read_qview.md)
-  : Read a Quansys Q-View project file
+  : Read a .Q-View project file
 
 ## Helpers
 
@@ -47,4 +47,4 @@ Upload, preview, visualise, and download a `.Q-View` file.
 
 - [`qviewparsR`](https://r-heller.github.io/qviewparsR/reference/qviewparsR-package.md)
   [`qviewparsR-package`](https://r-heller.github.io/qviewparsR/reference/qviewparsR-package.md)
-  : qviewparsR: Read Quansys Q-View ELISA Project Files
+  : qviewparsR: Read .Q-View Multiplex ELISA Project Files

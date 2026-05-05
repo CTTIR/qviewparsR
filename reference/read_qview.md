@@ -1,11 +1,10 @@
-# Read a Quansys Q-View project file
+# Read a .Q-View project file
 
-Parses a `.Q-View` binary container (a Q-View Software v3.x project file
-holding an embedded H2 database plus binary LOB segments) and extracts
-ELISA / multiplex assay data: project metadata, analyte panel with
-units, well-group sample assignments, per-well replicate pixel
-intensities, summary statistics, and (when present) the embedded CSV
-report.
+Parses a `.Q-View` binary container (a chemiluminescent multiplex ELISA
+project file holding an embedded H2 database plus binary LOB segments)
+and extracts the assay data: project metadata, analyte panel with units,
+well-group sample assignments, per-well replicate pixel intensities,
+summary statistics, and (when present) the embedded CSV report.
 
 ## Usage
 

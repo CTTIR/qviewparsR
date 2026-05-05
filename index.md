@@ -1,9 +1,9 @@
 # qviewparsR
 
-`qviewparsR` is a pure-R parser for the binary `.Q-View` project files
-produced by Quansys Biosciences Q-View Software (v3.x), used for
-chemiluminescent multiplex ELISA plate imaging and quantification. It
-extracts the embedded report and returns it as tidy tibbles.
+`qviewparsR` is a pure-R parser for the binary `.Q-View` project file
+format used in chemiluminescent multiplex ELISA plate imaging and
+quantification. It extracts the embedded report and returns it as tidy
+tibbles.
 
 No Java runtime, no H2 database driver, no system dependencies beyond a
 working R installation.
