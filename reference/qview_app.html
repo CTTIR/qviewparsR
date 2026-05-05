@@ -39,14 +39,22 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">qview_app</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">qview_app</span><span class="op">(</span>max_upload_mb <span class="op">=</span> <span class="fl">512</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dl><dt id="arg-max-upload-mb">max_upload_mb<a class="anchor" aria-label="anchor" href="#arg-max-upload-mb"></a></dt>
+<dd><p>Numeric. Maximum upload size per request, in
+megabytes. Q-View project files routinely exceed Shiny's 5 MB
+default; this argument bumps the limit for the duration of the
+running app and restores the previous value on exit. Default
+<code>512</code> MB.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Forwarded to <code><a href="https://rdrr.io/pkg/shiny/man/runApp.html" class="external-link">shiny::runApp()</a></code>.</p></dd>
 
 </dl></div>
