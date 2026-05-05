@@ -4,47 +4,62 @@
 
 Parse a Q-View binary project file.
 
-- [`read_qview()`](https://r-heller.github.io/qviewparsR/reference/read_qview.md)
-  : Read a .Q-View project file
+- [`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md)
+  **\[experimental\]** : Read a .Q-View project file
 
 ## Helpers
 
 Naming convention and plate-coordinate utilities.
 
-- [`strip_qview_prefix()`](https://r-heller.github.io/qviewparsR/reference/strip_qview_prefix.md)
-  : Reverse the Q-View internal naming convention
-- [`well_label()`](https://r-heller.github.io/qviewparsR/reference/well_label.md)
-  : Convert plate row / column to a well label
-- [`read_qview_template()`](https://r-heller.github.io/qviewparsR/reference/read_qview_template.md)
-  : Read a Q-View well-assignment template CSV
+- [`strip_qview_prefix()`](https://cttir.github.io/qviewparsR/reference/strip_qview_prefix.md)
+  **\[experimental\]** : Reverse the Q-View internal naming convention
+- [`well_label()`](https://cttir.github.io/qviewparsR/reference/well_label.md)
+  **\[experimental\]** : Convert plate row / column to a well label
+- [`read_qview_template()`](https://cttir.github.io/qviewparsR/reference/read_qview_template.md)
+  **\[experimental\]** : Read a Q-View well-assignment template CSV
 
 ## Methods
 
-Print and plot a parsed `qview` object.
+Print, summarise, plot, and coerce a parsed `qview` object.
 
-- [`print(`*`<qview>`*`)`](https://r-heller.github.io/qviewparsR/reference/print.qview.md)
+- [`is_qview()`](https://cttir.github.io/qviewparsR/reference/is_qview.md)
+  **\[experimental\]** :
+
+  Test whether an object is a `qview`
+
+- [`print(`*`<qview>`*`)`](https://cttir.github.io/qviewparsR/reference/print.qview.md)
   : Print a Q-View object
-- [`plot(`*`<qview>`*`)`](https://r-heller.github.io/qviewparsR/reference/plot.qview.md)
+
+- [`summary(`*`<qview>`*`)`](https://cttir.github.io/qviewparsR/reference/summary.qview.md)
+  : Summary statistics for a Q-View object
+
+- [`plot(`*`<qview>`*`)`](https://cttir.github.io/qviewparsR/reference/plot.qview.md)
   : Plot a Q-View object
+
+- [`as_tibble(`*`<qview>`*`)`](https://cttir.github.io/qviewparsR/reference/as_tibble.qview.md)
+  : Coerce a Q-View object to a tibble
 
 ## Export
 
 Write a parsed `qview` object to disk.
 
-- [`qview_to_xlsx()`](https://r-heller.github.io/qviewparsR/reference/qview_to_xlsx.md)
-  : Write a Q-View object to a multi-sheet Excel workbook
-- [`qview_to_csv_dir()`](https://r-heller.github.io/qviewparsR/reference/qview_to_csv_dir.md)
-  : Write a Q-View object as a directory of CSV files
+- [`write_qview_xlsx()`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
+  [`write_qview_csv()`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
+  [`write_qview_rds()`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
+  [`qview_to_xlsx()`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
+  [`qview_to_csv_dir()`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
+  **\[experimental\]** : Write a Q-View object to disk
 
 ## Shiny app
 
 Upload, preview, visualise, and download a `.Q-View` file.
 
-- [`qview_app()`](https://r-heller.github.io/qviewparsR/reference/qview_app.md)
-  : Launch the qviewparsR Q-View Shiny app
+- [`qview_app()`](https://cttir.github.io/qviewparsR/reference/qview_app.md)
+  **\[experimental\]** : Launch the qviewparsR Q-View Shiny app
 
 ## Package
 
-- [`qviewparsR`](https://r-heller.github.io/qviewparsR/reference/qviewparsR-package.md)
-  [`qviewparsR-package`](https://r-heller.github.io/qviewparsR/reference/qviewparsR-package.md)
-  : qviewparsR: Read .Q-View Multiplex ELISA Project Files
+- [`qviewparsR`](https://cttir.github.io/qviewparsR/reference/qviewparsR-package.md)
+  [`qviewparsR-package`](https://cttir.github.io/qviewparsR/reference/qviewparsR-package.md)
+  **\[experimental\]** : qviewparsR: Read .Q-View Multiplex ELISA
+  Project Files

@@ -20,7 +20,7 @@
 ">
 <meta property="og:description" content="Pure-R parser for `.Q-View` binary multiplex ELISA project files.
 ">
-<meta property="og:image" content="https://r-heller.github.io/qviewparsR/logo.svg">
+<meta property="og:image" content="https://cttir.github.io/qviewparsR/logo.svg">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -47,7 +47,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/r-heller/qviewparsR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CTTIR/qviewparsR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -69,13 +69,13 @@
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
-<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"r-heller/qviewparsR"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"CTTIR/qviewparsR"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-heller/qviewparsR" class="external-link">qviewparsR</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/CTTIR/qviewparsR" class="external-link">qviewparsR</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">qv</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_qview.html">read_qview</a></span><span class="op">(</span><span class="st">"path/to/project.Q-View"</span><span class="op">)</span></span>
 <span><span class="va">qv</span>                                <span class="co"># compact summary</span></span>
@@ -87,10 +87,14 @@
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">qv</span>, type <span class="op">=</span> <span class="st">"intensity_heatmap"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">qv</span>, type <span class="op">=</span> <span class="st">"replicate_scatter"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Export</span></span>
-<span><span class="fu"><a href="reference/qview_to_xlsx.html">qview_to_xlsx</a></span><span class="op">(</span><span class="va">qv</span>, <span class="st">"out.xlsx"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/qview_to_csv_dir.html">qview_to_csv_dir</a></span><span class="op">(</span><span class="va">qv</span>, <span class="st">"out_csv/"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">qv</span>, <span class="st">"out.rds"</span><span class="op">)</span></span>
+<span><span class="co"># Export (pipe-friendly: each writer returns qv invisibly)</span></span>
+<span><span class="va">qv</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/write_qview.html">write_qview_xlsx</a></span><span class="op">(</span><span class="st">"out.xlsx"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/write_qview.html">write_qview_csv</a></span><span class="op">(</span><span class="st">"out_csv/"</span><span class="op">)</span>  <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/write_qview.html">write_qview_rds</a></span><span class="op">(</span><span class="st">"out.rds"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Per-analyte mean / SD / CV per well-type group</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">qv</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Interactive front-end (upload, visualise, download)</span></span>
 <span><span class="fu"><a href="reference/qview_app.html">qview_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -348,6 +352,10 @@
 <h2 id="function-reference">Function reference<a class="anchor" aria-label="anchor" href="#function-reference"></a>
 </h2>
 <table class="table">
+<colgroup>
+<col width="47%">
+<col width="52%">
+</colgroup>
 <thead><tr>
 <th>Category</th>
 <th>Functions</th>
@@ -376,8 +384,13 @@
 <tr>
 <td>Export</td>
 <td>
-<code><a href="reference/qview_to_xlsx.html">qview_to_xlsx()</a></code>, <code><a href="reference/qview_to_csv_dir.html">qview_to_csv_dir()</a></code>
+<code><a href="reference/write_qview.html">write_qview_xlsx()</a></code>, <code><a href="reference/write_qview.html">write_qview_csv()</a></code>, <code><a href="reference/write_qview.html">write_qview_rds()</a></code>
 </td>
+</tr>
+<tr>
+<td>Summary</td>
+<td>
+<code><a href="reference/summary.qview.html">summary.qview()</a></code> (mean / SD / CV per analyte x well type)</td>
 </tr>
 <tr>
 <td>Shiny app</td>
@@ -395,8 +408,8 @@
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/r-heller/qviewparsR/" class="external-link">Browse source code</a></li>
-<li><a href="https://github.com/r-heller/qviewparsR/issues" class="external-link">Report a bug</a></li>
+<li><a href="https://github.com/CTTIR/qviewparsR/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/CTTIR/qviewparsR/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
 
@@ -420,13 +433,14 @@
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>Raban Heller <br><small class="roles"> Author, maintainer, copyright holder </small> <a href="https://orcid.org/0000-0001-8006-9742" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>Marco Mannes <br><small class="roles"> Author </small>   </li>
 </ul>
 </div>
 
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/r-heller/qviewparsR/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/r-heller/qviewparsR/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://github.com/CTTIR/qviewparsR/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/CTTIR/qviewparsR/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://opensource.org/licenses/MIT" class="external-link"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a></li>
 </ul>
 </div>
@@ -436,7 +450,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Raban Heller.</p>
+  <p>Developed by Raban Heller, Marco Mannes.</p>
 </div>
 
 <div class="pkgdown-footer-right">

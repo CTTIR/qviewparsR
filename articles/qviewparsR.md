@@ -1,86 +1,241 @@
-# Reading Q-View project files with qviewparsR
+# Reading and analysing .Q-View files with qviewparsR
 
-`qviewparsR` is a pure-R parser for `.Q-View` binary project files. The
-file format is a single-file container that bundles an embedded H2 SQL
-database with binary plate-image data; the rendered CSV report is stored
-as a CLOB inside the database.
-[`read_qview()`](https://r-heller.github.io/qviewparsR/reference/read_qview.md)
-extracts that report without needing a Java runtime or H2 driver.
+## What this package does
 
-## Reading a project file
+`qviewparsR` is a pure-R parser for the binary `.Q-View` project file
+format used in chemiluminescent multiplex ELISA plate imaging and
+quantification. A single `.Q-View` file bundles:
+
+- a plain-text manifest header,
+- an embedded H2 SQL database (with project metadata, the analyte panel,
+  plate geometry, sample-to-well assignments, replicate pixel
+  intensities, and – if the user generated a report inside the producing
+  application – a fully rendered CSV report stored as a CLOB), and
+- one or more binary LOB segments holding the raw chemiluminescent plate
+  images.
+
+[`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md)
+extracts everything except the raw images and returns it as a list of
+tidy tibbles, with no Java runtime, no H2 database driver, and no
+compiled code anywhere in the package.
+
+## Installation
 
 ``` r
 
-qv <- read_qview("path/to/project.Q-View")
-qv
+# install.packages("pak")
+pak::pak("CTTIR/qviewparsR")
 ```
 
-The returned object has class `qview` and contains:
+`qviewparsR` requires R \>= 4.1.0 plus a small set of tidyverse-aligned
+dependencies (`cli`, `dplyr`, `lifecycle`, `openxlsx2`, `readr`,
+`rlang`, `tibble`, `tidyr`). Plotting requires `ggplot2` (Suggested);
+the Shiny front-end additionally requires `shiny`, `bslib`, and `DT`.
+
+## A complete walk-through
+
+The end-to-end workflow is short:
 
 ``` r
 
-str(qv, max.level = 1)
-#> List of 11
-#>  $ metadata          :List of 12
-#>  $ manifest          : tibble [4 x 3]
-#>  $ segments          : tibble [3 x 4]
-#>  $ analytes          : tibble [<n_analytes> x 8]
-#>  $ well_groups       : tibble [<n_groups> x 7]
-#>  $ pixel_intensities : tibble [<n_rows> x 8]
-#>  $ summary_statistics: tibble [<n_rows> x 6]
-#>  $ concentrations    : NULL or tibble
-#>  $ curve_fit         : NULL or tibble
-#>  $ report_csv        : character vector
-#>  $ plate_layout      : tibble [96 x 7]
-#>  - attr(*, "class") = "qview"
+library(qviewparsR)
+
+qv <- read_qview("path/to/plate.Q-View")
+qv                          # one-screen summary
+
+qv$analytes                 # spot_number, analyte, unit, lod, lloq, uloq
+qv$well_groups              # one row per sample/calibrator/control
+qv$pixel_intensities        # long-format replicate readings
+qv$summary_statistics       # per-group mean / std-dev / CV rows
+qv$plate_layout             # one row per plate well
+
+summary(qv)                 # mean / SD / CV per well type x analyte
 ```
+
+[`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md)
+always returns a list of class `qview` with eleven slots described in
+[`?read_qview`](https://cttir.github.io/qviewparsR/reference/read_qview.md).
+Empty slots are zero-row tibbles rather than `NULL`, so downstream code
+can rely on shape stability.
 
 ## The naming convention
 
-When Q-View imports a plate-template CSV it rewrites the identifiers:
+The producing software rewrites identifiers from the original
+well-assignment template CSV before it stores them. The mapping is
+systematic and reversible:
 
-- `Cal 1` -\> `ICal 1`
-- `Low` -\> `GLow`
-- `High` -\> `HHigh`
-- `FD...` and any all-digit ID -\> a single `N` prefix.
+| Template value                | Stored as                       |
+|-------------------------------|---------------------------------|
+| `Cal 1` … `Cal N`             | `ICal 1` … `ICal N`             |
+| `Low`                         | `GLow`                          |
+| `High`                        | `HHigh`                         |
+| `FD24277364`, `1211498458`, … | `NFD24277364`, `N1211498458`, … |
 
-Pass `strip_prefix = TRUE` to undo the rewrite:
+[`strip_qview_prefix()`](https://cttir.github.io/qviewparsR/reference/strip_qview_prefix.md)
+reverses the rewrite. Pass `strip_prefix = TRUE` to
+[`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md)
+to apply it across every sample-id column at once:
 
 ``` r
 
-qv <- read_qview("path/to/project.Q-View", strip_prefix = TRUE)
-qv$well_groups$sample_id
+qv <- read_qview("path/to/plate.Q-View", strip_prefix = TRUE)
+unique(qv$well_groups$sample_id)
 ```
 
-## Plotting
+The vectorised helper is also useful on its own:
 
 ``` r
 
-plot(qv, type = "plate_map")
-plot(qv, type = "intensity_heatmap")
-plot(qv, type = "replicate_scatter")
+strip_qview_prefix(c("ICal 1", "GLow", "HHigh", "NFD24277364"))
+#> [1] "Cal 1"      "Low"        "High"       "FD24277364"
 ```
 
-[`plot.qview()`](https://r-heller.github.io/qviewparsR/reference/plot.qview.md)
-requires `ggplot2`.
+## Coercion and tidy-data idioms
+
+[`as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)
+returns the long-format `pixel_intensities` table – the primary tabular
+payload – so a parsed object can drop straight into a dplyr / ggplot2
+pipeline:
+
+``` r
+
+library(dplyr)
+library(tibble)
+
+qv |>
+  as_tibble() |>
+  filter(replicate == 1L) |>
+  group_by(analyte, unit) |>
+  summarise(median_pi = median(pixel_intensity, na.rm = TRUE),
+            .groups = "drop")
+```
+
+The
+[`is_qview()`](https://cttir.github.io/qviewparsR/reference/is_qview.md)
+predicate lets package-aware functions guard their inputs:
+
+``` r
+
+is_qview(qv)      # TRUE
+is_qview(list())  # FALSE
+```
+
+## Visualisation
+
+Three quick-look plot types are built in (ggplot2 required):
+
+``` r
+
+plot(qv, type = "plate_map")          # 96-well plate, fill = well type
+plot(qv, type = "intensity_heatmap")  # facet per analyte, fill = PI
+plot(qv, type = "replicate_scatter")  # rep 1 vs rep 2 per analyte
+```
+
+Each call returns a `ggplot` object, so themes, scales, and labels can
+be added on top:
+
+``` r
+
+library(ggplot2)
+plot(qv, type = "plate_map") +
+  theme_bw(base_size = 12) +
+  labs(title = NULL, subtitle = "QC overview")
+```
 
 ## Exporting
 
+Three writers cover the common destinations. All return the parsed
+object invisibly, so they compose with `|>`:
+
 ``` r
 
-qview_to_xlsx(qv, "out.xlsx")
-qview_to_csv_dir(qv, "out_csv/")
-saveRDS(qv, "out.rds")
+qv |>
+  write_qview_xlsx("plate.xlsx") |>      # one sheet per parsed table
+  write_qview_csv ("plate_csv/") |>      # one CSV file per parsed table
+  write_qview_rds ("plate.rds")          # full lossless R round-trip
 ```
 
+Add `overwrite = TRUE` to
+[`write_qview_xlsx()`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
+/
+[`write_qview_rds()`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
+to replace existing destinations.
+
+The legacy aliases
+[`qview_to_xlsx()`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
+and
+[`qview_to_csv_dir()`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
+still work but are flagged with
+[`lifecycle::deprecate_warn()`](https://lifecycle.r-lib.org/reference/deprecate_soft.html)
+and will be removed in a future release.
+
+## Cross-validating against a template CSV
+
+Every well assignment is already embedded in the Q-View file. If you
+also have the original well-assignment template CSV the producing
+application imported,
+[`read_qview_template()`](https://cttir.github.io/qviewparsR/reference/read_qview_template.md)
+parses it into a tibble that aligns with `qv$plate_layout` for
+cross-validation:
+
+``` r
+
+tmpl <- read_qview_template("path/to/template.csv")
+
+qv$plate_layout |>
+  dplyr::left_join(tmpl, by = "well", suffix = c("_qview", "_template")) |>
+  dplyr::filter(sample_id_qview != sample_id_template)
+```
+
+Any rows surviving the filter expose template-vs-Q-View mismatches.
+
 ## Interactive front-end
+
+For non-coding collaborators,
+[`qview_app()`](https://cttir.github.io/qviewparsR/reference/qview_app.md)
+launches a small Shiny application with the same workflow exposed
+visually:
 
 ``` r
 
 qview_app()
 ```
 
-Launches a Shiny app: upload a `.Q-View` file (and optionally a
-plate-template CSV), preview each parsed table, visualise the plate map,
-intensity heatmap, and replicate scatter, and download the result as
-`xlsx`, `rds`, or a zip of CSVs.
+The app accepts a `.Q-View` upload (and optionally a template CSV),
+shows every parsed table and the three plots in tabs, and offers
+one-click downloads as `xlsx`, `rds`, or a zipped CSV directory.
+
+## Error handling
+
+Every exported function validates its inputs early and raises a
+structured
+[`cli::cli_abort()`](https://cli.r-lib.org/reference/cli_abort.html)
+error that points at the user’s call, not at internal helpers. Typical
+shapes you may see:
+
+    Error in `read_qview()`:
+    ! `path` must be an existing file.
+    x "missing.Q-View" does not exist.
+
+    Error in `read_qview()`:
+    ! `path` is not a valid `.Q-View` project file.
+    x "junk.bin" is missing the expected container header.
+    i Expected a numeric container version followed by "Q-View Project".
+
+The messages carry an `i` bullet whenever there is an actionable hint.
+
+## Where to go next
+
+- [`?read_qview`](https://cttir.github.io/qviewparsR/reference/read_qview.md)
+  – exhaustive description of every output slot.
+- [`?write_qview`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
+  – the three exporters share one help page.
+- [`?summary.qview`](https://cttir.github.io/qviewparsR/reference/summary.qview.md)
+  – detail on the per-well-type aggregation.
+- [`?qview_app`](https://cttir.github.io/qviewparsR/reference/qview_app.md)
+  – launching the interactive app.
+
+The `inst/extdata/` directory does **not** ship a Q-View fixture because
+the binary format is large; instead, the test suite skips cleanly when
+no fixture is present (`tests/testthat/test-read_qview.R` documents the
+lookup paths).

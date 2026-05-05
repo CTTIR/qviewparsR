@@ -1,7 +1,6 @@
 # Convert plate row / column to a well label
 
-Converts 0-based or 1-based row and column indices to the standard
-`"A1"` ... `"H12"` plate notation. Vectorised.
+**\[experimental\]**
 
 ## Usage
 
@@ -28,7 +27,18 @@ well_label(row, col, zero_based = FALSE)
 
 ## Value
 
-Character vector of well labels (e.g. `"A1"`, `"H12"`).
+Character vector of well labels (e.g. `"A1"`, `"H12"`), recycled to the
+longer of `row` / `col`.
+
+## Details
+
+Converts 0-based or 1-based row and column indices to the standard
+`"A1"` ... `"H12"` plate notation. Vectorised.
+
+## See also
+
+Other qview-helper:
+[`strip_qview_prefix()`](https://cttir.github.io/qviewparsR/reference/strip_qview_prefix.md)
 
 ## Examples
 

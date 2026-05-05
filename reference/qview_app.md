@@ -1,11 +1,6 @@
 # Launch the qviewparsR Q-View Shiny app
 
-Interactive front-end for
-[`read_qview()`](https://r-heller.github.io/qviewparsR/reference/read_qview.md).
-Uploads a `.Q-View` file (and optionally an accompanying well-assignment
-template CSV), displays the parsed metadata, analytes, well groups, and
-replicate tables, and lets the user download the parsed result as
-`xlsx`, `rds`, or a zip of per-table CSV files.
+**\[experimental\]**
 
 ## Usage
 
@@ -25,6 +20,13 @@ qview_app(...)
 Invoked for its side effect of running the app.
 
 ## Details
+
+Interactive front-end for
+[`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md).
+Uploads a `.Q-View` file (and optionally an accompanying well-assignment
+template CSV), displays the parsed metadata, analytes, well groups, and
+replicate tables, and lets the user download the parsed result as
+`xlsx`, `rds`, or a zip of per-table CSV files.
 
 Requires the `shiny`, `bslib`, and `DT` packages (listed under
 `Suggests`).

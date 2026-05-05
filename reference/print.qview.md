@@ -17,7 +17,7 @@ print(x, ...)
 - x:
 
   A `qview` object returned by
-  [`read_qview()`](https://r-heller.github.io/qviewparsR/reference/read_qview.md).
+  [`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md).
 
 - ...:
 
@@ -26,3 +26,11 @@ print(x, ...)
 ## Value
 
 `x`, invisibly.
+
+## See also
+
+Other qview-methods:
+[`as_tibble.qview()`](https://cttir.github.io/qviewparsR/reference/as_tibble.qview.md),
+[`is_qview()`](https://cttir.github.io/qviewparsR/reference/is_qview.md),
+[`plot.qview()`](https://cttir.github.io/qviewparsR/reference/plot.qview.md),
+[`summary.qview()`](https://cttir.github.io/qviewparsR/reference/summary.qview.md)

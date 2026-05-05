@@ -15,26 +15,26 @@ derivation, and build helpers have been removed.
   detection limits, well-group sample assignments, per-well replicate
   pixel intensities, summary statistics, optional back-calculated
   concentrations, curve fits, and a plate layout.
-- [`strip_qview_prefix()`](https://r-heller.github.io/qviewparsR/reference/strip_qview_prefix.md):
+- [`strip_qview_prefix()`](https://cttir.github.io/qviewparsR/reference/strip_qview_prefix.md):
   reverses Q-View’s internal naming convention (`ICal N` -\> `Cal N`,
   `GLow` -\> `Low`, `HHigh` -\> `High`, `NFD...` / `N1234...` -\> the
   original ID).
-- [`read_qview_template()`](https://r-heller.github.io/qviewparsR/reference/read_qview_template.md):
+- [`read_qview_template()`](https://cttir.github.io/qviewparsR/reference/read_qview_template.md):
   parser for the well-assignment template CSV (12x8 layout with
   `Group Name`, `Group Type`, `Dilution Factor` sections).
-- [`well_label()`](https://r-heller.github.io/qviewparsR/reference/well_label.md):
+- [`well_label()`](https://cttir.github.io/qviewparsR/reference/well_label.md):
   vectorised plate-coordinate helper.
-- [`print.qview()`](https://r-heller.github.io/qviewparsR/reference/print.qview.md)
+- [`print.qview()`](https://cttir.github.io/qviewparsR/reference/print.qview.md)
   and
-  [`plot.qview()`](https://r-heller.github.io/qviewparsR/reference/plot.qview.md):
+  [`plot.qview()`](https://cttir.github.io/qviewparsR/reference/plot.qview.md):
   compact summary and quick-look plots (plate map, per-analyte intensity
   heatmap, replicate scatter).
-- [`qview_to_xlsx()`](https://r-heller.github.io/qviewparsR/reference/qview_to_xlsx.md)
+- [`qview_to_xlsx()`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
   and
-  [`qview_to_csv_dir()`](https://r-heller.github.io/qviewparsR/reference/qview_to_csv_dir.md):
+  [`qview_to_csv_dir()`](https://cttir.github.io/qviewparsR/reference/write_qview.md):
   export a parsed `qview` object to a multi-sheet workbook or a
   directory of CSV files.
-- [`qview_app()`](https://r-heller.github.io/qviewparsR/reference/qview_app.md):
+- [`qview_app()`](https://cttir.github.io/qviewparsR/reference/qview_app.md):
   Shiny front-end for upload, parsing, preview, and download.
 
 ### Removed

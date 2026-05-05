@@ -1,5 +1,7 @@
 # qviewparsR: Read .Q-View Multiplex ELISA Project Files
 
+**\[experimental\]**
+
 Pure-R parser for `.Q-View` binary project files used in
 chemiluminescent multiplex ELISA plate imaging and quantification.
 Extracts pixel intensities, analyte mappings, sample assignments, plate
@@ -10,38 +12,44 @@ downstream statistical analysis.
 ## Main functions
 
 - Reader:
-  [`read_qview()`](https://r-heller.github.io/qviewparsR/reference/read_qview.md)
+  [`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md)
   – parse a `.Q-View` file.
 
 - Helpers:
-  [`strip_qview_prefix()`](https://r-heller.github.io/qviewparsR/reference/strip_qview_prefix.md)
+  [`strip_qview_prefix()`](https://cttir.github.io/qviewparsR/reference/strip_qview_prefix.md)
   reverse the Q-View internal naming convention;
-  [`well_label()`](https://r-heller.github.io/qviewparsR/reference/well_label.md)
+  [`well_label()`](https://cttir.github.io/qviewparsR/reference/well_label.md)
   map (row, column) to plate notation.
 
 - Optional:
-  [`read_qview_template()`](https://r-heller.github.io/qviewparsR/reference/read_qview_template.md)
+  [`read_qview_template()`](https://cttir.github.io/qviewparsR/reference/read_qview_template.md)
   parse a Q-View well-assignment template CSV.
 
 - Methods:
-  [`print.qview()`](https://r-heller.github.io/qviewparsR/reference/print.qview.md),
-  [`plot.qview()`](https://r-heller.github.io/qviewparsR/reference/plot.qview.md).
+  [`is_qview()`](https://cttir.github.io/qviewparsR/reference/is_qview.md),
+  [`print.qview()`](https://cttir.github.io/qviewparsR/reference/print.qview.md),
+  [`plot.qview()`](https://cttir.github.io/qviewparsR/reference/plot.qview.md),
+  [`as_tibble.qview()`](https://cttir.github.io/qviewparsR/reference/as_tibble.qview.md).
 
 - Shiny:
-  [`qview_app()`](https://r-heller.github.io/qviewparsR/reference/qview_app.md)
+  [`qview_app()`](https://cttir.github.io/qviewparsR/reference/qview_app.md)
   interactive upload / preview / download.
 
 ## See also
 
 Useful links:
 
-- <https://github.com/r-heller/qviewparsR>
+- <https://github.com/CTTIR/qviewparsR>
 
-- <https://r-heller.github.io/qviewparsR/>
+- <https://cttir.github.io/qviewparsR/>
 
-- Report bugs at <https://github.com/r-heller/qviewparsR/issues>
+- Report bugs at <https://github.com/CTTIR/qviewparsR/issues>
 
 ## Author
 
 **Maintainer**: Raban Heller <raban.heller@charite.de>
 ([ORCID](https://orcid.org/0000-0001-8006-9742)) \[copyright holder\]
+
+Authors:
+
+- Marco Mannes

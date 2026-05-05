@@ -14,7 +14,7 @@ plot(x, type = c("plate_map", "intensity_heatmap", "replicate_scatter"), ...)
 - x:
 
   A `qview` object returned by
-  [`read_qview()`](https://r-heller.github.io/qviewparsR/reference/read_qview.md).
+  [`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md).
 
 - type:
 
@@ -23,7 +23,7 @@ plot(x, type = c("plate_map", "intensity_heatmap", "replicate_scatter"), ...)
 
 - ...:
 
-  Ignored.
+  Unused; for S3 generic compatibility.
 
 ## Value
 
@@ -41,3 +41,11 @@ A `ggplot` object.
   analyte.
 
 Requires the `ggplot2` package (Suggested).
+
+## See also
+
+Other qview-methods:
+[`as_tibble.qview()`](https://cttir.github.io/qviewparsR/reference/as_tibble.qview.md),
+[`is_qview()`](https://cttir.github.io/qviewparsR/reference/is_qview.md),
+[`print.qview()`](https://cttir.github.io/qviewparsR/reference/print.qview.md),
+[`summary.qview()`](https://cttir.github.io/qviewparsR/reference/summary.qview.md)

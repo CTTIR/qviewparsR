@@ -1,7 +1,6 @@
 # Reverse the Q-View internal naming convention
 
-On import, the producing software prefixes well-assignment template
-names with single-letter codes:
+**\[experimental\]**
 
 ## Usage
 
@@ -17,9 +16,13 @@ strip_qview_prefix(x)
 
 ## Value
 
-Character vector of the same length, with prefixes stripped.
+Character vector of the same length as `x`, with prefixes stripped. NAs
+and unrecognised values pass through unchanged.
 
 ## Details
+
+On import, the producing software prefixes well-assignment template
+names with single-letter codes:
 
 - `"Cal 1"` ... `"Cal N"` -\> `"ICal 1"` ... `"ICal N"` (Internal
   calibrator)
@@ -34,6 +37,11 @@ Character vector of the same length, with prefixes stripped.
 code sees the identifiers exactly as they appear in the original
 template CSV. Strings that do not match a known prefix pattern are
 returned unchanged.
+
+## See also
+
+Other qview-helper:
+[`well_label()`](https://cttir.github.io/qviewparsR/reference/well_label.md)
 
 ## Examples
 

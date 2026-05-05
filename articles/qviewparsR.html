@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Reading Q-View project files with qviewparsR • qviewparsR</title>
+<title>Reading and analysing .Q-View files with qviewparsR • qviewparsR</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -15,7 +15,7 @@
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Reading Q-View project files with qviewparsR">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Reading and analysing .Q-View files with qviewparsR">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -42,7 +42,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/r-heller/qviewparsR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CTTIR/qviewparsR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -55,94 +55,239 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.svg" class="logo" alt=""><h1>Reading Q-View project files with qviewparsR</h1>
+      <img src="../logo.svg" class="logo" alt=""><h1>Reading and analysing .Q-View files with qviewparsR</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/r-heller/qviewparsR/blob/main/vignettes/qviewparsR.Rmd" class="external-link"><code>vignettes/qviewparsR.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/CTTIR/qviewparsR/blob/main/vignettes/qviewparsR.Rmd" class="external-link"><code>vignettes/qviewparsR.Rmd</code></a></small>
       <div class="d-none name"><code>qviewparsR.Rmd</code></div>
     </div>
 
     
     
-<p><code>qviewparsR</code> is a pure-R parser for <code>.Q-View</code>
-binary project files. The file format is a single-file container that
-bundles an embedded H2 SQL database with binary plate-image data; the
-rendered CSV report is stored as a CLOB inside the database.
-<code><a href="../reference/read_qview.html">read_qview()</a></code> extracts that report without needing a Java
-runtime or H2 driver.</p>
 <div class="section level2">
-<h2 id="reading-a-project-file">Reading a project file<a class="anchor" aria-label="anchor" href="#reading-a-project-file"></a>
+<h2 id="what-this-package-does">What this package does<a class="anchor" aria-label="anchor" href="#what-this-package-does"></a>
+</h2>
+<p><code>qviewparsR</code> is a pure-R parser for the binary
+<code>.Q-View</code> project file format used in chemiluminescent
+multiplex ELISA plate imaging and quantification. A single
+<code>.Q-View</code> file bundles:</p>
+<ul>
+<li>a plain-text manifest header,</li>
+<li>an embedded H2 SQL database (with project metadata, the analyte
+panel, plate geometry, sample-to-well assignments, replicate pixel
+intensities, and – if the user generated a report inside the producing
+application – a fully rendered CSV report stored as a CLOB), and</li>
+<li>one or more binary LOB segments holding the raw chemiluminescent
+plate images.</li>
+</ul>
+<p><code><a href="../reference/read_qview.html">read_qview()</a></code> extracts everything except the raw images
+and returns it as a list of tidy tibbles, with no Java runtime, no H2
+database driver, and no compiled code anywhere in the package.</p>
+</div>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">qv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_qview.html">read_qview</a></span><span class="op">(</span><span class="st">"path/to/project.Q-View"</span><span class="op">)</span></span>
-<span><span class="va">qv</span></span></code></pre></div>
-<p>The returned object has class <code>qview</code> and contains:</p>
+<code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"CTTIR/qviewparsR"</span><span class="op">)</span></span></code></pre></div>
+<p><code>qviewparsR</code> requires R &gt;= 4.1.0 plus a small set of
+tidyverse-aligned dependencies (<code>cli</code>, <code>dplyr</code>,
+<code>lifecycle</code>, <code>openxlsx2</code>, <code>readr</code>,
+<code>rlang</code>, <code>tibble</code>, <code>tidyr</code>). Plotting
+requires <code>ggplot2</code> (Suggested); the Shiny front-end
+additionally requires <code>shiny</code>, <code>bslib</code>, and
+<code>DT</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="a-complete-walk-through">A complete walk-through<a class="anchor" aria-label="anchor" href="#a-complete-walk-through"></a>
+</h2>
+<p>The end-to-end workflow is short:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">qv</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; List of 11</span></span>
-<span><span class="co">#&gt;  $ metadata          :List of 12</span></span>
-<span><span class="co">#&gt;  $ manifest          : tibble [4 x 3]</span></span>
-<span><span class="co">#&gt;  $ segments          : tibble [3 x 4]</span></span>
-<span><span class="co">#&gt;  $ analytes          : tibble [&lt;n_analytes&gt; x 8]</span></span>
-<span><span class="co">#&gt;  $ well_groups       : tibble [&lt;n_groups&gt; x 7]</span></span>
-<span><span class="co">#&gt;  $ pixel_intensities : tibble [&lt;n_rows&gt; x 8]</span></span>
-<span><span class="co">#&gt;  $ summary_statistics: tibble [&lt;n_rows&gt; x 6]</span></span>
-<span><span class="co">#&gt;  $ concentrations    : NULL or tibble</span></span>
-<span><span class="co">#&gt;  $ curve_fit         : NULL or tibble</span></span>
-<span><span class="co">#&gt;  $ report_csv        : character vector</span></span>
-<span><span class="co">#&gt;  $ plate_layout      : tibble [96 x 7]</span></span>
-<span><span class="co">#&gt;  - attr(*, "class") = "qview"</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/CTTIR/qviewparsR" class="external-link">qviewparsR</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">qv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_qview.html">read_qview</a></span><span class="op">(</span><span class="st">"path/to/plate.Q-View"</span><span class="op">)</span></span>
+<span><span class="va">qv</span>                          <span class="co"># one-screen summary</span></span>
+<span></span>
+<span><span class="va">qv</span><span class="op">$</span><span class="va">analytes</span>                 <span class="co"># spot_number, analyte, unit, lod, lloq, uloq</span></span>
+<span><span class="va">qv</span><span class="op">$</span><span class="va">well_groups</span>              <span class="co"># one row per sample/calibrator/control</span></span>
+<span><span class="va">qv</span><span class="op">$</span><span class="va">pixel_intensities</span>        <span class="co"># long-format replicate readings</span></span>
+<span><span class="va">qv</span><span class="op">$</span><span class="va">summary_statistics</span>       <span class="co"># per-group mean / std-dev / CV rows</span></span>
+<span><span class="va">qv</span><span class="op">$</span><span class="va">plate_layout</span>             <span class="co"># one row per plate well</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">qv</span><span class="op">)</span>                 <span class="co"># mean / SD / CV per well type x analyte</span></span></code></pre></div>
+<p><code><a href="../reference/read_qview.html">read_qview()</a></code> always returns a list of class
+<code>qview</code> with eleven slots described in
+<code><a href="../reference/read_qview.html">?read_qview</a></code>. Empty slots are zero-row tibbles rather than
+<code>NULL</code>, so downstream code can rely on shape stability.</p>
 </div>
 <div class="section level2">
 <h2 id="the-naming-convention">The naming convention<a class="anchor" aria-label="anchor" href="#the-naming-convention"></a>
 </h2>
-<p>When Q-View imports a plate-template CSV it rewrites the
-identifiers:</p>
-<ul>
-<li>
-<code>Cal 1</code> -&gt; <code>ICal 1</code>
-</li>
-<li>
-<code>Low</code> -&gt; <code>GLow</code>
-</li>
-<li>
-<code>High</code> -&gt; <code>HHigh</code>
-</li>
-<li>
-<code>FD...</code> and any all-digit ID -&gt; a single
-<code>N</code> prefix.</li>
-</ul>
-<p>Pass <code>strip_prefix = TRUE</code> to undo the rewrite:</p>
+<p>The producing software rewrites identifiers from the original
+well-assignment template CSV before it stores them. The mapping is
+systematic and reversible:</p>
+<table class="table">
+<thead><tr class="header">
+<th>Template value</th>
+<th>Stored as</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>
+<code>Cal 1</code> … <code>Cal N</code>
+</td>
+<td>
+<code>ICal 1</code> … <code>ICal N</code>
+</td>
+</tr>
+<tr class="even">
+<td><code>Low</code></td>
+<td><code>GLow</code></td>
+</tr>
+<tr class="odd">
+<td><code>High</code></td>
+<td><code>HHigh</code></td>
+</tr>
+<tr class="even">
+<td>
+<code>FD24277364</code>, <code>1211498458</code>, …</td>
+<td>
+<code>NFD24277364</code>, <code>N1211498458</code>, …</td>
+</tr>
+</tbody>
+</table>
+<p><code><a href="../reference/strip_qview_prefix.html">strip_qview_prefix()</a></code> reverses the rewrite. Pass
+<code>strip_prefix = TRUE</code> to <code><a href="../reference/read_qview.html">read_qview()</a></code> to apply
+it across every sample-id column at once:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">qv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_qview.html">read_qview</a></span><span class="op">(</span><span class="st">"path/to/project.Q-View"</span>, strip_prefix <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">qv</span><span class="op">$</span><span class="va">well_groups</span><span class="op">$</span><span class="va">sample_id</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">qv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_qview.html">read_qview</a></span><span class="op">(</span><span class="st">"path/to/plate.Q-View"</span>, strip_prefix <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">qv</span><span class="op">$</span><span class="va">well_groups</span><span class="op">$</span><span class="va">sample_id</span><span class="op">)</span></span></code></pre></div>
+<p>The vectorised helper is also useful on its own:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/strip_qview_prefix.html">strip_qview_prefix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ICal 1"</span>, <span class="st">"GLow"</span>, <span class="st">"HHigh"</span>, <span class="st">"NFD24277364"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Cal 1"      "Low"        "High"       "FD24277364"</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="plotting">Plotting<a class="anchor" aria-label="anchor" href="#plotting"></a>
+<h2 id="coercion-and-tidy-data-idioms">Coercion and tidy-data idioms<a class="anchor" aria-label="anchor" href="#coercion-and-tidy-data-idioms"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">qv</span>, type <span class="op">=</span> <span class="st">"plate_map"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">qv</span>, type <span class="op">=</span> <span class="st">"intensity_heatmap"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">qv</span>, type <span class="op">=</span> <span class="st">"replicate_scatter"</span><span class="op">)</span></span></code></pre></div>
-<p><code><a href="../reference/plot.qview.html">plot.qview()</a></code> requires <code>ggplot2</code>.</p>
+<p><code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble()</a></code> returns the long-format
+<code>pixel_intensities</code> table – the primary tabular payload – so
+a parsed object can drop straight into a dplyr / ggplot2 pipeline:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/" class="external-link">tibble</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">qv</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">replicate</span> <span class="op">==</span> <span class="fl">1L</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">analyte</span>, <span class="va">unit</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>median_pi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">pixel_intensity</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>            .groups <span class="op">=</span> <span class="st">"drop"</span><span class="op">)</span></span></code></pre></div>
+<p>The <code><a href="../reference/is_qview.html">is_qview()</a></code> predicate lets package-aware functions
+guard their inputs:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/is_qview.html">is_qview</a></span><span class="op">(</span><span class="va">qv</span><span class="op">)</span>      <span class="co"># TRUE</span></span>
+<span><span class="fu"><a href="../reference/is_qview.html">is_qview</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>  <span class="co"># FALSE</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="visualisation">Visualisation<a class="anchor" aria-label="anchor" href="#visualisation"></a>
+</h2>
+<p>Three quick-look plot types are built in (ggplot2 required):</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">qv</span>, type <span class="op">=</span> <span class="st">"plate_map"</span><span class="op">)</span>          <span class="co"># 96-well plate, fill = well type</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">qv</span>, type <span class="op">=</span> <span class="st">"intensity_heatmap"</span><span class="op">)</span>  <span class="co"># facet per analyte, fill = PI</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">qv</span>, type <span class="op">=</span> <span class="st">"replicate_scatter"</span><span class="op">)</span>  <span class="co"># rep 1 vs rep 2 per analyte</span></span></code></pre></div>
+<p>Each call returns a <code>ggplot</code> object, so themes, scales,
+and labels can be added on top:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">qv</span>, type <span class="op">=</span> <span class="st">"plate_map"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="cn">NULL</span>, subtitle <span class="op">=</span> <span class="st">"QC overview"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="exporting">Exporting<a class="anchor" aria-label="anchor" href="#exporting"></a>
 </h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/qview_to_xlsx.html">qview_to_xlsx</a></span><span class="op">(</span><span class="va">qv</span>, <span class="st">"out.xlsx"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/qview_to_csv_dir.html">qview_to_csv_dir</a></span><span class="op">(</span><span class="va">qv</span>, <span class="st">"out_csv/"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">qv</span>, <span class="st">"out.rds"</span><span class="op">)</span></span></code></pre></div>
+<p>Three writers cover the common destinations. All return the parsed
+object invisibly, so they compose with <code>|&gt;</code>:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">qv</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/write_qview.html">write_qview_xlsx</a></span><span class="op">(</span><span class="st">"plate.xlsx"</span><span class="op">)</span> <span class="op">|&gt;</span>      <span class="co"># one sheet per parsed table</span></span>
+<span>  <span class="fu"><a href="../reference/write_qview.html">write_qview_csv</a></span> <span class="op">(</span><span class="st">"plate_csv/"</span><span class="op">)</span> <span class="op">|&gt;</span>      <span class="co"># one CSV file per parsed table</span></span>
+<span>  <span class="fu"><a href="../reference/write_qview.html">write_qview_rds</a></span> <span class="op">(</span><span class="st">"plate.rds"</span><span class="op">)</span>          <span class="co"># full lossless R round-trip</span></span></code></pre></div>
+<p>Add <code>overwrite = TRUE</code> to <code><a href="../reference/write_qview.html">write_qview_xlsx()</a></code>
+/ <code><a href="../reference/write_qview.html">write_qview_rds()</a></code> to replace existing destinations.</p>
+<p>The legacy aliases <code><a href="../reference/write_qview.html">qview_to_xlsx()</a></code> and
+<code><a href="../reference/write_qview.html">qview_to_csv_dir()</a></code> still work but are flagged with
+<code><a href="https://lifecycle.r-lib.org/reference/deprecate_soft.html" class="external-link">lifecycle::deprecate_warn()</a></code> and will be removed in a future
+release.</p>
+</div>
+<div class="section level2">
+<h2 id="cross-validating-against-a-template-csv">Cross-validating against a template CSV<a class="anchor" aria-label="anchor" href="#cross-validating-against-a-template-csv"></a>
+</h2>
+<p>Every well assignment is already embedded in the Q-View file. If you
+also have the original well-assignment template CSV the producing
+application imported, <code><a href="../reference/read_qview_template.html">read_qview_template()</a></code> parses it into
+a tibble that aligns with <code>qv$plate_layout</code> for
+cross-validation:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tmpl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_qview_template.html">read_qview_template</a></span><span class="op">(</span><span class="st">"path/to/template.csv"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">qv</span><span class="op">$</span><span class="va">plate_layout</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">tmpl</span>, by <span class="op">=</span> <span class="st">"well"</span>, suffix <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"_qview"</span>, <span class="st">"_template"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">sample_id_qview</span> <span class="op">!=</span> <span class="va">sample_id_template</span><span class="op">)</span></span></code></pre></div>
+<p>Any rows surviving the filter expose template-vs-Q-View
+mismatches.</p>
 </div>
 <div class="section level2">
 <h2 id="interactive-front-end">Interactive front-end<a class="anchor" aria-label="anchor" href="#interactive-front-end"></a>
 </h2>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<p>For non-coding collaborators, <code><a href="../reference/qview_app.html">qview_app()</a></code> launches a
+small Shiny application with the same workflow exposed visually:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/qview_app.html">qview_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>Launches a Shiny app: upload a <code>.Q-View</code> file (and
-optionally a plate-template CSV), preview each parsed table, visualise
-the plate map, intensity heatmap, and replicate scatter, and download
-the result as <code>xlsx</code>, <code>rds</code>, or a zip of CSVs.</p>
+<p>The app accepts a <code>.Q-View</code> upload (and optionally a
+template CSV), shows every parsed table and the three plots in tabs, and
+offers one-click downloads as <code>xlsx</code>, <code>rds</code>, or a
+zipped CSV directory.</p>
+</div>
+<div class="section level2">
+<h2 id="error-handling">Error handling<a class="anchor" aria-label="anchor" href="#error-handling"></a>
+</h2>
+<p>Every exported function validates its inputs early and raises a
+structured <code><a href="https://cli.r-lib.org/reference/cli_abort.html" class="external-link">cli::cli_abort()</a></code> error that points at the user’s
+call, not at internal helpers. Typical shapes you may see:</p>
+<pre><code>Error in `read_qview()`:
+! `path` must be an existing file.
+x "missing.Q-View" does not exist.</code></pre>
+<pre><code>Error in `read_qview()`:
+! `path` is not a valid `.Q-View` project file.
+x "junk.bin" is missing the expected container header.
+i Expected a numeric container version followed by "Q-View Project".</code></pre>
+<p>The messages carry an <code>i</code> bullet whenever there is an
+actionable hint.</p>
+</div>
+<div class="section level2">
+<h2 id="where-to-go-next">Where to go next<a class="anchor" aria-label="anchor" href="#where-to-go-next"></a>
+</h2>
+<ul>
+<li>
+<code><a href="../reference/read_qview.html">?read_qview</a></code> – exhaustive description of every output
+slot.</li>
+<li>
+<code><a href="../reference/write_qview.html">?write_qview</a></code> – the three exporters share one help
+page.</li>
+<li>
+<code><a href="../reference/summary.qview.html">?summary.qview</a></code> – detail on the per-well-type
+aggregation.</li>
+<li>
+<code><a href="../reference/qview_app.html">?qview_app</a></code> – launching the interactive app.</li>
+</ul>
+<p>The <code>inst/extdata/</code> directory does <strong>not</strong>
+ship a Q-View fixture because the binary format is large; instead, the
+test suite skips cleanly when no fixture is present
+(<code>tests/testthat/test-read_qview.R</code> documents the lookup
+paths).</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -151,7 +296,7 @@ the result as <code>xlsx</code>, <code>rds</code>, or a zip of CSVs.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Raban Heller.</p>
+  <p>Developed by Raban Heller, Marco Mannes.</p>
 </div>
 
 <div class="pkgdown-footer-right">

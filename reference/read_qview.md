@@ -1,15 +1,16 @@
 # Read a .Q-View project file
 
-Parses a `.Q-View` binary container (a chemiluminescent multiplex ELISA
-project file holding an embedded H2 database plus binary LOB segments)
-and extracts the assay data: project metadata, analyte panel with units,
-well-group sample assignments, per-well replicate pixel intensities,
-summary statistics, and (when present) the embedded CSV report.
+**\[experimental\]**
 
 ## Usage
 
 ``` r
-read_qview(path, strip_prefix = FALSE, verbose = TRUE)
+read_qview(
+  path,
+  strip_prefix = FALSE,
+  verbose = TRUE,
+  call = rlang::caller_env()
+)
 ```
 
 ## Arguments
@@ -21,13 +22,18 @@ read_qview(path, strip_prefix = FALSE, verbose = TRUE)
 - strip_prefix:
 
   Logical. If `TRUE`, reverse Q-View's internal naming convention via
-  [`strip_qview_prefix()`](https://r-heller.github.io/qviewparsR/reference/strip_qview_prefix.md)
+  [`strip_qview_prefix()`](https://cttir.github.io/qviewparsR/reference/strip_qview_prefix.md)
   so identifiers match the original well-assignment template. Default
   `FALSE`.
 
 - verbose:
 
   Logical. Print a short summary after parsing. Default `TRUE`.
+
+- call:
+
+  The execution environment of the calling function. Used for error
+  reporting; experts only.
 
 ## Value
 
@@ -89,6 +95,12 @@ A list with class `"qview"` containing:
 
 ## Details
 
+Parses a `.Q-View` binary container (a chemiluminescent multiplex ELISA
+project file holding an embedded H2 database plus binary LOB segments)
+and extracts the assay data: project metadata, analyte panel with units,
+well-group sample assignments, per-well replicate pixel intensities,
+summary statistics, and (when present) the embedded CSV report.
+
 The file format is reverse-engineered from public binary inspection: it
 begins with a plain-text manifest, followed by three concatenated H2
 database segments. The fully-formatted report Q-View renders for the
@@ -101,10 +113,13 @@ system dependencies beyond a working R installation.
 
 ## See also
 
-[`strip_qview_prefix()`](https://r-heller.github.io/qviewparsR/reference/strip_qview_prefix.md),
-[`read_qview_template()`](https://r-heller.github.io/qviewparsR/reference/read_qview_template.md),
-[`print.qview()`](https://r-heller.github.io/qviewparsR/reference/print.qview.md),
-[`plot.qview()`](https://r-heller.github.io/qviewparsR/reference/plot.qview.md).
+[`strip_qview_prefix()`](https://cttir.github.io/qviewparsR/reference/strip_qview_prefix.md),
+[`read_qview_template()`](https://cttir.github.io/qviewparsR/reference/read_qview_template.md),
+[`print.qview()`](https://cttir.github.io/qviewparsR/reference/print.qview.md),
+[`plot.qview()`](https://cttir.github.io/qviewparsR/reference/plot.qview.md).
+
+Other qview-reader:
+[`read_qview_template()`](https://cttir.github.io/qviewparsR/reference/read_qview_template.md)
 
 ## Examples
 

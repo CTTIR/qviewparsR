@@ -13,7 +13,7 @@ working R installation.
 ``` r
 
 # install.packages("pak")
-pak::pak("r-heller/qviewparsR")
+pak::pak("CTTIR/qviewparsR")
 ```
 
 ## Quick start
@@ -32,10 +32,14 @@ plot(qv, type = "plate_map")      # plate visualisation (needs ggplot2)
 plot(qv, type = "intensity_heatmap")
 plot(qv, type = "replicate_scatter")
 
-# Export
-qview_to_xlsx(qv, "out.xlsx")
-qview_to_csv_dir(qv, "out_csv/")
-saveRDS(qv, "out.rds")
+# Export (pipe-friendly: each writer returns qv invisibly)
+qv |>
+  write_qview_xlsx("out.xlsx") |>
+  write_qview_csv("out_csv/")  |>
+  write_qview_rds("out.rds")
+
+# Per-analyte mean / SD / CV per well-type group
+summary(qv)
 
 # Interactive front-end (upload, visualise, download)
 qview_app()
@@ -108,14 +112,14 @@ identifiers internally:
 | `High`                      | `HHigh`                      |
 | `FD24277364`, all-digit IDs | `NFD24277364`, `N1211498458` |
 
-[`strip_qview_prefix()`](https://r-heller.github.io/qviewparsR/reference/strip_qview_prefix.md)
+[`strip_qview_prefix()`](https://cttir.github.io/qviewparsR/reference/strip_qview_prefix.md)
 reverses this transformation, and
 `read_qview(path, strip_prefix = TRUE)` applies it across the whole
 returned object.
 
 ## Output structure
 
-[`read_qview()`](https://r-heller.github.io/qviewparsR/reference/read_qview.md)
+[`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md)
 returns a list with class `qview`:
 
 | Slot | Description |
@@ -136,12 +140,13 @@ returns a list with class `qview`:
 
 | Category | Functions |
 |----|----|
-| Reader | [`read_qview()`](https://r-heller.github.io/qviewparsR/reference/read_qview.md) |
-| Helpers | [`strip_qview_prefix()`](https://r-heller.github.io/qviewparsR/reference/strip_qview_prefix.md), [`well_label()`](https://r-heller.github.io/qviewparsR/reference/well_label.md) |
-| Optional | [`read_qview_template()`](https://r-heller.github.io/qviewparsR/reference/read_qview_template.md) |
-| Methods | [`print.qview()`](https://r-heller.github.io/qviewparsR/reference/print.qview.md), [`plot.qview()`](https://r-heller.github.io/qviewparsR/reference/plot.qview.md) |
-| Export | [`qview_to_xlsx()`](https://r-heller.github.io/qviewparsR/reference/qview_to_xlsx.md), [`qview_to_csv_dir()`](https://r-heller.github.io/qviewparsR/reference/qview_to_csv_dir.md) |
-| Shiny app | [`qview_app()`](https://r-heller.github.io/qviewparsR/reference/qview_app.md) |
+| Reader | [`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md) |
+| Helpers | [`strip_qview_prefix()`](https://cttir.github.io/qviewparsR/reference/strip_qview_prefix.md), [`well_label()`](https://cttir.github.io/qviewparsR/reference/well_label.md) |
+| Optional | [`read_qview_template()`](https://cttir.github.io/qviewparsR/reference/read_qview_template.md) |
+| Methods | [`print.qview()`](https://cttir.github.io/qviewparsR/reference/print.qview.md), [`plot.qview()`](https://cttir.github.io/qviewparsR/reference/plot.qview.md) |
+| Export | [`write_qview_xlsx()`](https://cttir.github.io/qviewparsR/reference/write_qview.md), [`write_qview_csv()`](https://cttir.github.io/qviewparsR/reference/write_qview.md), [`write_qview_rds()`](https://cttir.github.io/qviewparsR/reference/write_qview.md) |
+| Summary | [`summary.qview()`](https://cttir.github.io/qviewparsR/reference/summary.qview.md) (mean / SD / CV per analyte x well type) |
+| Shiny app | [`qview_app()`](https://cttir.github.io/qviewparsR/reference/qview_app.md) |
 
 ## License
 
