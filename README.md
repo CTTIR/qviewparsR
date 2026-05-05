@@ -1,4 +1,4 @@
-# qviewparsR <img src="man/figures/logo.png" align="right" height="139" alt="qviewparsR logo" />
+# qviewparsR <img src="man/figures/logo.svg" align="right" height="139" alt="qviewparsR hex sticker" />
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/CTTIR/qviewparsR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/CTTIR/qviewparsR/actions/workflows/R-CMD-check.yaml)
