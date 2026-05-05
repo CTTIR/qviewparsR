@@ -34,10 +34,23 @@ jobs:
           covr::to_cobertura(cov)
         shell: Rscript {0}
 
-      - uses: codecov/codecov-action@v4
+      - name: Upload coverage to Codecov
+        if: ${{ env.CODECOV_TOKEN != '' }}
+        uses: codecov/codecov-action@v5
         with:
-          fail_ci_if_error: ${{ github.event_name != 'pull_request' && true || false }}
-          file: ./cobertura.xml
-          plugin: noop
-          disable_search: true
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./cobertura.xml
+          fail_ci_if_error: false
+          disable_search: true
+          plugins: noop
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Coverage summary (no Codecov token)
+        if: ${{ env.CODECOV_TOKEN == '' }}
+        run: |
+          echo "::warning ::No CODECOV_TOKEN secret set on this repository."
+          echo "Coverage was computed locally but not uploaded to Codecov."
+          echo "Add CODECOV_TOKEN under Settings -> Secrets and variables -> Actions to enable upload."
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
