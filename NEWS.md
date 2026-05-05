@@ -1,9 +1,9 @@
 # qviewparsR 1.0.0
 
 Major restructure: the package is now exclusively a parser for `.Q-View`
-binary project files produced by Quansys Biosciences Q-View Software.
-All previous panel-specific readers, normalisation, derivation, and
-build helpers have been removed.
+binary project files (chemiluminescent multiplex ELISA plate imaging /
+quantification). All previous panel-specific readers, normalisation,
+derivation, and build helpers have been removed.
 
 ## New
 

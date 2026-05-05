@@ -13,7 +13,7 @@ strip_qview_prefix(x)
 Character vector of the same length, with prefixes stripped.
 }
 \description{
-On import, Q-View Software prefixes well-assignment template names
+On import, the producing software prefixes well-assignment template names
 with single-letter codes:
 }
 \details{

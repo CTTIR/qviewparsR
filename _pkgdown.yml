@@ -7,7 +7,7 @@ template:
 home:
   title: qviewparsR
   description: >
-    Pure-R parser for Quansys Q-View `.Q-View` binary ELISA project files.
+    Pure-R parser for `.Q-View` binary multiplex ELISA project files.
 
 reference:
   - title: Reader

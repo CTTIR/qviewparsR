@@ -2,7 +2,7 @@
 % Please edit documentation in R/read_qview.R
 \name{read_qview}
 \alias{read_qview}
-\title{Read a Quansys Q-View project file}
+\title{Read a .Q-View project file}
 \usage{
 read_qview(path, strip_prefix = FALSE, verbose = TRUE)
 }
@@ -50,9 +50,9 @@ or \code{NULL} if no report was generated.}
 }
 }
 \description{
-Parses a \code{.Q-View} binary container (a Q-View Software v3.x project
-file holding an embedded H2 database plus binary LOB segments) and
-extracts ELISA / multiplex assay data: project metadata, analyte
+Parses a \code{.Q-View} binary container (a chemiluminescent multiplex
+ELISA project file holding an embedded H2 database plus binary LOB
+segments) and extracts the assay data: project metadata, analyte
 panel with units, well-group sample assignments, per-well replicate
 pixel intensities, summary statistics, and (when present) the
 embedded CSV report.
