@@ -11,6 +11,11 @@
 #' Requires the `shiny`, `bslib`, and `DT` packages (listed under
 #' `Suggests`).
 #'
+#' @param max_upload_mb Numeric. Maximum upload size per request, in
+#'   megabytes. Q-View project files routinely exceed Shiny's 5 MB
+#'   default; this argument bumps the limit for the duration of the
+#'   running app and restores the previous value on exit. Default
+#'   `512` MB.
 #' @param ... Forwarded to [shiny::runApp()].
 #'
 #' @return Invoked for its side effect of running the app.
@@ -22,7 +27,7 @@
 #'
 #' @family qview-app
 #' @export
-qview_app <- function(...) {
+qview_app <- function(max_upload_mb = 512, ...) {
   for (pkg in c("shiny", "bslib", "DT", "ggplot2", "withr")) {
     if (!requireNamespace(pkg, quietly = TRUE)) {
       cli::cli_abort(c(
@@ -31,6 +36,10 @@ qview_app <- function(...) {
       ))
     }
   }
+  stopifnot(is.numeric(max_upload_mb), length(max_upload_mb) == 1L,
+            max_upload_mb > 0)
+  old <- options(shiny.maxRequestSize = max_upload_mb * 1024^2)
+  on.exit(options(old), add = TRUE)
   app <- shiny::shinyApp(ui = .qv_app_ui(), server = .qv_app_server)
   shiny::runApp(app, ...)
 }
