@@ -2,6 +2,10 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/CTTIR/qviewparsR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/CTTIR/qviewparsR/actions/workflows/R-CMD-check.yaml)
+[![pkgdown](https://github.com/CTTIR/qviewparsR/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/CTTIR/qviewparsR/actions/workflows/pkgdown.yaml)
+[![CRAN status](https://www.r-pkg.org/badges/version/qviewparsR)](https://CRAN.R-project.org/package=qviewparsR)
+[![Codecov test coverage](https://codecov.io/gh/CTTIR/qviewparsR/branch/main/graph/badge.svg)](https://app.codecov.io/gh/CTTIR/qviewparsR?branch=main)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <!-- badges: end -->
 
