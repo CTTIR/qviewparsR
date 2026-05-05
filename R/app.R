@@ -218,7 +218,8 @@ qview_app <- function(...) {
     filename = function() filename_stamp(".xlsx"),
     content  = function(file) {
       shiny::req(state$qv)
-      qview_to_xlsx(state$qv, file, template = state$template)
+      write_qview_xlsx(state$qv, file, template = state$template,
+                       overwrite = TRUE)
     }
   )
 
@@ -236,7 +237,7 @@ qview_app <- function(...) {
       shiny::req(state$qv)
       tmp <- tempfile("qview_csv_")
       dir.create(tmp); on.exit(unlink(tmp, recursive = TRUE), add = TRUE)
-      qview_to_csv_dir(state$qv, tmp, template = state$template)
+      write_qview_csv(state$qv, tmp, template = state$template)
       old <- setwd(tmp); on.exit(setwd(old), add = TRUE)
       utils::zip(file, files = list.files(tmp))
     }

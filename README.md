@@ -1,7 +1,7 @@
 # qviewparsR <img src="man/figures/logo.png" align="right" height="139" alt="qviewparsR logo" />
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/r-heller/qviewparsR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/r-heller/qviewparsR/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/CTTIR/qviewparsR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/CTTIR/qviewparsR/actions/workflows/R-CMD-check.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <!-- badges: end -->
 
@@ -17,7 +17,7 @@ working R installation.
 
 ```r
 # install.packages("pak")
-pak::pak("r-heller/qviewparsR")
+pak::pak("CTTIR/qviewparsR")
 ```
 
 ## Quick start
@@ -35,10 +35,14 @@ plot(qv, type = "plate_map")      # plate visualisation (needs ggplot2)
 plot(qv, type = "intensity_heatmap")
 plot(qv, type = "replicate_scatter")
 
-# Export
-qview_to_xlsx(qv, "out.xlsx")
-qview_to_csv_dir(qv, "out_csv/")
-saveRDS(qv, "out.rds")
+# Export (pipe-friendly: each writer returns qv invisibly)
+qv |>
+  write_qview_xlsx("out.xlsx") |>
+  write_qview_csv("out_csv/")  |>
+  write_qview_rds("out.rds")
+
+# Per-analyte mean / SD / CV per well-type group
+summary(qv)
 
 # Interactive front-end (upload, visualise, download)
 qview_app()
@@ -143,7 +147,8 @@ returned object.
 | Helpers | `strip_qview_prefix()`, `well_label()` |
 | Optional | `read_qview_template()` |
 | Methods | `print.qview()`, `plot.qview()` |
-| Export | `qview_to_xlsx()`, `qview_to_csv_dir()` |
+| Export | `write_qview_xlsx()`, `write_qview_csv()`, `write_qview_rds()` |
+| Summary | `summary.qview()` (mean / SD / CV per analyte x well type) |
 | Shiny app | `qview_app()` |
 
 ## License

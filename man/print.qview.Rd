@@ -24,6 +24,7 @@ qualitative pixel intensities.
 Other qview-methods: 
 \code{\link{as_tibble.qview}()},
 \code{\link{is_qview}()},
-\code{\link{plot.qview}()}
+\code{\link{plot.qview}()},
+\code{\link{summary.qview}()}
 }
 \concept{qview-methods}

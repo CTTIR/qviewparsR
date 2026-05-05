@@ -114,12 +114,46 @@ test_that("input validation gives informative errors", {
                "must be .*TRUE.* or .*FALSE")
 })
 
-test_that("qview_to_xlsx() refuses to overwrite by default", {
+test_that("write_qview_xlsx() refuses to overwrite by default", {
   skip_if_not(fixture_available, "no Q-View fixture available")
   qv <- read_qview(fixture, verbose = FALSE)
   out <- tempfile(fileext = ".xlsx"); on.exit(unlink(out))
-  qview_to_xlsx(qv, out)
+  write_qview_xlsx(qv, out)
   expect_true(file.exists(out))
-  expect_error(qview_to_xlsx(qv, out), "already exists")
-  expect_invisible(qview_to_xlsx(qv, out, overwrite = TRUE))
+  expect_error(write_qview_xlsx(qv, out), "already exists")
+  expect_invisible(write_qview_xlsx(qv, out, overwrite = TRUE))
+})
+
+test_that("write_qview_rds() round-trips a qview object", {
+  skip_if_not(fixture_available, "no Q-View fixture available")
+  qv <- read_qview(fixture, verbose = FALSE)
+  out <- tempfile(fileext = ".rds"); on.exit(unlink(out))
+  write_qview_rds(qv, out)
+  qv2 <- readRDS(out)
+  expect_true(is_qview(qv2))
+  expect_equal(nrow(qv$pixel_intensities), nrow(qv2$pixel_intensities))
+})
+
+test_that("summary.qview() returns one row per well_type x analyte", {
+  skip_if_not(fixture_available, "no Q-View fixture available")
+  qv <- read_qview(fixture, verbose = FALSE)
+  s <- summary(qv)
+  expect_s3_class(s, "qview_summary")
+  expect_named(s, c("well_type", "analyte", "unit", "n",
+                    "mean", "sd", "cv", "min", "max"))
+  expect_true(all(s$n > 0L))
+  expect_true(all(s$cv >= 0 | is.na(s$cv)))
+})
+
+test_that("deprecated qview_to_xlsx() warns but still works", {
+  skip_if_not(fixture_available, "no Q-View fixture available")
+  qv <- read_qview(fixture, verbose = FALSE)
+  out <- tempfile(fileext = ".xlsx"); on.exit(unlink(out))
+  expect_warning(qview_to_xlsx(qv, out), "deprecated")
+  expect_true(file.exists(out))
+})
+
+test_that("error messages match snapshots", {
+  expect_snapshot(read_qview("nonexistent.Q-View"), error = TRUE)
+  expect_snapshot(read_qview(123), error = TRUE)
 })

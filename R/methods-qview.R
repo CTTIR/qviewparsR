@@ -75,6 +75,65 @@ print.qview <- function(x, ...) {
 }
 
 
+#' Summary statistics for a Q-View object
+#'
+#' Per-analyte mean, standard deviation, and coefficient of variation
+#' (`sd / mean`) of pixel intensities, by well-group type. Calibrator /
+#' standard wells are reported separately so calibration variability is
+#' easy to inspect.
+#'
+#' @param object A `qview` object returned by [read_qview()].
+#' @param ... Unused; for S3 generic compatibility.
+#'
+#' @return A [tibble::tibble()] with one row per `well_type` x `analyte`
+#'   combination, columns: `well_type`, `analyte`, `unit`, `n`, `mean`,
+#'   `sd`, `cv`, `min`, `max`.
+#'
+#' @family qview-methods
+#' @export
+summary.qview <- function(object, ...) {
+  rlang::check_dots_empty()
+  .check_qview(object)
+  pi  <- object$pixel_intensities
+  wg  <- object$well_groups[, c("well_group", "well_type"), drop = FALSE]
+  if (nrow(pi) == 0L) {
+    return(tibble::tibble(
+      well_type = factor(character(),
+        levels = c("standard", "negative", "sample", "control")),
+      analyte = character(), unit = character(),
+      n = integer(),
+      mean = numeric(), sd = numeric(), cv = numeric(),
+      min = numeric(), max = numeric()
+    ))
+  }
+  d <- dplyr::left_join(pi, wg, by = "well_group")
+  out <- d |>
+    dplyr::group_by(.data$well_type, .data$analyte, .data$unit) |>
+    dplyr::summarise(
+      n    = dplyr::n(),
+      mean = mean(.data$pixel_intensity, na.rm = TRUE),
+      sd   = stats::sd(.data$pixel_intensity, na.rm = TRUE),
+      min  = suppressWarnings(min(.data$pixel_intensity, na.rm = TRUE)),
+      max  = suppressWarnings(max(.data$pixel_intensity, na.rm = TRUE)),
+      .groups = "drop"
+    )
+  out$cv <- ifelse(out$mean > 0, out$sd / out$mean, NA_real_)
+  out <- out[, c("well_type", "analyte", "unit", "n",
+                 "mean", "sd", "cv", "min", "max")]
+  structure(out, class = c("qview_summary", class(out)))
+}
+
+
+#' @export
+print.qview_summary <- function(x, ...) {
+  rlang::check_dots_empty()
+  cli::cli_h1("Q-View summary")
+  cli::cli_text("Mean / SD / CV of pixel intensities, grouped by well type:")
+  print(tibble::as_tibble(x))
+  invisible(x)
+}
+
+
 #' Coerce a Q-View object to a tibble
 #'
 #' Returns the long-format `pixel_intensities` table — the primary

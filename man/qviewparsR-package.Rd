@@ -32,14 +32,19 @@ template CSV.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/r-heller/qviewparsR}
-  \item \url{https://r-heller.github.io/qviewparsR/}
-  \item Report bugs at \url{https://github.com/r-heller/qviewparsR/issues}
+  \item \url{https://github.com/CTTIR/qviewparsR}
+  \item \url{https://cttir.github.io/qviewparsR/}
+  \item Report bugs at \url{https://github.com/CTTIR/qviewparsR/issues}
 }
 
 }
 \author{
 \strong{Maintainer}: Raban Heller \email{raban.heller@charite.de} (\href{https://orcid.org/0000-0001-8006-9742}{ORCID}) [copyright holder]
+
+Authors:
+\itemize{
+  \item Marco Mannes
+}
 
 }
 \keyword{internal}

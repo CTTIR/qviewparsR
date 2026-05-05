@@ -1,4 +1,4 @@
-url: https://r-heller.github.io/qviewparsR/
+url: https://cttir.github.io/qviewparsR/
 
 template:
   bootstrap: 5
@@ -23,16 +23,20 @@ reference:
       - read_qview_template
 
   - title: Methods
-    desc: Print and plot a parsed `qview` object.
+    desc: Print, summarise, plot, and coerce a parsed `qview` object.
     contents:
+      - is_qview
       - print.qview
+      - summary.qview
       - plot.qview
+      - as_tibble.qview
 
   - title: Export
     desc: Write a parsed `qview` object to disk.
     contents:
-      - qview_to_xlsx
-      - qview_to_csv_dir
+      - write_qview_xlsx
+      - write_qview_csv
+      - write_qview_rds
 
   - title: Shiny app
     desc: Upload, preview, visualise, and download a `.Q-View` file.

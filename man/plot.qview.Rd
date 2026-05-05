@@ -36,6 +36,7 @@ Requires the \code{ggplot2} package (Suggested).
 Other qview-methods: 
 \code{\link{as_tibble.qview}()},
 \code{\link{is_qview}()},
-\code{\link{print.qview}()}
+\code{\link{print.qview}()},
+\code{\link{summary.qview}()}
 }
 \concept{qview-methods}

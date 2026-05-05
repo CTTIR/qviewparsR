@@ -25,6 +25,7 @@ Logical scalar.
 Other qview-methods: 
 \code{\link{as_tibble.qview}()},
 \code{\link{plot.qview}()},
-\code{\link{print.qview}()}
+\code{\link{print.qview}()},
+\code{\link{summary.qview}()}
 }
 \concept{qview-methods}

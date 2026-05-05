@@ -24,6 +24,7 @@ directly.
 Other qview-methods: 
 \code{\link{is_qview}()},
 \code{\link{plot.qview}()},
-\code{\link{print.qview}()}
+\code{\link{print.qview}()},
+\code{\link{summary.qview}()}
 }
 \concept{qview-methods}
