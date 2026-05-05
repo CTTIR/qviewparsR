@@ -2,48 +2,63 @@
 
 ## qviewparsR 1.0.0
 
-Major restructure: the package is now exclusively a parser for `.Q-View`
-binary project files (chemiluminescent multiplex ELISA plate imaging /
-quantification). All previous panel-specific readers, normalisation,
-derivation, and build helpers have been removed.
+Initial release. Pure-R parser for `.Q-View` binary project files
+(chemiluminescent multiplex ELISA plate imaging and quantification). No
+Java runtime, no H2 database driver, no compiled code.
 
-### New
+### Reader
 
-- `read_qview(path, strip_prefix = FALSE)`: pure-R parser for the
-  `.Q-View` container format. Returns a list with class `qview`
-  containing project metadata, the analyte panel with units and
-  detection limits, well-group sample assignments, per-well replicate
-  pixel intensities, summary statistics, optional back-calculated
-  concentrations, curve fits, and a plate layout.
-- [`strip_qview_prefix()`](https://cttir.github.io/qviewparsR/reference/strip_qview_prefix.md):
-  reverses Q-View’s internal naming convention (`ICal N` -\> `Cal N`,
-  `GLow` -\> `Low`, `HHigh` -\> `High`, `NFD...` / `N1234...` -\> the
-  original ID).
+- `read_qview(path, strip_prefix = FALSE)`: parses a `.Q-View` container
+  and returns a list of class `qview` with project metadata, the analyte
+  panel (units, LOD / LLOQ / ULOQ, assay-control range), well-group
+  sample assignments, per-well replicate pixel intensities, summary
+  statistics, optional back-calculated concentrations, curve fits, and a
+  plate layout (all tidy tibbles).
 - [`read_qview_template()`](https://cttir.github.io/qviewparsR/reference/read_qview_template.md):
-  parser for the well-assignment template CSV (12x8 layout with
-  `Group Name`, `Group Type`, `Dilution Factor` sections).
+  parses the companion well-assignment template CSV (NxM layout with
+  Group Name / Group Type / Dilution Factor sections).
+
+### Helpers
+
+- [`strip_qview_prefix()`](https://cttir.github.io/qviewparsR/reference/strip_qview_prefix.md):
+  reverses the producer-side naming convention (`ICal N` -\> `Cal N`,
+  `GLow` -\> `Low`, `HHigh` -\> `High`, `NFD...` / `N1234...` -\>
+  original sample ID).
 - [`well_label()`](https://cttir.github.io/qviewparsR/reference/well_label.md):
   vectorised plate-coordinate helper.
-- [`print.qview()`](https://cttir.github.io/qviewparsR/reference/print.qview.md)
-  and
-  [`plot.qview()`](https://cttir.github.io/qviewparsR/reference/plot.qview.md):
-  compact summary and quick-look plots (plate map, per-analyte intensity
-  heatmap, replicate scatter).
-- [`qview_to_xlsx()`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
-  and
-  [`qview_to_csv_dir()`](https://cttir.github.io/qviewparsR/reference/write_qview.md):
-  export a parsed `qview` object to a multi-sheet workbook or a
-  directory of CSV files.
+
+### Methods
+
+- [`is_qview()`](https://cttir.github.io/qviewparsR/reference/is_qview.md):
+  predicate for the S3 class.
+- [`print.qview()`](https://cttir.github.io/qviewparsR/reference/print.qview.md):
+  compact one-screen summary.
+- [`summary.qview()`](https://cttir.github.io/qviewparsR/reference/summary.qview.md):
+  per-analyte mean / SD / CV / min / max grouped by well type, returned
+  as a `qview_summary` tibble with its own print method.
+- `plot.qview(type = ...)`: quick-look plate map, per-analyte intensity
+  heatmap, and replicate-1-vs-2 scatter; viridis throughout.
+- [`as_tibble.qview()`](https://cttir.github.io/qviewparsR/reference/as_tibble.qview.md):
+  long-format pixel-intensity tibble.
+
+### Export
+
+- [`write_qview_xlsx()`](https://cttir.github.io/qviewparsR/reference/write_qview.md),
+  [`write_qview_csv()`](https://cttir.github.io/qviewparsR/reference/write_qview.md),
+  [`write_qview_rds()`](https://cttir.github.io/qviewparsR/reference/write_qview.md):
+  pipe-friendly writers that return the parsed object invisibly.
+  [`qview_to_xlsx()`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
+  /
+  [`qview_to_csv_dir()`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
+  are kept as
+  [`lifecycle::deprecate_warn()`](https://lifecycle.r-lib.org/reference/deprecate_soft.html)
+  aliases for back-compatibility.
+
+### Interactive front-end
+
 - [`qview_app()`](https://cttir.github.io/qviewparsR/reference/qview_app.md):
-  Shiny front-end for upload, parsing, preview, and download.
-
-### Removed
-
-- `cp_read_complement()`, `cp_read_neuroaxonal()`, `cp_read_metadata()`,
-  `cp_read_controls()`, `cp_read_auto()` and the panel-specific fixtures
-  and tests.
-- `cp_build()`, `cp_normalize()`, `cp_derive()`, `cp_validate()`,
-  `cp_summary()`.
-- `cp_export_xlsx()`, `cp_export_csv()`, `cp_export_rds()`.
-- `cp_example_data()`, `cp_example_files()`, `cp_timepoint_map()`,
-  `cp_analyte_info()`.
+  monochrome bslib Shiny app with built-in dark/light toggle,
+  hex-sticker brand, large upload cap (default 512 MB), per-table xlsx
+  download, and a publication-ready 2x2 Overview tab (plate layout /
+  pixel-intensity distribution / replicate concordance / mean PI by well
+  type) with high-DPI PNG and vector PDF export.

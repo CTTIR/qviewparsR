@@ -34,34 +34,43 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.0" id="qviewparsr-100">qviewparsR 1.0.0<a class="anchor" aria-label="anchor" href="#qviewparsr-100"></a></h2>
-<p>Major restructure: the package is now exclusively a parser for <code>.Q-View</code> binary project files (chemiluminescent multiplex ELISA plate imaging / quantification). All previous panel-specific readers, normalisation, derivation, and build helpers have been removed.</p>
+<p>Initial release. Pure-R parser for <code>.Q-View</code> binary project files (chemiluminescent multiplex ELISA plate imaging and quantification). No Java runtime, no H2 database driver, no compiled code.</p>
 <div class="section level3">
-<h3 id="new-1-0-0">New<a class="anchor" aria-label="anchor" href="#new-1-0-0"></a></h3>
+<h3 id="reader-1-0-0">Reader<a class="anchor" aria-label="anchor" href="#reader-1-0-0"></a></h3>
 <ul><li>
-<code>read_qview(path, strip_prefix = FALSE)</code>: pure-R parser for the <code>.Q-View</code> container format. Returns a list with class <code>qview</code> containing project metadata, the analyte panel with units and detection limits, well-group sample assignments, per-well replicate pixel intensities, summary statistics, optional back-calculated concentrations, curve fits, and a plate layout.</li>
+<code>read_qview(path, strip_prefix = FALSE)</code>: parses a <code>.Q-View</code> container and returns a list of class <code>qview</code> with project metadata, the analyte panel (units, LOD / LLOQ / ULOQ, assay-control range), well-group sample assignments, per-well replicate pixel intensities, summary statistics, optional back-calculated concentrations, curve fits, and a plate layout (all tidy tibbles).</li>
 <li>
-<code><a href="../reference/strip_qview_prefix.html">strip_qview_prefix()</a></code>: reverses Q-View’s internal naming convention (<code>ICal N</code> -&gt; <code>Cal N</code>, <code>GLow</code> -&gt; <code>Low</code>, <code>HHigh</code> -&gt; <code>High</code>, <code>NFD...</code> / <code>N1234...</code> -&gt; the original ID).</li>
-<li>
-<code><a href="../reference/read_qview_template.html">read_qview_template()</a></code>: parser for the well-assignment template CSV (12x8 layout with <code>Group Name</code>, <code>Group Type</code>, <code>Dilution Factor</code> sections).</li>
-<li>
-<code><a href="../reference/well_label.html">well_label()</a></code>: vectorised plate-coordinate helper.</li>
-<li>
-<code><a href="../reference/print.qview.html">print.qview()</a></code> and <code><a href="../reference/plot.qview.html">plot.qview()</a></code>: compact summary and quick-look plots (plate map, per-analyte intensity heatmap, replicate scatter).</li>
-<li>
-<code><a href="../reference/write_qview.html">qview_to_xlsx()</a></code> and <code><a href="../reference/write_qview.html">qview_to_csv_dir()</a></code>: export a parsed <code>qview</code> object to a multi-sheet workbook or a directory of CSV files.</li>
-<li>
-<code><a href="../reference/qview_app.html">qview_app()</a></code>: Shiny front-end for upload, parsing, preview, and download.</li>
+<code><a href="../reference/read_qview_template.html">read_qview_template()</a></code>: parses the companion well-assignment template CSV (NxM layout with Group Name / Group Type / Dilution Factor sections).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="removed-1-0-0">Removed<a class="anchor" aria-label="anchor" href="#removed-1-0-0"></a></h3>
+<h3 id="helpers-1-0-0">Helpers<a class="anchor" aria-label="anchor" href="#helpers-1-0-0"></a></h3>
 <ul><li>
-<code>cp_read_complement()</code>, <code>cp_read_neuroaxonal()</code>, <code>cp_read_metadata()</code>, <code>cp_read_controls()</code>, <code>cp_read_auto()</code> and the panel-specific fixtures and tests.</li>
+<code><a href="../reference/strip_qview_prefix.html">strip_qview_prefix()</a></code>: reverses the producer-side naming convention (<code>ICal N</code> -&gt; <code>Cal N</code>, <code>GLow</code> -&gt; <code>Low</code>, <code>HHigh</code> -&gt; <code>High</code>, <code>NFD...</code> / <code>N1234...</code> -&gt; original sample ID).</li>
 <li>
-<code>cp_build()</code>, <code>cp_normalize()</code>, <code>cp_derive()</code>, <code>cp_validate()</code>, <code>cp_summary()</code>.</li>
+<code><a href="../reference/well_label.html">well_label()</a></code>: vectorised plate-coordinate helper.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="methods-1-0-0">Methods<a class="anchor" aria-label="anchor" href="#methods-1-0-0"></a></h3>
+<ul><li>
+<code><a href="../reference/is_qview.html">is_qview()</a></code>: predicate for the S3 class.</li>
 <li>
-<code>cp_export_xlsx()</code>, <code>cp_export_csv()</code>, <code>cp_export_rds()</code>.</li>
+<code><a href="../reference/print.qview.html">print.qview()</a></code>: compact one-screen summary.</li>
 <li>
-<code>cp_example_data()</code>, <code>cp_example_files()</code>, <code>cp_timepoint_map()</code>, <code>cp_analyte_info()</code>.</li>
+<code><a href="../reference/summary.qview.html">summary.qview()</a></code>: per-analyte mean / SD / CV / min / max grouped by well type, returned as a <code>qview_summary</code> tibble with its own print method.</li>
+<li>
+<code>plot.qview(type = ...)</code>: quick-look plate map, per-analyte intensity heatmap, and replicate-1-vs-2 scatter; viridis throughout.</li>
+<li>
+<code><a href="../reference/as_tibble.qview.html">as_tibble.qview()</a></code>: long-format pixel-intensity tibble.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="export-1-0-0">Export<a class="anchor" aria-label="anchor" href="#export-1-0-0"></a></h3>
+<ul><li>
+<code><a href="../reference/write_qview.html">write_qview_xlsx()</a></code>, <code><a href="../reference/write_qview.html">write_qview_csv()</a></code>, <code><a href="../reference/write_qview.html">write_qview_rds()</a></code>: pipe-friendly writers that return the parsed object invisibly. <code><a href="../reference/write_qview.html">qview_to_xlsx()</a></code> / <code><a href="../reference/write_qview.html">qview_to_csv_dir()</a></code> are kept as <code><a href="https://lifecycle.r-lib.org/reference/deprecate_soft.html" class="external-link">lifecycle::deprecate_warn()</a></code> aliases for back-compatibility.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="interactive-front-end-1-0-0">Interactive front-end<a class="anchor" aria-label="anchor" href="#interactive-front-end-1-0-0"></a></h3>
+<ul><li>
+<code><a href="../reference/qview_app.html">qview_app()</a></code>: monochrome bslib Shiny app with built-in dark/light toggle, hex-sticker brand, large upload cap (default 512 MB), per-table xlsx download, and a publication-ready 2x2 Overview tab (plate layout / pixel-intensity distribution / replicate concordance / mean PI by well type) with high-DPI PNG and vector PDF export.</li>
 </ul></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
