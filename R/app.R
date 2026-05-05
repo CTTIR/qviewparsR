@@ -196,6 +196,7 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
   bslib::page_sidebar(
     title = NULL,
     theme = .qv_theme(dark = FALSE),
+    fillable = TRUE,
     shiny::tags$head(shiny::tags$style(shiny::HTML(.qv_css))),
     shiny::div(
       class = "qv-brand",
@@ -240,10 +241,15 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
     ),
     bslib::card(
       bslib::card_header("Status"),
-      shiny::verbatimTextOutput("status")
+      shiny::verbatimTextOutput("status"),
+      full_screen = TRUE,
+      height      = "20vh",
+      min_height  = "120px"
     ),
     bslib::navset_card_tab(
       id = "tabs",
+      full_screen = TRUE,
+      height      = "60vh",
       bslib::nav_panel(
         "Overview",
         shiny::div(
@@ -312,7 +318,10 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
     ),
     bslib::card(
       bslib::card_header("About"),
-      .qv_about_panel()
+      .qv_about_panel(),
+      full_screen = TRUE,
+      height      = "20vh",
+      min_height  = "120px"
     )
   )
 }
