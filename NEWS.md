@@ -1,39 +1,50 @@
 # qviewparsR 1.0.0
 
-Major restructure: the package is now exclusively a parser for `.Q-View`
-binary project files (chemiluminescent multiplex ELISA plate imaging /
-quantification). All previous panel-specific readers, normalisation,
-derivation, and build helpers have been removed.
+Initial release. Pure-R parser for `.Q-View` binary project files
+(chemiluminescent multiplex ELISA plate imaging and quantification).
+No Java runtime, no H2 database driver, no compiled code.
 
-## New
+## Reader
 
-* `read_qview(path, strip_prefix = FALSE)`: pure-R parser for the
-  `.Q-View` container format. Returns a list with class `qview`
-  containing project metadata, the analyte panel with units and
-  detection limits, well-group sample assignments, per-well
-  replicate pixel intensities, summary statistics, optional
-  back-calculated concentrations, curve fits, and a plate layout.
-* `strip_qview_prefix()`: reverses Q-View's internal naming
-  convention (`ICal N` -> `Cal N`, `GLow` -> `Low`, `HHigh` -> `High`,
-  `NFD...` / `N1234...` -> the original ID).
-* `read_qview_template()`: parser for the well-assignment template
-  CSV (12x8 layout with `Group Name`, `Group Type`, `Dilution Factor`
-  sections).
+* `read_qview(path, strip_prefix = FALSE)`: parses a `.Q-View` container
+  and returns a list of class `qview` with project metadata, the
+  analyte panel (units, LOD / LLOQ / ULOQ, assay-control range),
+  well-group sample assignments, per-well replicate pixel intensities,
+  summary statistics, optional back-calculated concentrations, curve
+  fits, and a plate layout (all tidy tibbles).
+* `read_qview_template()`: parses the companion well-assignment
+  template CSV (NxM layout with Group Name / Group Type /
+  Dilution Factor sections).
+
+## Helpers
+
+* `strip_qview_prefix()`: reverses the producer-side naming convention
+  (`ICal N` -> `Cal N`, `GLow` -> `Low`, `HHigh` -> `High`,
+  `NFD...` / `N1234...` -> original sample ID).
 * `well_label()`: vectorised plate-coordinate helper.
-* `print.qview()` and `plot.qview()`: compact summary and quick-look
-  plots (plate map, per-analyte intensity heatmap, replicate scatter).
-* `qview_to_xlsx()` and `qview_to_csv_dir()`: export a parsed `qview`
-  object to a multi-sheet workbook or a directory of CSV files.
-* `qview_app()`: Shiny front-end for upload, parsing, preview, and
-  download.
 
-## Removed
+## Methods
 
-* `cp_read_complement()`, `cp_read_neuroaxonal()`, `cp_read_metadata()`,
-  `cp_read_controls()`, `cp_read_auto()` and the panel-specific
-  fixtures and tests.
-* `cp_build()`, `cp_normalize()`, `cp_derive()`, `cp_validate()`,
-  `cp_summary()`.
-* `cp_export_xlsx()`, `cp_export_csv()`, `cp_export_rds()`.
-* `cp_example_data()`, `cp_example_files()`, `cp_timepoint_map()`,
-  `cp_analyte_info()`.
+* `is_qview()`: predicate for the S3 class.
+* `print.qview()`: compact one-screen summary.
+* `summary.qview()`: per-analyte mean / SD / CV / min / max grouped by
+  well type, returned as a `qview_summary` tibble with its own print
+  method.
+* `plot.qview(type = ...)`: quick-look plate map, per-analyte intensity
+  heatmap, and replicate-1-vs-2 scatter; viridis throughout.
+* `as_tibble.qview()`: long-format pixel-intensity tibble.
+
+## Export
+
+* `write_qview_xlsx()`, `write_qview_csv()`, `write_qview_rds()`:
+  pipe-friendly writers that return the parsed object invisibly.
+  `qview_to_xlsx()` / `qview_to_csv_dir()` are kept as
+  `lifecycle::deprecate_warn()` aliases for back-compatibility.
+
+## Interactive front-end
+
+* `qview_app()`: monochrome bslib Shiny app with built-in dark/light
+  toggle, hex-sticker brand, large upload cap (default 512 MB),
+  per-table xlsx download, and a publication-ready 2x2 Overview tab
+  (plate layout / pixel-intensity distribution / replicate concordance
+  / mean PI by well type) with high-DPI PNG and vector PDF export.
