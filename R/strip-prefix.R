@@ -1,5 +1,7 @@
 #' Reverse the Q-View internal naming convention
 #'
+#' `r lifecycle::badge("experimental")`
+#'
 #' On import, the producing software prefixes well-assignment template names
 #' with single-letter codes:
 #'
@@ -15,12 +17,14 @@
 #'
 #' @param x Character vector of Q-View internal names.
 #'
-#' @return Character vector of the same length, with prefixes stripped.
+#' @return Character vector of the same length as `x`, with prefixes
+#'   stripped. NAs and unrecognised values pass through unchanged.
 #'
 #' @examples
 #' strip_qview_prefix(c("ICal 1", "GLow", "HHigh",
 #'                      "NFD24277364", "N1211498458", "Plate 1"))
 #'
+#' @family qview-helper
 #' @export
 strip_qview_prefix <- function(x) {
   x <- as.character(x)

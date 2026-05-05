@@ -1,5 +1,7 @@
 #' Launch the qviewparsR Q-View Shiny app
 #'
+#' `r lifecycle::badge("experimental")`
+#'
 #' Interactive front-end for [read_qview()]. Uploads a `.Q-View` file
 #' (and optionally an accompanying well-assignment template CSV),
 #' displays the parsed metadata, analytes, well groups, and replicate
@@ -18,6 +20,7 @@
 #'   qview_app()
 #' }
 #'
+#' @family qview-app
 #' @export
 qview_app <- function(...) {
   for (pkg in c("shiny", "bslib", "DT", "ggplot2")) {
@@ -35,7 +38,7 @@ qview_app <- function(...) {
 
 .qv_app_ui <- function() {
   bslib::page_sidebar(
-    title = "qviewparsR — Q-View parser",
+    title = "qviewparsR - Q-View parser",
     sidebar = bslib::sidebar(
       width = 360,
       shiny::tags$p(

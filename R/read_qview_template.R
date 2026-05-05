@@ -11,29 +11,42 @@
 #' setting up new plates or cross-validating Q-View imports against
 #' the original template.
 #'
-#' @param path Path to the template file (csv or xlsx).
+#' @description
+#' `r lifecycle::badge("experimental")`
+#'
+#' @param path Path to the template file (csv).
 #' @param verbose Logical. Print a short summary after parsing.
 #'   Default `TRUE`.
+#' @param call The execution environment of the calling function. Used
+#'   for error reporting; experts only.
 #'
-#' @return A tibble with one row per well: `well`, `plate_row`,
-#'   `plate_col`, `sample_id`, `group_type`, `dilution`.
+#' @return A [tibble::tibble()] with one row per well and columns
+#'   `well` (character, e.g. `"A1"`), `plate_row` (character, `"A"`..),
+#'   `plate_col` (integer), `sample_id` (character), `group_type`
+#'   (character), `dilution` (numeric).
 #'
 #' @examples
 #' \dontrun{
 #'   layout <- read_qview_template("plate-template.csv")
 #' }
 #'
+#' @family qview-reader
+#'
 #' @export
-read_qview_template <- function(path, verbose = TRUE) {
-  if (!file.exists(path)) {
-    cli::cli_abort("File not found: {.path {path}}.")
-  }
+read_qview_template <- function(path,
+                                verbose = TRUE,
+                                call = rlang::caller_env()) {
+  rlang::check_required(path)
+  .check_path(path, call = call)
+  .check_flag(verbose, call = call)
   ext <- tolower(tools::file_ext(path))
   if (ext %in% c("xls", "xlsx")) {
-    cli::cli_abort(c(
-      "{.path {path}} is an Excel file.",
-      i = "Save the template as CSV from the spreadsheet application before reading."
-    ))
+    cli::cli_abort(
+      c("{.arg path} must be a CSV template, not an Excel workbook.",
+        "x" = "{.path {path}} is a {.val {ext}} file.",
+        "i" = "Save the template as CSV from your spreadsheet application before reading."),
+      call = call
+    )
   }
   raw <- readr::read_delim(
     path, delim = ",",
@@ -46,10 +59,12 @@ read_qview_template <- function(path, verbose = TRUE) {
   m <- regmatches(dim_cell,
                   regexec("^([0-9]+)x([0-9]+)$", trimws(dim_cell)))[[1L]]
   if (length(m) != 3L) {
-    cli::cli_abort(c(
-      "{.path {path}} is missing the {.val NxM} plate-dimensions cell.",
-      i = "Expected the top-left cell to look like {.val 12x8}."
-    ))
+    cli::cli_abort(
+      c("{.arg path} is not a recognisable Q-View well-assignment template.",
+        "x" = "{.path {path}} is missing the top-left {.val NxM} dimensions cell.",
+        "i" = "Expected the top-left cell to look like {.val 12x8}."),
+      call = call
+    )
   }
   ncols <- as.integer(m[2L]); nrows <- as.integer(m[3L])
 
@@ -60,10 +75,12 @@ read_qview_template <- function(path, verbose = TRUE) {
     !is.na(col2) & trimws(col2) == "1"
   )
   if (length(hdr_idx) == 0L) {
-    cli::cli_abort(c(
-      "{.path {path}} has no recognisable section headers.",
-      i = "Each section must start with a row whose first cell is blank and whose second cell is {.val 1}."
-    ))
+    cli::cli_abort(
+      c("{.arg path} has no recognisable section headers.",
+        "x" = "{.path {path}} contains no rows of the expected layout.",
+        "i" = "Each section must start with a row whose first cell is blank and whose second cell is {.val 1}."),
+      call = call
+    )
   }
 
   parse_section <- function(start) {

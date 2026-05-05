@@ -1,3 +1,21 @@
+#' Test whether an object is a `qview`
+#'
+#' `r lifecycle::badge("experimental")`
+#'
+#' @param x An object to test.
+#'
+#' @return Logical scalar.
+#'
+#' @examples
+#' \dontrun{
+#'   is_qview(read_qview("plate.Q-View"))
+#' }
+#'
+#' @family qview-methods
+#' @export
+is_qview <- function(x) inherits(x, "qview")
+
+
 #' Print a Q-View object
 #'
 #' Compact summary of a parsed `qview` object: project / plate
@@ -10,8 +28,11 @@
 #'
 #' @return `x`, invisibly.
 #'
+#' @family qview-methods
+#'
 #' @export
 print.qview <- function(x, ...) {
+  rlang::check_dots_empty()
   md <- x$metadata
   cli::cli_h1("Q-View project: {.val {md$project %||% NA}}")
   cli::cli_bullets(c(
@@ -19,7 +40,7 @@ print.qview <- function(x, ...) {
     "*" = "Image:    {.val {md$image %||% NA}}",
     "*" = "Imager:   {.val {md$imager %||% NA}}",
     "*" = "Product:  {.val {md$product %||% NA}}",
-    "*" = "Software: {.val Q-View} v{.val {md$qview_version %||% NA}}",
+    "*" = "Software: v{.val {md$qview_version %||% NA}}",
     "*" = "Template: {.val {md$template %||% NA}}",
     "*" = "Created:  {.val {md$report_created %||% NA}}"
   ))
@@ -54,6 +75,29 @@ print.qview <- function(x, ...) {
 }
 
 
+#' Coerce a Q-View object to a tibble
+#'
+#' Returns the long-format `pixel_intensities` table — the primary
+#' tabular data carried by a `qview` object. To access other slots
+#' (well groups, analyte panel, summary statistics) use `qv$<slot>`
+#' directly.
+#'
+#' @param x A `qview` object returned by [read_qview()].
+#' @param ... Unused; for S3 generic compatibility.
+#'
+#' @return A [tibble::tibble()] of replicate pixel-intensity readings.
+#'
+#' @family qview-methods
+#'
+#' @importFrom tibble as_tibble
+#' @method as_tibble qview
+#' @export
+as_tibble.qview <- function(x, ...) {
+  rlang::check_dots_empty()
+  tibble::as_tibble(x$pixel_intensities)
+}
+
+
 #' Plot a Q-View object
 #'
 #' Quick-look plots for a parsed `qview` object.
@@ -70,18 +114,24 @@ print.qview <- function(x, ...) {
 #' @param x A `qview` object returned by [read_qview()].
 #' @param type One of `"plate_map"`, `"intensity_heatmap"`,
 #'   `"replicate_scatter"`. Default `"plate_map"`.
-#' @param ... Ignored.
+#' @param ... Unused; for S3 generic compatibility.
 #'
 #' @return A `ggplot` object.
+#'
+#' @family qview-methods
 #'
 #' @export
 plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
                                    "replicate_scatter"), ...) {
-  type <- match.arg(type)
+  rlang::check_dots_empty()
+  .check_qview(x)
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    cli::cli_abort(
-      "Package {.pkg ggplot2} is required for plot.qview(). Install with {.code install.packages(\"ggplot2\")}.")
+    cli::cli_abort(c(
+      "Plotting a {.cls qview} object requires the {.pkg ggplot2} package.",
+      "i" = 'Install it with {.code install.packages("ggplot2")}.'
+    ))
   }
+  type <- match.arg(type)
   switch(type,
     plate_map         = .qv_plot_plate_map(x),
     intensity_heatmap = .qv_plot_intensity_heatmap(x),

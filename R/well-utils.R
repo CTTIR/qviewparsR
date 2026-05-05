@@ -1,5 +1,7 @@
 #' Convert plate row / column to a well label
 #'
+#' `r lifecycle::badge("experimental")`
+#'
 #' Converts 0-based or 1-based row and column indices to the standard
 #' `"A1"` ... `"H12"` plate notation. Vectorised.
 #'
@@ -10,13 +12,15 @@
 #' @param zero_based Logical. If `TRUE`, treat `row` and `col` as
 #'   0-based; if `FALSE` (default), treat them as 1-based.
 #'
-#' @return Character vector of well labels (e.g. `"A1"`, `"H12"`).
+#' @return Character vector of well labels (e.g. `"A1"`, `"H12"`),
+#'   recycled to the longer of `row` / `col`.
 #'
 #' @examples
 #' well_label(0, 0, zero_based = TRUE)   # "A1"
 #' well_label(7, 11, zero_based = TRUE)  # "H12"
 #' well_label("C", 5)                    # "C5"
 #'
+#' @family qview-helper
 #' @export
 well_label <- function(row, col, zero_based = FALSE) {
   if (is.character(row)) {

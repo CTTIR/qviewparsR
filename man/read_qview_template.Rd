@@ -4,26 +4,33 @@
 \alias{read_qview_template}
 \title{Read a Q-View well-assignment template CSV}
 \usage{
-read_qview_template(path, verbose = TRUE)
+read_qview_template(path, verbose = TRUE, call = rlang::caller_env())
 }
 \arguments{
-\item{path}{Path to the template file (csv or xlsx).}
+\item{path}{Path to the template file (csv).}
 
 \item{verbose}{Logical. Print a short summary after parsing.
 Default \code{TRUE}.}
+
+\item{call}{The execution environment of the calling function. Used
+for error reporting; experts only.}
 }
 \value{
-A tibble with one row per well: \code{well}, \code{plate_row},
-\code{plate_col}, \code{sample_id}, \code{group_type}, \code{dilution}.
+A \code{\link[tibble:tibble]{tibble::tibble()}} with one row per well and columns
+\code{well} (character, e.g. \code{"A1"}), \code{plate_row} (character, \code{"A"}..),
+\code{plate_col} (integer), \code{sample_id} (character), \code{group_type}
+(character), \code{dilution} (numeric).
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+}
+\details{
 Parses the plate-template CSV that Q-View imports for sample
 assignment. The file uses a multi-section layout: an \code{NxM} cell in
 the top-left declares the plate dimensions, followed by sections
 labelled \verb{Group Name}, \verb{Group Type}, and \verb{Dilution Factor}. Each
 section is one row per plate row and one column per plate column.
-}
-\details{
+
 All template data is also embedded inside the \code{.Q-View} file itself
 (and is recovered by \code{\link[=read_qview]{read_qview()}}); this function exists for
 setting up new plates or cross-validating Q-View imports against
@@ -35,3 +42,8 @@ the original template.
 }
 
 }
+\seealso{
+Other qview-reader: 
+\code{\link{read_qview}()}
+}
+\concept{qview-reader}

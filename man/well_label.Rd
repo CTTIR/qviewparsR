@@ -17,9 +17,13 @@ treated as 1-based).}
 0-based; if \code{FALSE} (default), treat them as 1-based.}
 }
 \value{
-Character vector of well labels (e.g. \code{"A1"}, \code{"H12"}).
+Character vector of well labels (e.g. \code{"A1"}, \code{"H12"}),
+recycled to the longer of \code{row} / \code{col}.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+}
+\details{
 Converts 0-based or 1-based row and column indices to the standard
 \code{"A1"} ... \code{"H12"} plate notation. Vectorised.
 }
@@ -29,3 +33,8 @@ well_label(7, 11, zero_based = TRUE)  # "H12"
 well_label("C", 5)                    # "C5"
 
 }
+\seealso{
+Other qview-helper: 
+\code{\link{strip_qview_prefix}()}
+}
+\concept{qview-helper}

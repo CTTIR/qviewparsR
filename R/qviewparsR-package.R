@@ -1,6 +1,8 @@
 #' qviewparsR: Read .Q-View Multiplex ELISA Project Files
 #'
 #' @description
+#' `r lifecycle::badge("experimental")`
+#'
 #' Pure-R parser for `.Q-View` binary project files used in
 #' chemiluminescent multiplex ELISA plate imaging and quantification.
 #' Extracts pixel intensities, analyte mappings, sample assignments,
@@ -14,13 +16,15 @@
 #'   convention; [well_label()] map (row, column) to plate notation.
 #' * Optional: [read_qview_template()] parse a Q-View well-assignment
 #'   template CSV.
-#' * Methods: [print.qview()], [plot.qview()].
+#' * Methods: [is_qview()], [print.qview()], [plot.qview()],
+#'   [as_tibble.qview()].
 #' * Shiny: [qview_app()] interactive upload / preview / download.
 #'
 #' @keywords internal
 "_PACKAGE"
 
 ## usethis namespace: start
+#' @importFrom lifecycle deprecated
 #' @importFrom rlang .data
 ## usethis namespace: end
 NULL

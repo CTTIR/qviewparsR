@@ -20,3 +20,10 @@ identifiers, analyte panel, well-group counts by type, and whether
 the embedded report carries quantitative concentrations or only
 qualitative pixel intensities.
 }
+\seealso{
+Other qview-methods: 
+\code{\link{as_tibble.qview}()},
+\code{\link{is_qview}()},
+\code{\link{plot.qview}()}
+}
+\concept{qview-methods}

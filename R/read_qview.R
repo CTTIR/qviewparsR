@@ -1,5 +1,7 @@
 #' Read a .Q-View project file
 #'
+#' `r lifecycle::badge("experimental")`
+#'
 #' Parses a `.Q-View` binary container (a chemiluminescent multiplex
 #' ELISA project file holding an embedded H2 database plus binary LOB
 #' segments) and extracts the assay data: project metadata, analyte
@@ -23,6 +25,8 @@
 #'   the original well-assignment template. Default `FALSE`.
 #' @param verbose Logical. Print a short summary after parsing.
 #'   Default `TRUE`.
+#' @param call The execution environment of the calling function. Used
+#'   for error reporting; experts only.
 #'
 #' @return A list with class `"qview"` containing:
 #' \describe{
@@ -67,17 +71,20 @@
 #'
 #' @seealso [strip_qview_prefix()], [read_qview_template()],
 #'   [print.qview()], [plot.qview()].
+#' @family qview-reader
 #'
 #' @export
-read_qview <- function(path, strip_prefix = FALSE, verbose = TRUE) {
+read_qview <- function(path,
+                       strip_prefix = FALSE,
+                       verbose = TRUE,
+                       call = rlang::caller_env()) {
   rlang::check_required(path)
-  stopifnot(is.character(path), length(path) == 1L)
-  if (!file.exists(path)) {
-    cli::cli_abort("File not found: {.path {path}}.")
-  }
+  .check_path(path, call = call)
+  .check_flag(strip_prefix, call = call)
+  .check_flag(verbose, call = call)
 
   raw <- readBin(path, what = "raw", n = file.info(path)$size)
-  .qv_check_magic(raw, path)
+  .qv_check_magic(raw, path, call = call)
 
   manifest <- .qv_parse_manifest(raw)
   segments <- .qv_find_h2_segments(raw)
@@ -139,15 +146,17 @@ read_qview <- function(path, strip_prefix = FALSE, verbose = TRUE) {
 
 # --- Magic-byte / manifest validation -----------------------------------------
 
-.qv_check_magic <- function(raw, path) {
+.qv_check_magic <- function(raw, path, call = rlang::caller_env()) {
   hdr <- raw[seq_len(min(64L, length(raw)))]
   hdr[hdr == as.raw(0)] <- charToRaw(" ")
   txt <- rawToChar(hdr)
   if (!grepl("^[0-9]+\\s+Q-View Project", txt, perl = TRUE)) {
-    cli::cli_abort(c(
-      "{.path {path}} is not a valid Q-View project file.",
-      i = "Expected the file to start with a numeric container version followed by {.val Q-View Project}."
-    ))
+    cli::cli_abort(
+      c("{.arg path} is not a valid {.field .Q-View} project file.",
+        "x" = "{.path {path}} is missing the expected container header.",
+        "i" = "Expected a numeric container version followed by {.val Q-View Project}."),
+      call = call
+    )
   }
   invisible(TRUE)
 }

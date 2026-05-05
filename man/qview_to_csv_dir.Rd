@@ -4,7 +4,7 @@
 \alias{qview_to_csv_dir}
 \title{Write a Q-View object as a directory of CSV files}
 \usage{
-qview_to_csv_dir(qv, dir, template = NULL)
+qview_to_csv_dir(qv, dir, template = NULL, call = rlang::caller_env())
 }
 \arguments{
 \item{qv}{A \code{qview} object from \code{\link[=read_qview]{read_qview()}}.}
@@ -12,10 +12,18 @@ qview_to_csv_dir(qv, dir, template = NULL)
 \item{dir}{Output directory (created if it does not exist).}
 
 \item{template}{Optional plate-template tibble to include.}
+
+\item{call}{The execution environment of the calling function. Used
+for error reporting; experts only.}
 }
 \value{
-Vector of file paths written, invisibly.
+\code{qv}, invisibly, to support pipelines.
 }
 \description{
-Write a Q-View object as a directory of CSV files
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 }
+\seealso{
+Other qview-export: 
+\code{\link{qview_to_xlsx}()}
+}
+\concept{qview-export}

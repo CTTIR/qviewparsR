@@ -12,7 +12,7 @@
 \item{type}{One of \code{"plate_map"}, \code{"intensity_heatmap"},
 \code{"replicate_scatter"}. Default \code{"plate_map"}.}
 
-\item{...}{Ignored.}
+\item{...}{Unused; for S3 generic compatibility.}
 }
 \value{
 A \code{ggplot} object.
@@ -32,3 +32,10 @@ intensity per analyte.
 
 Requires the \code{ggplot2} package (Suggested).
 }
+\seealso{
+Other qview-methods: 
+\code{\link{as_tibble.qview}()},
+\code{\link{is_qview}()},
+\code{\link{print.qview}()}
+}
+\concept{qview-methods}

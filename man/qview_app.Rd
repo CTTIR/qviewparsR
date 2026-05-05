@@ -13,13 +13,15 @@ qview_app(...)
 Invoked for its side effect of running the app.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+}
+\details{
 Interactive front-end for \code{\link[=read_qview]{read_qview()}}. Uploads a \code{.Q-View} file
 (and optionally an accompanying well-assignment template CSV),
 displays the parsed metadata, analytes, well groups, and replicate
 tables, and lets the user download the parsed result as \code{xlsx},
 \code{rds}, or a zip of per-table CSV files.
-}
-\details{
+
 Requires the \code{shiny}, \code{bslib}, and \code{DT} packages (listed under
 \code{Suggests}).
 }
@@ -29,3 +31,4 @@ if (interactive()) {
 }
 
 }
+\concept{qview-app}

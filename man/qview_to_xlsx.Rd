@@ -4,7 +4,13 @@
 \alias{qview_to_xlsx}
 \title{Write a Q-View object to a multi-sheet Excel workbook}
 \usage{
-qview_to_xlsx(qv, path, template = NULL)
+qview_to_xlsx(
+  qv,
+  path,
+  template = NULL,
+  overwrite = FALSE,
+  call = rlang::caller_env()
+)
 }
 \arguments{
 \item{qv}{A \code{qview} object from \code{\link[=read_qview]{read_qview()}}.}
@@ -13,10 +19,21 @@ qview_to_xlsx(qv, path, template = NULL)
 
 \item{template}{Optional plate-template tibble (from
 \code{\link[=read_qview_template]{read_qview_template()}}) to include as an extra sheet.}
+
+\item{overwrite}{Logical. If \code{FALSE} (the default), an existing file
+at \code{path} triggers an error; set to \code{TRUE} to replace it.}
+
+\item{call}{The execution environment of the calling function. Used
+for error reporting; experts only.}
 }
 \value{
-\code{path}, invisibly.
+\code{qv}, invisibly, to support pipelines.
 }
 \description{
-Write a Q-View object to a multi-sheet Excel workbook
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 }
+\seealso{
+Other qview-export: 
+\code{\link{qview_to_csv_dir}()}
+}
+\concept{qview-export}

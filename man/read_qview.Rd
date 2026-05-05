@@ -4,7 +4,12 @@
 \alias{read_qview}
 \title{Read a .Q-View project file}
 \usage{
-read_qview(path, strip_prefix = FALSE, verbose = TRUE)
+read_qview(
+  path,
+  strip_prefix = FALSE,
+  verbose = TRUE,
+  call = rlang::caller_env()
+)
 }
 \arguments{
 \item{path}{Character. Path to the \code{.Q-View} file.}
@@ -15,6 +20,9 @@ the original well-assignment template. Default \code{FALSE}.}
 
 \item{verbose}{Logical. Print a short summary after parsing.
 Default \code{TRUE}.}
+
+\item{call}{The execution environment of the calling function. Used
+for error reporting; experts only.}
 }
 \value{
 A list with class \code{"qview"} containing:
@@ -50,14 +58,16 @@ or \code{NULL} if no report was generated.}
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+}
+\details{
 Parses a \code{.Q-View} binary container (a chemiluminescent multiplex
 ELISA project file holding an embedded H2 database plus binary LOB
 segments) and extracts the assay data: project metadata, analyte
 panel with units, well-group sample assignments, per-well replicate
 pixel intensities, summary statistics, and (when present) the
 embedded CSV report.
-}
-\details{
+
 The file format is reverse-engineered from public binary inspection:
 it begins with a plain-text manifest, followed by three concatenated
 H2 database segments. The fully-formatted report Q-View renders for
@@ -81,4 +91,8 @@ no system dependencies beyond a working R installation.
 \seealso{
 \code{\link[=strip_qview_prefix]{strip_qview_prefix()}}, \code{\link[=read_qview_template]{read_qview_template()}},
 \code{\link[=print.qview]{print.qview()}}, \code{\link[=plot.qview]{plot.qview()}}.
+
+Other qview-reader: 
+\code{\link{read_qview_template}()}
 }
+\concept{qview-reader}

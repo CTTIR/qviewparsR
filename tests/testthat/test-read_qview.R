@@ -88,10 +88,38 @@ test_that("read_qview rejects non-Q-View files", {
   bad <- tempfile(fileext = ".bin")
   writeBin(charToRaw("Not a Q-View file."), bad)
   expect_error(read_qview(bad, verbose = FALSE),
-               "not a valid Q-View")
+               "not a valid .*Q-View")
 })
 
 test_that("read_qview detects the magic header on the fixture", {
   skip_if_not(fixture_available, "no Q-View fixture available")
   expect_true(.qv_is_qview_binary(fixture))
+})
+
+test_that("is_qview() and as_tibble.qview() round-trip", {
+  skip_if_not(fixture_available, "no Q-View fixture available")
+  qv <- read_qview(fixture, verbose = FALSE)
+  expect_true(is_qview(qv))
+  expect_false(is_qview(list(metadata = list())))
+  tbl <- tibble::as_tibble(qv)
+  expect_s3_class(tbl, "tbl_df")
+  expect_equal(nrow(tbl), nrow(qv$pixel_intensities))
+})
+
+test_that("input validation gives informative errors", {
+  expect_error(read_qview(123),       "must be a single non-empty string")
+  expect_error(read_qview("missing"), "must be an existing file")
+  bad <- tempfile(fileext = ".bin"); writeBin(charToRaw("Not Q-View"), bad)
+  expect_error(read_qview(bad, strip_prefix = "yes"),
+               "must be .*TRUE.* or .*FALSE")
+})
+
+test_that("qview_to_xlsx() refuses to overwrite by default", {
+  skip_if_not(fixture_available, "no Q-View fixture available")
+  qv <- read_qview(fixture, verbose = FALSE)
+  out <- tempfile(fileext = ".xlsx"); on.exit(unlink(out))
+  qview_to_xlsx(qv, out)
+  expect_true(file.exists(out))
+  expect_error(qview_to_xlsx(qv, out), "already exists")
+  expect_invisible(qview_to_xlsx(qv, out, overwrite = TRUE))
 })

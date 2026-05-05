@@ -10,13 +10,15 @@ strip_qview_prefix(x)
 \item{x}{Character vector of Q-View internal names.}
 }
 \value{
-Character vector of the same length, with prefixes stripped.
+Character vector of the same length as \code{x}, with prefixes
+stripped. NAs and unrecognised values pass through unchanged.
 }
 \description{
-On import, the producing software prefixes well-assignment template names
-with single-letter codes:
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 }
 \details{
+On import, the producing software prefixes well-assignment template names
+with single-letter codes:
 \itemize{
 \item \code{"Cal 1"} ... \code{"Cal N"} -> \code{"ICal 1"} ... \code{"ICal N"} (Internal calibrator)
 \item \code{"Low"} -> \code{"GLow"}
@@ -34,3 +36,8 @@ strip_qview_prefix(c("ICal 1", "GLow", "HHigh",
                      "NFD24277364", "N1211498458", "Plate 1"))
 
 }
+\seealso{
+Other qview-helper: 
+\code{\link{well_label}()}
+}
+\concept{qview-helper}

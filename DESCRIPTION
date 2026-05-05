@@ -23,11 +23,11 @@ Depends:
 Imports:
     cli,
     dplyr,
+    lifecycle,
     openxlsx2,
     readr,
     rlang,
     stats,
-    stringr,
     tibble,
     tidyr,
     tools,
