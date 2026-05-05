@@ -2,7 +2,21 @@ url: https://cttir.github.io/qviewparsR/
 
 template:
   bootstrap: 5
-  bootswatch: flatly
+  light-switch: true
+  bslib:
+    primary:        "#212121"
+    secondary:      "#424242"
+    bg:             "#fafafa"
+    fg:             "#212121"
+    base_font:      {google: false}
+    code_font:      {google: false}
+    border-radius:  "0.25rem"
+    border-color:   "#e0e0e0"
+
+includes:
+  in_header: |
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
 
 home:
   title: qviewparsR

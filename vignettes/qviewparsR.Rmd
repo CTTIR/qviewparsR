@@ -1,6 +1,8 @@
 ---
 title: "Reading and analysing .Q-View files with qviewparsR"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    css: null
 vignette: >
   %\VignetteIndexEntry{Reading and analysing .Q-View files with qviewparsR}
   %\VignetteEngine{knitr::rmarkdown}
@@ -10,55 +12,97 @@ vignette: >
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
-  eval = FALSE
+  comment  = "#>",
+  eval     = FALSE,
+  fig.align = "center",
+  fig.width = 7, fig.height = 4.5,
+  dpi = 96
 )
 library(qviewparsR)
 ```
 
-## What this package does
+```{=html}
+<style>
+:root { --qv-fg:#212121; --qv-bg:#fafafa; --qv-line:#e0e0e0;
+        --qv-mute:#666; --qv-card:#fff; --qv-cap:#f0f0f0; }
+body  { font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",
+        Roboto,"Helvetica Neue",Arial,sans-serif;
+        color: var(--qv-fg); background: var(--qv-bg);
+        line-height: 1.5; max-width: 760px; margin: 2rem auto;
+        padding: 0 1.25rem; }
+h1, h2, h3, h4 { letter-spacing: .02em; font-weight: 600; }
+h1 { font-size: 1.65rem; border-bottom: 1px solid var(--qv-line);
+     padding-bottom: .25rem; }
+h2 { font-size: 1.25rem; margin-top: 1.6rem; }
+h3 { font-size: 1.05rem; margin-top: 1.2rem; color: var(--qv-mute); }
+a, a:visited { color: var(--qv-fg); text-underline-offset: .18em; }
+a:hover { color: #000; text-decoration-thickness: 2px; }
+code, pre, kbd { font-family: "SF Mono",Consolas,"Liberation Mono",Menlo,monospace; }
+code { background: var(--qv-card); border: 1px solid var(--qv-line);
+       padding: 0 .25rem; border-radius: 3px; }
+pre  { background: var(--qv-card); border: 1px solid var(--qv-line);
+       padding: .9rem 1rem; border-radius: .25rem; overflow-x: auto; }
+pre code { border: 0; padding: 0; background: transparent; }
+table { border-collapse: collapse; margin: 0.6rem 0; }
+table th { border-bottom: 1px solid var(--qv-fg); text-align: left;
+           padding: .35rem .65rem; }
+table td { padding: .35rem .65rem; border-bottom: 1px solid var(--qv-line); }
+blockquote { border-left: 3px solid var(--qv-fg);
+             padding: .25rem .9rem; color: var(--qv-fg);
+             background: var(--qv-card); margin: 1rem 0; }
+.qv-hero { display:flex; align-items:center; gap:1rem;
+           padding-bottom:1rem; border-bottom:1px solid var(--qv-line); }
+.qv-hero img { height: 96px; width: auto; }
+.qv-hero h1  { border: 0; padding: 0; margin: 0 0 .25rem 0; font-size: 1.6rem; }
+.qv-hero p   { margin: 0; color: var(--qv-mute); }
+hr { border: 0; border-top: 1px solid var(--qv-line); margin: 1.5rem 0; }
+</style>
+```
 
-`qviewparsR` is a pure-R parser for the binary `.Q-View` project file
-format used in chemiluminescent multiplex ELISA plate imaging and
-quantification. A single `.Q-View` file bundles:
+::: qv-hero
 
-* a plain-text manifest header,
-* an embedded H2 SQL database (with project metadata, the analyte
-  panel, plate geometry, sample-to-well assignments, replicate pixel
-  intensities, and -- if the user generated a report inside the
-  producing application -- a fully rendered CSV report stored as a
-  CLOB), and
-* one or more binary LOB segments holding the raw chemiluminescent
-  plate images.
+<img src="../man/figures/logo.svg" alt="qviewparsR hex sticker">
 
-`read_qview()` extracts everything except the raw images and returns
-it as a list of tidy tibbles, with no Java runtime, no H2 database
-driver, and no compiled code anywhere in the package.
+::: {.qv-meta}
+# qviewparsR
+Pure-R parser for `.Q-View` multiplex ELISA project files.
+:::
+
+:::
+
+A `.Q-View` file is a single-file binary container that bundles a
+plain-text manifest, an embedded H2 SQL database with project
+metadata / analyte panel / sample assignments / replicate pixel
+intensities (and -- when generated -- a fully rendered CSV report
+stored as a CLOB), and one or more LOB segments holding the raw
+chemiluminescent plate images.
+
+`qviewparsR` extracts everything except the raw images and returns it
+as tidy tibbles. There is no Java runtime, no H2 database driver, no
+compiled code -- all logic is pure R.
 
 ## Installation
 
-```{r}
+```r
 # install.packages("pak")
 pak::pak("CTTIR/qviewparsR")
 ```
 
-`qviewparsR` requires R >= 4.1.0 plus a small set of tidyverse-aligned
-dependencies (`cli`, `dplyr`, `lifecycle`, `openxlsx2`, `readr`,
-`rlang`, `tibble`, `tidyr`). Plotting requires `ggplot2` (Suggested);
-the Shiny front-end additionally requires `shiny`, `bslib`, and `DT`.
+The package depends on a small tidyverse-aligned core
+(`cli`, `dplyr`, `lifecycle`, `openxlsx2`, `readr`, `rlang`, `tibble`,
+`tidyr`). Plotting requires `ggplot2`; the publication overview adds
+`patchwork`; the Shiny front-end adds `shiny`, `bslib`, `DT`, `withr`.
 
 ## A complete walk-through
 
-The end-to-end workflow is short:
-
-```{r}
+```r
 library(qviewparsR)
 
 qv <- read_qview("path/to/plate.Q-View")
 qv                          # one-screen summary
 
 qv$analytes                 # spot_number, analyte, unit, lod, lloq, uloq
-qv$well_groups              # one row per sample/calibrator/control
+qv$well_groups              # one row per sample / calibrator / control
 qv$pixel_intensities        # long-format replicate readings
 qv$summary_statistics       # per-group mean / std-dev / CV rows
 qv$plate_layout             # one row per plate well
@@ -66,34 +110,30 @@ qv$plate_layout             # one row per plate well
 summary(qv)                 # mean / SD / CV per well type x analyte
 ```
 
-`read_qview()` always returns a list of class `qview` with eleven slots
-described in `?read_qview`. Empty slots are zero-row tibbles rather
-than `NULL`, so downstream code can rely on shape stability.
+`read_qview()` always returns a list of class `qview` with eleven
+slots described in `?read_qview`. Empty slots are zero-row tibbles
+rather than `NULL`, so downstream code can rely on shape stability.
 
 ## The naming convention
 
 The producing software rewrites identifiers from the original
-well-assignment template CSV before it stores them. The mapping is
+well-assignment template before storing them. The mapping is
 systematic and reversible:
 
-| Template value                | Stored as          |
-|-------------------------------|--------------------|
-| `Cal 1` ... `Cal N`           | `ICal 1` ... `ICal N` |
-| `Low`                         | `GLow`             |
-| `High`                        | `HHigh`            |
-| `FD24277364`, `1211498458`, ...| `NFD24277364`, `N1211498458`, ... |
+| Template value                  | Stored as                          |
+|---------------------------------|------------------------------------|
+| `Cal 1` ... `Cal N`             | `ICal 1` ... `ICal N`              |
+| `Low`                           | `GLow`                             |
+| `High`                          | `HHigh`                            |
+| `FD24277364`, `1211498458`, ... | `NFD24277364`, `N1211498458`, ...  |
 
 `strip_qview_prefix()` reverses the rewrite. Pass `strip_prefix = TRUE`
 to `read_qview()` to apply it across every sample-id column at once:
 
-```{r}
+```r
 qv <- read_qview("path/to/plate.Q-View", strip_prefix = TRUE)
 unique(qv$well_groups$sample_id)
-```
 
-The vectorised helper is also useful on its own:
-
-```{r}
 strip_qview_prefix(c("ICal 1", "GLow", "HHigh", "NFD24277364"))
 #> [1] "Cal 1"      "Low"        "High"       "FD24277364"
 ```
@@ -101,12 +141,11 @@ strip_qview_prefix(c("ICal 1", "GLow", "HHigh", "NFD24277364"))
 ## Coercion and tidy-data idioms
 
 `as_tibble()` returns the long-format `pixel_intensities` table -- the
-primary tabular payload -- so a parsed object can drop straight into a
+primary tabular payload -- so a parsed object drops straight into a
 dplyr / ggplot2 pipeline:
 
-```{r}
+```r
 library(dplyr)
-library(tibble)
 
 qv |>
   as_tibble() |>
@@ -116,19 +155,12 @@ qv |>
             .groups = "drop")
 ```
 
-The `is_qview()` predicate lets package-aware functions guard their
-inputs:
-
-```{r}
-is_qview(qv)      # TRUE
-is_qview(list())  # FALSE
-```
-
 ## Visualisation
 
-Three quick-look plot types are built in (ggplot2 required):
+The `plot.qview()` method offers three quick-look views, all coloured
+on the same viridis ramp the Shiny app uses:
 
-```{r}
+```r
 plot(qv, type = "plate_map")          # 96-well plate, fill = well type
 plot(qv, type = "intensity_heatmap")  # facet per analyte, fill = PI
 plot(qv, type = "replicate_scatter")  # rep 1 vs rep 2 per analyte
@@ -137,7 +169,7 @@ plot(qv, type = "replicate_scatter")  # rep 1 vs rep 2 per analyte
 Each call returns a `ggplot` object, so themes, scales, and labels can
 be added on top:
 
-```{r}
+```r
 library(ggplot2)
 plot(qv, type = "plate_map") +
   theme_bw(base_size = 12) +
@@ -149,28 +181,27 @@ plot(qv, type = "plate_map") +
 Three writers cover the common destinations. All return the parsed
 object invisibly, so they compose with `|>`:
 
-```{r}
+```r
 qv |>
   write_qview_xlsx("plate.xlsx") |>      # one sheet per parsed table
-  write_qview_csv ("plate_csv/") |>      # one CSV file per parsed table
+  write_qview_csv ("plate_csv/") |>      # one CSV per parsed table
   write_qview_rds ("plate.rds")          # full lossless R round-trip
 ```
 
-Add `overwrite = TRUE` to `write_qview_xlsx()` / `write_qview_rds()` to
-replace existing destinations.
+`write_qview_xlsx()` and `write_qview_rds()` accept `overwrite = TRUE`
+to replace existing destinations.
 
 The legacy aliases `qview_to_xlsx()` and `qview_to_csv_dir()` still
-work but are flagged with `lifecycle::deprecate_warn()` and will be
-removed in a future release.
+work but emit `lifecycle::deprecate_warn()`; switch to the new names.
 
 ## Cross-validating against a template CSV
 
-Every well assignment is already embedded in the Q-View file. If you
-also have the original well-assignment template CSV the producing
+Every well assignment is already embedded in the `.Q-View` file. If
+you also have the original well-assignment template CSV the producing
 application imported, `read_qview_template()` parses it into a tibble
-that aligns with `qv$plate_layout` for cross-validation:
+that aligns with `qv$plate_layout`:
 
-```{r}
+```r
 tmpl <- read_qview_template("path/to/template.csv")
 
 qv$plate_layout |>
@@ -182,22 +213,30 @@ Any rows surviving the filter expose template-vs-Q-View mismatches.
 
 ## Interactive front-end
 
-For non-coding collaborators, `qview_app()` launches a small Shiny
-application with the same workflow exposed visually:
+For non-coding collaborators, `qview_app()` launches a Shiny app in
+the same monochrome aesthetic (light + dark mode) with the hex sticker
+in the upper-left corner:
 
-```{r}
-qview_app()
+```r
+qview_app()             # 512 MB upload cap by default
+qview_app(max_upload_mb = 1024)
 ```
 
-The app accepts a `.Q-View` upload (and optionally a template CSV),
-shows every parsed table and the three plots in tabs, and offers
-one-click downloads as `xlsx`, `rds`, or a zipped CSV directory.
+The app accepts a `.Q-View` upload (and optionally a template CSV) and
+exposes:
+
+* a publication-ready 2x2 **Overview** figure (plate layout / pixel
+  intensity distribution / replicate concordance / mean PI by well
+  type) with high-DPI PNG and vector PDF export;
+* every parsed table with its own xlsx download;
+* one-click **xlsx / rds / csv-zip** of the whole project;
+* a built-in dark/light toggle and per-card max/restore.
 
 ## Error handling
 
-Every exported function validates its inputs early and raises a
-structured `cli::cli_abort()` error that points at the user's call,
-not at internal helpers. Typical shapes you may see:
+Every exported function validates inputs early and raises a structured
+`cli::cli_abort()` error pointing at the user's call rather than at
+internal helpers, e.g.:
 
 ```
 Error in `read_qview()`:
@@ -212,16 +251,14 @@ x "junk.bin" is missing the expected container header.
 i Expected a numeric container version followed by "Q-View Project".
 ```
 
-The messages carry an `i` bullet whenever there is an actionable hint.
+The `i` bullet always carries an actionable hint when one exists.
 
-## Where to go next
+## Citation
 
-* `?read_qview` -- exhaustive description of every output slot.
-* `?write_qview` -- the three exporters share one help page.
-* `?summary.qview` -- detail on the per-well-type aggregation.
-* `?qview_app` -- launching the interactive app.
+```r
+citation("qviewparsR")
+```
 
-The `inst/extdata/` directory does **not** ship a Q-View fixture
-because the binary format is large; instead, the test suite skips
-cleanly when no fixture is present (`tests/testthat/test-read_qview.R`
-documents the lookup paths).
+> Heller R, Mannes M (2026). *qviewparsR: Read .Q-View Multiplex
+> ELISA Project Files*. R package version 1.0.0.
+> <https://github.com/CTTIR/qviewparsR>
