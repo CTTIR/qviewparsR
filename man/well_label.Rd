@@ -34,7 +34,7 @@ well_label("C", 5)                    # "C5"
 
 }
 \seealso{
-Other qview-helper: 
-\code{\link{strip_qview_prefix}()}
+Other qview-helper:
+\code{\link[=strip_qview_prefix]{strip_qview_prefix()}}
 }
 \concept{qview-helper}

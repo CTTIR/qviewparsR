@@ -37,7 +37,7 @@ strip_qview_prefix(c("ICal 1", "GLow", "HHigh",
 
 }
 \seealso{
-Other qview-helper: 
-\code{\link{well_label}()}
+Other qview-helper:
+\code{\link[=well_label]{well_label()}}
 }
 \concept{qview-helper}

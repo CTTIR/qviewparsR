@@ -23,10 +23,10 @@ standard wells are reported separately so calibration variability is
 easy to inspect.
 }
 \seealso{
-Other qview-methods: 
-\code{\link{as_tibble.qview}()},
-\code{\link{is_qview}()},
-\code{\link{plot.qview}()},
-\code{\link{print.qview}()}
+Other qview-methods:
+\code{\link[=as_tibble.qview]{as_tibble.qview()}},
+\code{\link[=is_qview]{is_qview()}},
+\code{\link[=plot.qview]{plot.qview()}},
+\code{\link[=print.qview]{print.qview()}}
 }
 \concept{qview-methods}

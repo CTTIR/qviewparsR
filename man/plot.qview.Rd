@@ -33,10 +33,10 @@ intensity per analyte.
 Requires the \code{ggplot2} package (Suggested).
 }
 \seealso{
-Other qview-methods: 
-\code{\link{as_tibble.qview}()},
-\code{\link{is_qview}()},
-\code{\link{print.qview}()},
-\code{\link{summary.qview}()}
+Other qview-methods:
+\code{\link[=as_tibble.qview]{as_tibble.qview()}},
+\code{\link[=is_qview]{is_qview()}},
+\code{\link[=print.qview]{print.qview()}},
+\code{\link[=summary.qview]{summary.qview()}}
 }
 \concept{qview-methods}

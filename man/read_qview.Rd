@@ -92,7 +92,7 @@ no system dependencies beyond a working R installation.
 \code{\link[=strip_qview_prefix]{strip_qview_prefix()}}, \code{\link[=read_qview_template]{read_qview_template()}},
 \code{\link[=print.qview]{print.qview()}}, \code{\link[=plot.qview]{plot.qview()}}.
 
-Other qview-reader: 
-\code{\link{read_qview_template}()}
+Other qview-reader:
+\code{\link[=read_qview_template]{read_qview_template()}}
 }
 \concept{qview-reader}

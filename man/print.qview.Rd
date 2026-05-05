@@ -21,10 +21,10 @@ the embedded report carries quantitative concentrations or only
 qualitative pixel intensities.
 }
 \seealso{
-Other qview-methods: 
-\code{\link{as_tibble.qview}()},
-\code{\link{is_qview}()},
-\code{\link{plot.qview}()},
-\code{\link{summary.qview}()}
+Other qview-methods:
+\code{\link[=as_tibble.qview]{as_tibble.qview()}},
+\code{\link[=is_qview]{is_qview()}},
+\code{\link[=plot.qview]{plot.qview()}},
+\code{\link[=summary.qview]{summary.qview()}}
 }
 \concept{qview-methods}

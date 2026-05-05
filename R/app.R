@@ -177,13 +177,27 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
 [data-bs-theme=\"dark\"] .nav-tabs .nav-link.active { color:var(--qv-fg); border-bottom-color:var(--qv-fg); }
 "
 
-.qv_table_panel <- function(slot, dl_id, label) {
+.qv_table_panel <- function(tbl_id, dl_xlsx, label) {
   shiny::tagList(
     shiny::div(
       class = "d-flex justify-content-end mb-2",
-      shiny::downloadButton(dl_id, paste0("Download ", label, " (xlsx)"))
+      shiny::downloadButton(dl_xlsx, paste0("Download ", label, " (xlsx)"))
     ),
-    DT::DTOutput(slot)
+    DT::DTOutput(tbl_id)
+  )
+}
+
+# Data panel: top toolbar (xlsx + plot PNG), table, divider, plot.
+.qv_data_panel <- function(tbl_id, dl_xlsx, plot_id, dl_plot, label) {
+  shiny::tagList(
+    shiny::div(
+      class = "d-flex justify-content-end gap-2 mb-2",
+      shiny::downloadButton(dl_xlsx, paste0("Download ", label, " (xlsx)")),
+      shiny::downloadButton(dl_plot, paste0("Download ", label, " plot (PNG)"))
+    ),
+    DT::DTOutput(tbl_id),
+    shiny::tags$hr(),
+    shiny::plotOutput(plot_id, height = "440px")
   )
 }
 
@@ -243,23 +257,39 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
     ),
     bslib::navset_card_tab(
       id = "tabs",
-      bslib::nav_panel("Metadata",        shiny::verbatimTextOutput("md")),
+      bslib::nav_panel("Metadata",
+        shiny::tagList(
+          shiny::div(
+            class = "d-flex justify-content-end mb-2",
+            shiny::downloadButton("dl_tbl_metadata", "Download metadata (xlsx)")
+          ),
+          DT::DTOutput("tbl_metadata")
+        )
+      ),
       bslib::nav_panel("Analytes",
-        .qv_table_panel("tbl_analytes",    "dl_tbl_analytes",    "analytes")),
+        .qv_data_panel("tbl_analytes",    "dl_tbl_analytes",
+                       "plt_analytes",    "dl_plt_analytes",    "analytes")),
       bslib::nav_panel("Well groups",
-        .qv_table_panel("tbl_well_groups", "dl_tbl_well_groups", "well_groups")),
+        .qv_data_panel("tbl_well_groups", "dl_tbl_well_groups",
+                       "plt_well_groups", "dl_plt_well_groups", "well_groups")),
       bslib::nav_panel("Plate layout",
-        .qv_table_panel("tbl_plate",       "dl_tbl_plate",       "plate_layout")),
+        .qv_data_panel("tbl_plate",       "dl_tbl_plate",
+                       "plt_plate",       "dl_plt_plate",       "plate_layout")),
       bslib::nav_panel("Pixel intensities",
-        .qv_table_panel("tbl_pi",          "dl_tbl_pi",          "pixel_intensities")),
+        .qv_data_panel("tbl_pi",          "dl_tbl_pi",
+                       "plt_pi",          "dl_plt_pi",          "pixel_intensities")),
       bslib::nav_panel("Summaries",
-        .qv_table_panel("tbl_summary",     "dl_tbl_summary",     "summary_statistics")),
+        .qv_data_panel("tbl_summary",     "dl_tbl_summary",
+                       "plt_summary",     "dl_plt_summary",     "summary_statistics")),
       bslib::nav_panel("Concentrations",
-        .qv_table_panel("tbl_conc",        "dl_tbl_conc",        "concentrations")),
+        .qv_data_panel("tbl_conc",        "dl_tbl_conc",
+                       "plt_conc",        "dl_plt_conc",        "concentrations")),
       bslib::nav_panel("Curve fit",
-        .qv_table_panel("tbl_curve",       "dl_tbl_curve",       "curve_fit")),
+        .qv_data_panel("tbl_curve",       "dl_tbl_curve",
+                       "plt_curve",       "dl_plt_curve",       "curve_fit")),
       bslib::nav_panel("Plate template",
-        .qv_table_panel("tbl_template",    "dl_tbl_template",    "template")),
+        .qv_data_panel("tbl_template",    "dl_tbl_template",
+                       "plt_template",    "dl_plt_template",    "template")),
       bslib::nav_panel(
         "Visualise",
         shiny::fluidRow(
@@ -411,27 +441,66 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
     }
   })
 
-  output$md <- shiny::renderPrint({
-    if (is.null(state$qv)) return(invisible())
-    print(state$qv)
-  })
-
-  render_tbl <- function(slot) {
+  render_tbl <- function(provider) {
     DT::renderDT({
-      if (is.null(state$qv)) return(NULL)
-      d <- state$qv[[slot]]
+      d <- provider()
       if (is.null(d) || nrow(d) == 0L) return(NULL)
       DT::datatable(d, options = list(scrollX = TRUE, pageLength = 25),
                     rownames = FALSE)
     })
   }
-  output$tbl_analytes    <- render_tbl("analytes")
-  output$tbl_well_groups <- render_tbl("well_groups")
-  output$tbl_plate       <- render_tbl("plate_layout")
-  output$tbl_pi          <- render_tbl("pixel_intensities")
-  output$tbl_summary     <- render_tbl("summary_statistics")
-  output$tbl_conc        <- render_tbl("concentrations")
-  output$tbl_curve       <- render_tbl("curve_fit")
+  output$tbl_metadata    <- render_tbl(function() {
+    if (is.null(state$qv)) NULL else .qv_metadata_kv(state$qv)
+  })
+  output$tbl_analytes    <- render_tbl(function() state$qv$analytes)
+  output$tbl_well_groups <- render_tbl(function() state$qv$well_groups)
+  output$tbl_plate       <- render_tbl(function() state$qv$plate_layout)
+  output$tbl_pi          <- render_tbl(function() state$qv$pixel_intensities)
+  output$tbl_summary     <- render_tbl(function() {
+    if (is.null(state$qv)) NULL else summary(state$qv)
+  })
+  output$tbl_conc        <- render_tbl(function() state$qv$concentrations)
+  output$tbl_curve       <- render_tbl(function() state$qv$curve_fit)
+  output$tbl_template    <- render_tbl(function() state$template)
+
+  # ---- Per-tab plots ------------------------------------------------
+  plot_for <- function(builder) {
+    shiny::reactive({
+      shiny::req(state$qv)
+      tryCatch(builder(state$qv),
+               error = function(e) {
+                 log_msg("Plot error: ", conditionMessage(e)); NULL
+               })
+    })
+  }
+  rx_plt_analytes    <- plot_for(.qv_plot_analytes)
+  rx_plt_well_groups <- plot_for(.qv_plot_well_groups)
+  rx_plt_plate       <- plot_for(.qv_plot_plate_map)
+  rx_plt_pi          <- plot_for(.qv_plot_intensity_heatmap)
+  rx_plt_summary     <- plot_for(.qv_plot_summary)
+  rx_plt_conc        <- plot_for(.qv_plot_concentrations)
+  rx_plt_curve       <- plot_for(.qv_plot_curve_fit)
+  rx_plt_template    <- shiny::reactive({
+    shiny::req(state$template)
+    tryCatch(.qv_plot_template(state$template),
+             error = function(e) { log_msg("Plot error: ", conditionMessage(e)); NULL })
+  })
+
+  show_plot <- function(rx, fallback) {
+    shiny::renderPlot({
+      p <- rx()
+      if (is.null(p)) return(.qv_blank_plot(fallback))
+      p
+    })
+  }
+  output$plt_analytes    <- show_plot(rx_plt_analytes,    "Upload and parse a .Q-View file to see analyte panel.")
+  output$plt_well_groups <- show_plot(rx_plt_well_groups, "Upload and parse a .Q-View file to see well groups.")
+  output$plt_plate       <- show_plot(rx_plt_plate,       "Upload and parse a .Q-View file to see the plate layout.")
+  output$plt_pi          <- show_plot(rx_plt_pi,          "Upload and parse a .Q-View file to see pixel intensities.")
+  output$plt_summary     <- show_plot(rx_plt_summary,     "Upload and parse a .Q-View file to see summary statistics.")
+  output$plt_conc        <- show_plot(rx_plt_conc,        "No quantitative concentrations: regression model is qualitative.")
+  output$plt_curve       <- show_plot(rx_plt_curve,       "Upload and parse a .Q-View file to see curve fit.")
+  output$plt_template    <- show_plot(rx_plt_template,    "Upload an optional plate-template CSV (sidebar) to populate this tab.")
 
   current_plot <- shiny::reactive({
     shiny::req(state$qv)
@@ -479,21 +548,44 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
       }
     )
   }
+  output$dl_tbl_metadata    <- one_sheet_xlsx(function() {
+    if (is.null(state$qv)) NULL else .qv_metadata_kv(state$qv)
+  }, "metadata")
   output$dl_tbl_analytes    <- one_sheet_xlsx(function() state$qv$analytes,           "analytes")
   output$dl_tbl_well_groups <- one_sheet_xlsx(function() state$qv$well_groups,        "well_groups")
   output$dl_tbl_plate       <- one_sheet_xlsx(function() state$qv$plate_layout,       "plate_layout")
   output$dl_tbl_pi          <- one_sheet_xlsx(function() state$qv$pixel_intensities,  "pixel_intensities")
-  output$dl_tbl_summary     <- one_sheet_xlsx(function() state$qv$summary_statistics, "summary_statistics")
+  output$dl_tbl_summary     <- one_sheet_xlsx(function() {
+    if (is.null(state$qv)) NULL else summary(state$qv)
+  }, "summary_statistics")
   output$dl_tbl_conc        <- one_sheet_xlsx(function() state$qv$concentrations,     "concentrations")
   output$dl_tbl_curve       <- one_sheet_xlsx(function() state$qv$curve_fit,          "curve_fit")
   output$dl_tbl_template    <- one_sheet_xlsx(function() state$template,              "template")
 
-  output$tbl_template <- DT::renderDT({
-    if (is.null(state$template)) return(NULL)
-    DT::datatable(state$template,
-                  options = list(scrollX = TRUE, pageLength = 25),
-                  rownames = FALSE)
-  })
+  # ---- Per-tab plot PNG download handlers ---------------------------
+  one_plot_png <- function(rx, label) {
+    shiny::downloadHandler(
+      filename = function() filename_stamp(paste0("_", label, ".png")),
+      content  = function(file) {
+        p <- rx(); shiny::req(p)
+        ggplot2::ggsave(
+          file, p,
+          width  = if (is.null(input$plot_w_in)) 10 else input$plot_w_in,
+          height = if (is.null(input$plot_h_in)) 7  else input$plot_h_in,
+          dpi    = if (is.null(input$plot_dpi))  600 else input$plot_dpi,
+          units  = "in"
+        )
+      }
+    )
+  }
+  output$dl_plt_analytes    <- one_plot_png(rx_plt_analytes,    "analytes")
+  output$dl_plt_well_groups <- one_plot_png(rx_plt_well_groups, "well_groups")
+  output$dl_plt_plate       <- one_plot_png(rx_plt_plate,       "plate_layout")
+  output$dl_plt_pi          <- one_plot_png(rx_plt_pi,          "pixel_intensities")
+  output$dl_plt_summary     <- one_plot_png(rx_plt_summary,     "summary_statistics")
+  output$dl_plt_conc        <- one_plot_png(rx_plt_conc,        "concentrations")
+  output$dl_plt_curve       <- one_plot_png(rx_plt_curve,       "curve_fit")
+  output$dl_plt_template    <- one_plot_png(rx_plt_template,    "template")
 
   filename_stamp <- function(ext) {
     paste0("qview_", format(Sys.time(), "%Y%m%d_%H%M%S"), ext)

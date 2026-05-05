@@ -43,7 +43,7 @@ the original template.
 
 }
 \seealso{
-Other qview-reader: 
-\code{\link{read_qview}()}
+Other qview-reader:
+\code{\link[=read_qview]{read_qview()}}
 }
 \concept{qview-reader}

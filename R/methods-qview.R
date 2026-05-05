@@ -264,5 +264,124 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
 }
 
 
+# --- Per-slot plot helpers used by the Shiny app ----------------------
+# Each returns a ggplot object or NULL when the slot has no data.
+
+.qv_plot_analytes <- function(qv) {
+  d <- qv$analytes
+  if (is.null(d) || nrow(d) == 0L) return(NULL)
+  d <- d[!is.na(d$analyte), , drop = FALSE]
+  d$label <- factor(d$analyte, levels = d$analyte[order(d$spot_number)])
+  ggplot2::ggplot(d, ggplot2::aes(x = .data$label, y = .data$spot_number,
+                                  fill = .data$unit)) +
+    ggplot2::geom_col() +
+    ggplot2::scale_fill_viridis_d(option = "D", begin = 0.2, end = 0.85,
+                                  na.value = "grey80") +
+    ggplot2::coord_flip() +
+    ggplot2::labs(title = "Analyte panel", x = NULL,
+                  y = "Spot number", fill = "Unit") +
+    ggplot2::theme_minimal()
+}
+
+.qv_plot_well_groups <- function(qv) {
+  d <- qv$well_groups
+  if (is.null(d) || nrow(d) == 0L) return(NULL)
+  ggplot2::ggplot(d, ggplot2::aes(x = .data$well_type, fill = .data$well_type)) +
+    ggplot2::geom_bar() +
+    ggplot2::scale_fill_viridis_d(option = "D", begin = 0.2, end = 0.85) +
+    ggplot2::labs(title = "Well groups by type", x = NULL,
+                  y = "Number of groups", fill = "Well type") +
+    ggplot2::theme_minimal()
+}
+
+.qv_plot_summary <- function(qv) {
+  s <- summary(qv)
+  if (nrow(s) == 0L) return(NULL)
+  ggplot2::ggplot(s, ggplot2::aes(x = .data$analyte, y = .data$mean,
+                                  fill = .data$well_type)) +
+    ggplot2::geom_col(position = "dodge") +
+    ggplot2::geom_errorbar(
+      ggplot2::aes(ymin = pmax(.data$mean - .data$sd, 0),
+                   ymax = .data$mean + .data$sd),
+      position = ggplot2::position_dodge(width = 0.9), width = 0.25,
+      na.rm = TRUE
+    ) +
+    ggplot2::scale_fill_viridis_d(option = "D", begin = 0.2, end = 0.85) +
+    ggplot2::labs(title = "Mean pixel intensity (+/- SD) by well type",
+                  x = NULL, y = "Mean PI", fill = "Well type") +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 30, hjust = 1))
+}
+
+.qv_plot_concentrations <- function(qv) {
+  d <- qv$concentrations
+  if (is.null(d) || nrow(d) == 0L) return(NULL)
+  ggplot2::ggplot(d, ggplot2::aes(x = .data$well_group, y = .data$concentration,
+                                  fill = .data$analyte)) +
+    ggplot2::geom_col(position = "dodge") +
+    ggplot2::scale_fill_viridis_d(option = "D", begin = 0.2, end = 0.85) +
+    ggplot2::labs(title = "Back-calculated concentrations",
+                  x = NULL, y = "Concentration", fill = "Analyte") +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, vjust = 0.5))
+}
+
+.qv_plot_curve_fit <- function(qv) {
+  d <- qv$curve_fit
+  if (is.null(d) || nrow(d) == 0L) return(NULL)
+  d$model <- factor(ifelse(is.na(d$regression_model) | !nzchar(d$regression_model),
+                           "(none)", d$regression_model))
+  ggplot2::ggplot(d, ggplot2::aes(x = stats::reorder(.data$analyte, .data$spot_number),
+                                  y = 1, fill = .data$model)) +
+    ggplot2::geom_tile(colour = "grey30") +
+    ggplot2::geom_text(ggplot2::aes(label = .data$model), size = 3) +
+    ggplot2::scale_fill_viridis_d(option = "D", begin = 0.2, end = 0.85) +
+    ggplot2::coord_flip() +
+    ggplot2::labs(title = "Regression model per analyte",
+                  x = NULL, y = NULL, fill = "Model") +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(axis.text.x = ggplot2::element_blank(),
+                   axis.ticks.x = ggplot2::element_blank())
+}
+
+.qv_plot_template <- function(template) {
+  if (is.null(template) || nrow(template) == 0L) return(NULL)
+  d <- template
+  d$plate_col <- factor(d$plate_col, levels = sort(unique(d$plate_col)))
+  d$plate_row <- factor(d$plate_row, levels = rev(sort(unique(d$plate_row))))
+  ggplot2::ggplot(d, ggplot2::aes(.data$plate_col, .data$plate_row,
+                                  fill = .data$group_type)) +
+    ggplot2::geom_tile(colour = "grey30") +
+    ggplot2::geom_text(ggplot2::aes(label = .data$sample_id),
+                       size = 2.5, na.rm = TRUE) +
+    ggplot2::scale_fill_viridis_d(option = "D", begin = 0.2, end = 0.85,
+                                  na.value = "grey90") +
+    ggplot2::labs(title = "Plate template", x = NULL, y = NULL,
+                  fill = "Group type") +
+    ggplot2::theme_minimal()
+}
+
+.qv_blank_plot <- function(text) {
+  if (!requireNamespace("ggplot2", quietly = TRUE)) return(invisible())
+  ggplot2::ggplot() +
+    ggplot2::annotate("text", x = 0.5, y = 0.5, label = text,
+                      size = 4, colour = "grey40", lineheight = 1.1) +
+    ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
+    ggplot2::theme_void()
+}
+
+
+.qv_metadata_kv <- function(qv) {
+  md <- qv$metadata
+  tibble::tibble(
+    field = names(md),
+    value = vapply(md, function(v) {
+      if (length(v) == 0L) return(NA_character_)
+      paste(format(v), collapse = "; ")
+    }, character(1L))
+  )
+}
+
+
 # null-coalescing helper local to this file (keeps R >= 4.1 compatibility).
 `%||%` <- function(a, b) if (is.null(a) || (length(a) == 1L && is.na(a))) b else a

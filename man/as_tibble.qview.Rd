@@ -21,10 +21,10 @@ tabular data carried by a \code{qview} object. To access other slots
 directly.
 }
 \seealso{
-Other qview-methods: 
-\code{\link{is_qview}()},
-\code{\link{plot.qview}()},
-\code{\link{print.qview}()},
-\code{\link{summary.qview}()}
+Other qview-methods:
+\code{\link[=is_qview]{is_qview()}},
+\code{\link[=plot.qview]{plot.qview()}},
+\code{\link[=print.qview]{print.qview()}},
+\code{\link[=summary.qview]{summary.qview()}}
 }
 \concept{qview-methods}
