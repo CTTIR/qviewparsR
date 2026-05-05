@@ -1,4 +1,4 @@
-#' comparsR: Read Quansys Q-View ELISA Project Files
+#' qviewparsR: Read Quansys Q-View ELISA Project Files
 #'
 #' @description
 #' Pure-R parser for `.Q-View` binary project files produced by Quansys

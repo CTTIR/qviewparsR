@@ -1,4 +1,4 @@
-Package: comparsR
+Package: qviewparsR
 Title: Read Quansys Q-View ELISA Project Files
 Version: 1.0.0
 Authors@R:
@@ -15,9 +15,9 @@ Description: Pure-R parser for the binary '.Q-View' project file format
     layout, all as tidy tibbles. No Java runtime or H2 database driver
     is required.
 License: MIT + file LICENSE
-URL: https://github.com/r-heller/comparsR,
-    https://r-heller.github.io/comparsR/
-BugReports: https://github.com/r-heller/comparsR/issues
+URL: https://github.com/r-heller/qviewparsR,
+    https://r-heller.github.io/qviewparsR/
+BugReports: https://github.com/r-heller/qviewparsR/issues
 Depends:
     R (>= 4.1.0)
 Imports:

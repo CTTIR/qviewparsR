@@ -189,5 +189,5 @@
 
   <!-- Package name -->
   <text font-family="monospace" font-weight="700" font-size="27"
-    fill="#80CBC4" text-anchor="middle" x="250" y="545" letter-spacing="1">comparsR</text>
+    fill="#80CBC4" text-anchor="middle" x="250" y="545" letter-spacing="1">qviewparsR</text>
 </svg>

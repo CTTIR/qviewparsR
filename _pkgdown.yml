@@ -1,68 +1,53 @@
-url: https://r-heller.github.io/comparsR/
+url: https://r-heller.github.io/qviewparsR/
 
 template:
   bootstrap: 5
   bootswatch: flatly
 
 home:
-  title: comparsR
+  title: qviewparsR
   description: >
-    Parse and export longitudinal complement and neuroaxonal multiplex
-    immunoassays.
+    Pure-R parser for Quansys Q-View `.Q-View` binary ELISA project files.
 
 reference:
-  - title: Readers
-    desc: Parse raw instrument output and clinical metadata.
+  - title: Reader
+    desc: Parse a Q-View binary project file.
     contents:
-      - cp_read_complement
-      - cp_read_neuroaxonal
-      - cp_read_metadata
-      - cp_read_controls
-      - cp_read_auto
+      - read_qview
 
-  - title: Build
-    desc: Assemble the canonical `compars_data` container.
+  - title: Helpers
+    desc: Naming convention and plate-coordinate utilities.
     contents:
-      - cp_build
+      - strip_qview_prefix
+      - well_label
+      - read_qview_template
 
-  - title: Transform
-    desc: Normalise against controls and compute derived variables.
+  - title: Methods
+    desc: Print and plot a parsed `qview` object.
     contents:
-      - cp_normalize
-      - cp_derive
+      - print.qview
+      - plot.qview
 
   - title: Export
-    desc: Write `compars_data` objects to disk.
+    desc: Write a parsed `qview` object to disk.
     contents:
-      - cp_export_xlsx
-      - cp_export_csv
-      - cp_export_rds
+      - qview_to_xlsx
+      - qview_to_csv_dir
 
-  - title: Validation and reporting
+  - title: Shiny app
+    desc: Upload, preview, visualise, and download a `.Q-View` file.
     contents:
-      - cp_validate
-      - cp_summary
-      - compars_data-methods
-
-  - title: Reference tables
-    contents:
-      - cp_timepoint_map
-      - cp_analyte_info
-
-  - title: Examples
-    contents:
-      - cp_example_data
-      - cp_example_files
+      - qview_app
 
   - title: Package
     contents:
-      - comparsR-package
+      - qviewparsR-package
 
 articles:
   - title: Getting started
     navbar: ~
     contents:
-      - comparsR
+      - qviewparsR
 
 navbar:
   structure:

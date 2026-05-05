@@ -1,8 +1,8 @@
 ---
-title: "Reading Q-View project files with comparsR"
+title: "Reading Q-View project files with qviewparsR"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Reading Q-View project files with comparsR}
+  %\VignetteIndexEntry{Reading Q-View project files with qviewparsR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -12,10 +12,10 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-library(comparsR)
+library(qviewparsR)
 ```
 
-`comparsR` is a pure-R parser for `.Q-View` binary project files. The
+`qviewparsR` is a pure-R parser for `.Q-View` binary project files. The
 file format is a single-file container that bundles an embedded H2 SQL
 database with binary plate-image data; the rendered CSV report is
 stored as a CLOB inside the database. `read_qview()` extracts that
@@ -45,41 +45,6 @@ str(qv, max.level = 1)
 #>  $ report_csv        : character vector
 #>  $ plate_layout      : tibble [96 x 7]
 #>  - attr(*, "class") = "qview"
-```
-
-## Output tibbles
-
-The shape of each table (with placeholder analyte names):
-
-### `analytes`
-
-```
-spot_number | analyte    | unit  | lod | lloq | uloq | assay_control_low | assay_control_high
------------------------------------------------------------------------------------------
-1           | analyte_1  | ng/ml | NA  | NA   | NA   | NA                | NA
-2           | analyte_2  | ug/ml | NA  | NA   | NA   | NA                | NA
-...
-```
-
-### `well_groups`
-
-```
-well_group | sample_id | is_standard | is_negative | is_sample | is_control | well_type
-----------------------------------------------------------------------------------------
-Cal 1      | Cal 1     | TRUE        | FALSE       | FALSE     | FALSE      | standard
-Low        | Low       | FALSE       | TRUE        | FALSE     | FALSE      | negative
-sample_a   | sample_a  | FALSE       | FALSE       | TRUE      | FALSE      | sample
-...
-```
-
-### `pixel_intensities`
-
-```
-well_group | sample_id | well | replicate | analyte   | unit  | pixel_intensity | dilution
--------------------------------------------------------------------------------------------
-sample_a   | sample_a  | C3   | 1         | analyte_1 | ng/ml | 12345           | 100
-sample_a   | sample_a  | C3   | 1         | analyte_2 | ug/ml |  4567           | 100
-...
 ```
 
 ## The naming convention
@@ -122,6 +87,7 @@ saveRDS(qv, "out.rds")
 qview_app()
 ```
 
-Launches a small Shiny app: upload a `.Q-View` file (and optionally a
-plate-template CSV), preview each parsed table, and download the
-result as `xlsx`, `rds`, or a zip of CSVs.
+Launches a Shiny app: upload a `.Q-View` file (and optionally a
+plate-template CSV), preview each parsed table, visualise the plate
+map, intensity heatmap, and replicate scatter, and download the result
+as `xlsx`, `rds`, or a zip of CSVs.

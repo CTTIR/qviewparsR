@@ -2,7 +2,7 @@
 % Please edit documentation in R/app.R
 \name{qview_app}
 \alias{qview_app}
-\title{Launch the comparsR Q-View Shiny app}
+\title{Launch the qviewparsR Q-View Shiny app}
 \usage{
 qview_app(...)
 }

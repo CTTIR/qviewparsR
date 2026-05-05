@@ -9,7 +9,7 @@
 ^CRAN-SUBMISSION$
 ^\.data$
 ^\.data/.*$
-^comparsR_icon\.svg$
+^qviewparsR_icon\.svg$
 ^_build\.R$
 ^LICENSE\.md$
 ^revdep$

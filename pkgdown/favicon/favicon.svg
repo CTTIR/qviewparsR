@@ -153,4 +153,4 @@
     <line x1="353" y1="208" x2="356" y2="208" stroke="#3a3a5c" stroke-width="0.6" opacity="0.4"></line>
     <text font-family="monospace" font-size="6" fill="#3a3a5c" opacity="0.5" text-anchor="middle" x="378" y="218">pathways</text>
 
-  </g><polygon points="250,30 455,145 455,375 250,490 45,375 45,145" fill="none" stroke="#00897B" stroke-width="11" stroke-linejoin="round"></polygon><polygon points="250,44 441,153 441,367 250,476 59,367 59,153" fill="none" stroke="#4DB6AC" stroke-width="1.5" stroke-linejoin="round" opacity="0.5"></polygon><text font-family="monospace" font-weight="700" font-size="27" fill="#80CBC4" text-anchor="middle" x="250" y="545" letter-spacing="1">comparsR</text></svg>
+  </g><polygon points="250,30 455,145 455,375 250,490 45,375 45,145" fill="none" stroke="#00897B" stroke-width="11" stroke-linejoin="round"></polygon><polygon points="250,44 441,153 441,367 250,476 59,367 59,153" fill="none" stroke="#4DB6AC" stroke-width="1.5" stroke-linejoin="round" opacity="0.5"></polygon><text font-family="monospace" font-weight="700" font-size="27" fill="#80CBC4" text-anchor="middle" x="250" y="545" letter-spacing="1">qviewparsR</text></svg>

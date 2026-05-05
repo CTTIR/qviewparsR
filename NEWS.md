@@ -1,4 +1,4 @@
-# comparsR 1.0.0
+# qviewparsR 1.0.0
 
 Major restructure: the package is now exclusively a parser for `.Q-View`
 binary project files produced by Quansys Biosciences Q-View Software.

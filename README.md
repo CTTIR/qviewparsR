@@ -1,11 +1,11 @@
-# comparsR <img src="man/figures/logo.png" align="right" height="139" alt="comparsR logo" />
+# qviewparsR <img src="man/figures/logo.png" align="right" height="139" alt="qviewparsR logo" />
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/r-heller/comparsR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/r-heller/comparsR/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/r-heller/qviewparsR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/r-heller/qviewparsR/actions/workflows/R-CMD-check.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <!-- badges: end -->
 
-`comparsR` is a pure-R parser for the binary `.Q-View` project files
+`qviewparsR` is a pure-R parser for the binary `.Q-View` project files
 produced by Quansys Biosciences Q-View Software (v3.x), used for
 chemiluminescent multiplex ELISA plate imaging and quantification. It
 extracts the embedded report and returns it as tidy tibbles.
@@ -17,13 +17,13 @@ working R installation.
 
 ```r
 # install.packages("pak")
-pak::pak("r-heller/comparsR")
+pak::pak("r-heller/qviewparsR")
 ```
 
 ## Quick start
 
 ```r
-library(comparsR)
+library(qviewparsR)
 
 qv <- read_qview("path/to/project.Q-View")
 qv                                # compact summary
@@ -40,7 +40,7 @@ qview_to_xlsx(qv, "out.xlsx")
 qview_to_csv_dir(qv, "out_csv/")
 saveRDS(qv, "out.rds")
 
-# Interactive front-end
+# Interactive front-end (upload, visualise, download)
 qview_app()
 ```
 
@@ -75,7 +75,7 @@ database uses 2048-byte pages.
 
 ### Embedded H2 schema (key tables)
 
-`comparsR` recovers data through the embedded CSV report; the table
+`qviewparsR` recovers data through the embedded CSV report; the table
 diagram below documents the underlying schema for reference.
 
 | Group | Table | Purpose |

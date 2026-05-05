@@ -1,4 +1,4 @@
 library(testthat)
-library(comparsR)
+library(qviewparsR)
 
-test_check("comparsR")
+test_check("qviewparsR")
