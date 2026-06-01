@@ -9,6 +9,7 @@
 ^CRAN-SUBMISSION$
 ^\.data$
 ^\.data/.*$
+^\.remember$
 ^qviewparsR_icon\.svg$
 ^_build\.R$
 ^LICENSE\.md$

@@ -123,7 +123,7 @@ read_qview <- function(path,
       summary_statistics = summary_statistics,
       concentrations     = concentrations,
       curve_fit          = curve_fit,
-      report_csv         = report_lines,
+      report_csv         = if (is.null(report_lines)) NULL else unique(report_lines),
       plate_layout       = plate_layout
     ),
     class = "qview"
@@ -347,7 +347,11 @@ read_qview <- function(path,
     if (any(keep)) captured <- c(captured, parts[keep])
   }
   if (length(captured) == 0L) return(NULL)
-  unique(trimws(captured))
+  # Keep duplicate copies: the H2 container flushes the current row to more
+  # than one page, and that copy frequency is what lets the row parser tell
+  # the committed reading from stale/truncated versions. De-duplication for
+  # display happens later, in read_qview().
+  trimws(captured)
 }
 
 
@@ -387,7 +391,8 @@ read_qview <- function(path,
       family      = info$family,
       analyte     = analytes$analyte,
       value       = nums,
-      unit        = analytes$unit
+      unit        = analytes$unit,
+      .line       = i                      # source-line id; dropped before return
     )
   }
 
@@ -398,9 +403,44 @@ read_qview <- function(path,
   out <- out[!is.na(out$well_group) & nzchar(out$well_group),
              , drop = FALSE]
   out <- out[!is.na(out$value), , drop = FALSE]
-  out <- dplyr::distinct(out, .data$well_group, .data$well,
-                         .data$replicate, .data$kind, .data$family,
-                         .data$analyte, .keep_all = TRUE)
+  # --- Collapse stale duplicate replicate readings ----------------------
+  # The H2 container keeps superseded MVCC page versions of a well's row.
+  # A version cut at a 2048-byte page boundary parses as a short row
+  # (fewer analytes, a number sometimes truncated mid-digit) and can carry
+  # a stale group label, so the same physical well appears several times
+  # with different values. The current, committed row is flushed to more
+  # than one page, so for each physical (well, replicate, family, analyte)
+  # keep the value that occurs most often across the duplicate copies,
+  # breaking ties toward the most complete source row (the intact, non-
+  # truncated version). This must run on the raw rows -- before any
+  # de-duplication that would discard the copy-frequency signal. Summary
+  # rows (well == NA) are keyed by group and de-duplicated as before.
+  is_rep <- out$kind == "replicate" & !is.na(out$well) & nzchar(out$well)
+  rep_part <- out[is_rep, , drop = FALSE]
+  other_part <- out[!is_rep, , drop = FALSE]
+  if (nrow(rep_part) > 0L) {
+    # completeness of the *source line* (a truncated copy carries fewer
+    # analyte values than the intact one), independent of its group label.
+    rep_part$.cov <- stats::ave(rep(1L, nrow(rep_part)), rep_part$.line,
+                                FUN = length)
+    cell <- paste(rep_part$well, rep_part$replicate, rep_part$family,
+                  rep_part$analyte, sep = "\r")
+    rep_part$.freq <- stats::ave(rep(1L, nrow(rep_part)),
+                                 paste(cell, rep_part$value, sep = "\v"),
+                                 FUN = length)
+    ord <- order(rep_part$well, rep_part$replicate, rep_part$family,
+                 rep_part$analyte, -rep_part$.freq, -rep_part$.cov)
+    rep_part <- rep_part[ord, , drop = FALSE]
+    rep_part <- dplyr::distinct(rep_part, .data$well, .data$replicate,
+                               .data$family, .data$analyte, .keep_all = TRUE)
+    rep_part$.cov <- NULL
+    rep_part$.freq <- NULL
+  }
+  other_part <- dplyr::distinct(other_part, .data$well_group, .data$well,
+                                .data$replicate, .data$kind, .data$family,
+                                .data$analyte, .keep_all = TRUE)
+  out <- dplyr::bind_rows(rep_part, other_part)
+  out$.line <- NULL
 
   # Parse "(1:NNN)" dilution suffix off the well_group label.
   dilution <- rep(NA_real_, nrow(out))

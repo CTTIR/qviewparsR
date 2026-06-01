@@ -244,11 +244,16 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
   if (nrow(reps) == 0L) {
     cli::cli_abort("No replicate pixel intensities are available to plot.")
   }
+  # A well-group label can attach to more than one well (e.g. a re-used
+  # calibrator position), so a (well_group, analyte, replicate) key may
+  # hold several readings; average them rather than letting pivot_wider
+  # emit list-columns that downstream ggplot cannot render.
   wide <- tidyr::pivot_wider(
     reps[, c("well_group", "analyte", "replicate", "pixel_intensity")],
     names_from = "replicate",
     values_from = "pixel_intensity",
-    names_prefix = "rep_"
+    names_prefix = "rep_",
+    values_fn = function(v) mean(v, na.rm = TRUE)
   )
   if (!all(c("rep_1", "rep_2") %in% colnames(wide))) {
     cli::cli_abort("Need replicate 1 and replicate 2 readings to draw the scatter.")

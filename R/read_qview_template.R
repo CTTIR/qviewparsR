@@ -48,8 +48,9 @@ read_qview_template <- function(path,
       call = call
     )
   }
+  delim <- .qv_sniff_delim(path)
   raw <- readr::read_delim(
-    path, delim = ",",
+    path, delim = delim,
     col_names = FALSE,
     col_types = readr::cols(.default = readr::col_character()),
     show_col_types = FALSE
@@ -138,4 +139,23 @@ read_qview_template <- function(path,
     ))
   }
   out
+}
+
+
+# Detect the field separator of a template export. Q-View on a European
+# locale writes semicolon-separated values (and the .csv/.tsv/.txt the app
+# accepts may be tab-separated); pick whichever delimiter is most frequent
+# in the header. Defaults to comma when nothing stands out.
+.qv_sniff_delim <- function(path) {
+  sniff <- tryCatch(readLines(path, n = 10L, warn = FALSE),
+                    error = function(e) character())
+  sniff <- paste(sniff, collapse = "\n")
+  if (!nzchar(sniff)) return(",")
+  cand <- c(",", ";", "\t")
+  counts <- vapply(cand, function(d) {
+    m <- gregexpr(d, sniff, fixed = TRUE)[[1L]]
+    if (length(m) == 1L && m[1L] == -1L) 0L else length(m)
+  }, integer(1L))
+  if (max(counts) == 0L) return(",")
+  cand[which.max(counts)]
 }
