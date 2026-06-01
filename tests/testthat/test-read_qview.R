@@ -84,6 +84,18 @@ test_that("plate_layout covers a full plate of wells", {
                   colnames(qv$plate_layout)))
 })
 
+test_that("stale H2 page versions are de-duplicated to one reading per well", {
+  skip_if_not(fixture_available, "no Q-View fixture available")
+  qv <- read_qview(fixture, verbose = FALSE)
+  # Each physical (well, analyte) holds exactly one pixel intensity, and
+  # plate_layout has no duplicated wells, despite the container retaining
+  # superseded page versions.
+  pi <- qv$pixel_intensities
+  key <- paste(pi$well, pi$analyte)
+  expect_false(any(duplicated(key)))
+  expect_false(any(duplicated(qv$plate_layout$well)))
+})
+
 test_that("read_qview rejects non-Q-View files", {
   bad <- tempfile(fileext = ".bin")
   writeBin(charToRaw("Not a Q-View file."), bad)

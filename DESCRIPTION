@@ -36,12 +36,14 @@ Imports:
     utils
 Suggests:
     bslib,
+    chromote,
     DT,
     ggplot2,
     knitr,
     patchwork,
     rmarkdown,
     shiny,
+    shinytest2,
     testthat (>= 3.0.0),
     withr
 VignetteBuilder:

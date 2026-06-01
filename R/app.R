@@ -40,8 +40,14 @@ qview_app <- function(max_upload_mb = 512, ...) {
             max_upload_mb > 0)
   old <- options(shiny.maxRequestSize = max_upload_mb * 1024^2)
   on.exit(options(old), add = TRUE)
-  app <- shiny::shinyApp(ui = .qv_app_ui(), server = .qv_app_server)
-  shiny::runApp(app, ...)
+  shiny::runApp(.qv_app(), ...)
+}
+
+
+# Build (but do not run) the Shiny app object. Shared by qview_app() and by
+# the shinytest2 harness under tests/testthat/apps/qview/.
+.qv_app <- function() {
+  shiny::shinyApp(ui = .qv_app_ui(), server = .qv_app_server)
 }
 
 
