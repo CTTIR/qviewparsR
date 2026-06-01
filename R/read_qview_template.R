@@ -26,9 +26,10 @@
 #'   (character), `dilution` (numeric).
 #'
 #' @examples
-#' \dontrun{
-#'   layout <- read_qview_template("plate-template.csv")
-#' }
+#' path <- system.file("extdata", "example-template.csv",
+#'                     package = "qviewparsR")
+#' layout <- read_qview_template(path)
+#' head(layout)
 #'
 #' @family qview-reader
 #'

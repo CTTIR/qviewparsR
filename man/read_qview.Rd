@@ -79,11 +79,14 @@ Parsing is done in pure R: no Java runtime, no H2 database driver,
 no system dependencies beyond a working R installation.
 }
 \examples{
-\dontrun{
-  qv <- read_qview("plate.Q-View")
-  qv
-  qv$analytes
-  qv$pixel_intensities
+# A small synthetic .Q-View ships with the package:
+path <- system.file("extdata", "example.Q-View", package = "qviewparsR")
+qv <- read_qview(path)
+qv
+qv$analytes
+head(qv$pixel_intensities)
+
+if (requireNamespace("ggplot2", quietly = TRUE)) {
   plot(qv, type = "plate_map")
 }
 

@@ -1,0 +1,45 @@
+1
+Q-View Project.lobs.db
+
+4
+project.info
+
+125
+Q-View Project.h2.db
+
+-- H2 0.5/B --
+-- H2 0.5/B --
+-- H2 0.5/B --
+Project: Example ELISA project
+Plate: Plate 1
+Image: example-plate (01 Jan 2024 12:00)
+Imager: #000000 (00000)
+Product: EXAMPLE-LOT
+User: Demo
+Report Created: 01 Jan 2024 12:05
+Q-View Version: 3.13
+Well Assignment Template: example-template
+
+Well Group,Statistic,Well,Error Codes,Ba (ng/ml),Bb (ug/ml),Ref Spot (N/A)
+,Regression Model,NA,NA,4PL,4PL,NA
+Assay,Upper Limit of Quantification,NA,NA,Incalculable,Incalculable,NA
+,Lower Limit of Quantification,NA,NA,Incalculable,Incalculable,NA
+,Limit of Detection,NA,NA,Incalculable,Incalculable,NA
+,Assay Control Range High,NA,NA,NA,NA,65535
+,Assay Control Range Low,NA,NA,NA,NA,5000
+Lot,Upper Limit of Quantification,NA,NA,18.91,0.20,NA
+,Lower Limit of Quantification,NA,NA,0.26,0.0029,NA
+,Limit of Detection,NA,NA,0.065,0.00051,NA
+
+ICal 1,Pixel Intensity (Replicate 1),A1,NA,8671,19982,27646
+,Pixel Intensity (Replicate 2),A2,NA,17838,23848,34177
+ICal 2,Pixel Intensity (Replicate 1),B1,NA,4000,5000,30000
+,Pixel Intensity (Replicate 2),B2,NA,4100,5100,30500
+GLow,Pixel Intensity (Replicate 1),G1,NA,300,400,29000
+,Pixel Intensity (Replicate 2),G2,NA,310,410,29500
+HHigh,Pixel Intensity (Replicate 1),H1,NA,12000,15000,31000
+,Pixel Intensity (Replicate 2),H2,NA,12100,15100,31500
+N12345,Reduced Concentration (Replicate 1),A3,NA,2.5,0.05,NA
+,Reduced Concentration (Replicate 2),A4,NA,2.6,0.052,NA
+N12345,Pixel Intensity (Replicate 1),A3,NA,1200,1300,28000
+,Pixel Intensity (Replicate 2),A4,NA,1250,1350,28500

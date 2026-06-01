@@ -7,9 +7,9 @@
 #' @return Logical scalar.
 #'
 #' @examples
-#' \dontrun{
-#'   is_qview(read_qview("plate.Q-View"))
-#' }
+#' path <- system.file("extdata", "example.Q-View", package = "qviewparsR")
+#' is_qview(read_qview(path, verbose = FALSE))
+#' is_qview(list())
 #'
 #' @family qview-methods
 #' @export
@@ -89,6 +89,11 @@ print.qview <- function(x, ...) {
 #'   combination, columns: `well_type`, `analyte`, `unit`, `n`, `mean`,
 #'   `sd`, `cv`, `min`, `max`.
 #'
+#' @examples
+#' path <- system.file("extdata", "example.Q-View", package = "qviewparsR")
+#' qv <- read_qview(path, verbose = FALSE)
+#' summary(qv)
+#'
 #' @family qview-methods
 #' @export
 summary.qview <- function(object, ...) {
@@ -146,6 +151,11 @@ print.qview_summary <- function(x, ...) {
 #'
 #' @return A [tibble::tibble()] of replicate pixel-intensity readings.
 #'
+#' @examples
+#' path <- system.file("extdata", "example.Q-View", package = "qviewparsR")
+#' qv <- read_qview(path, verbose = FALSE)
+#' tibble::as_tibble(qv)
+#'
 #' @family qview-methods
 #'
 #' @importFrom tibble as_tibble
@@ -176,6 +186,12 @@ as_tibble.qview <- function(x, ...) {
 #' @param ... Unused; for S3 generic compatibility.
 #'
 #' @return A `ggplot` object.
+#'
+#' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
+#' path <- system.file("extdata", "example.Q-View", package = "qviewparsR")
+#' qv <- read_qview(path, verbose = FALSE)
+#' plot(qv, type = "plate_map")
+#' plot(qv, type = "replicate_scatter")
 #'
 #' @family qview-methods
 #'

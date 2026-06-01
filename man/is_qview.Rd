@@ -16,9 +16,9 @@ Logical scalar.
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 }
 \examples{
-\dontrun{
-  is_qview(read_qview("plate.Q-View"))
-}
+path <- system.file("extdata", "example.Q-View", package = "qviewparsR")
+is_qview(read_qview(path, verbose = FALSE))
+is_qview(list())
 
 }
 \seealso{

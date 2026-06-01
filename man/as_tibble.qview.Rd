@@ -20,6 +20,12 @@ tabular data carried by a \code{qview} object. To access other slots
 (well groups, analyte panel, summary statistics) use \verb{qv$<slot>}
 directly.
 }
+\examples{
+path <- system.file("extdata", "example.Q-View", package = "qviewparsR")
+qv <- read_qview(path, verbose = FALSE)
+tibble::as_tibble(qv)
+
+}
 \seealso{
 Other qview-methods:
 \code{\link[=is_qview]{is_qview()}},

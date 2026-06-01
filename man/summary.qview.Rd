@@ -22,6 +22,12 @@ Per-analyte mean, standard deviation, and coefficient of variation
 standard wells are reported separately so calibration variability is
 easy to inspect.
 }
+\examples{
+path <- system.file("extdata", "example.Q-View", package = "qviewparsR")
+qv <- read_qview(path, verbose = FALSE)
+summary(qv)
+
+}
 \seealso{
 Other qview-methods:
 \code{\link[=as_tibble.qview]{as_tibble.qview()}},

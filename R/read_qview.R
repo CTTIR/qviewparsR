@@ -61,11 +61,14 @@
 #' }
 #'
 #' @examples
-#' \dontrun{
-#'   qv <- read_qview("plate.Q-View")
-#'   qv
-#'   qv$analytes
-#'   qv$pixel_intensities
+#' # A small synthetic .Q-View ships with the package:
+#' path <- system.file("extdata", "example.Q-View", package = "qviewparsR")
+#' qv <- read_qview(path)
+#' qv
+#' qv$analytes
+#' head(qv$pixel_intensities)
+#'
+#' if (requireNamespace("ggplot2", quietly = TRUE)) {
 #'   plot(qv, type = "plate_map")
 #' }
 #'
@@ -302,22 +305,33 @@ read_qview <- function(path,
     assay_control_high = NA_real_
   )
   # Pull the "Limit of Detection", "Lower / Upper Limit of Quantification",
-  # and assay control range rows from the same first contiguous chunk if
-  # they are visible in a Lot section.
+  # and assay control range rows from the same first contiguous chunk.
+  # These come in two stacked blocks: an "Assay" block (often
+  # "Incalculable") and a "Lot" block (the numeric limits we want). Only
+  # the block's first row carries the label; continuation rows have an
+  # empty first field, so track the carried-forward section and match on
+  # it -- otherwise the leading-comma rows are missed and the Assay block
+  # is indistinguishable from the Lot block.
   lines <- strsplit(text, "[\r\n]+")[[1L]]
-  pull_row <- function(stat, anchor = "Lot") {
-    rx <- paste0("^", anchor, "?,", stat, ",")
-    hit <- lines[grepl(rx, lines)]
-    if (length(hit) == 0L) return(NULL)
-    parts <- .qv_split_csv_row(hit[1L])
+  section <- ""
+  sect_of <- vapply(lines, function(ln) {
+    f1 <- trimws(sub(",.*$", "", ln))
+    if (nzchar(f1)) section <<- f1
+    section
+  }, character(1L), USE.NAMES = FALSE)
+  pull_row <- function(stat, want = "Lot") {
+    idx <- which(sect_of == want &
+                 grepl(paste0(",", stat, ","), lines, fixed = TRUE))
+    if (length(idx) == 0L) return(NULL)
+    parts <- .qv_split_csv_row(lines[idx[1L]])
     vals <- parts[-seq_len(4L)]
     suppressWarnings(as.numeric(vals[seq_len(nrow(out))]))
   }
-  lod  <- pull_row("Limit of Detection")
-  lloq <- pull_row("Lower Limit of Quantification")
-  uloq <- pull_row("Upper Limit of Quantification")
-  acl  <- pull_row("Assay Control Range Low",  anchor = "")
-  ach  <- pull_row("Assay Control Range High", anchor = "")
+  lod  <- pull_row("Limit of Detection",            want = "Lot")
+  lloq <- pull_row("Lower Limit of Quantification", want = "Lot")
+  uloq <- pull_row("Upper Limit of Quantification", want = "Lot")
+  acl  <- pull_row("Assay Control Range Low",  want = "Assay")
+  ach  <- pull_row("Assay Control Range High", want = "Assay")
   if (!is.null(lod))  out$lod  <- lod
   if (!is.null(lloq)) out$lloq <- lloq
   if (!is.null(uloq)) out$uloq <- uloq

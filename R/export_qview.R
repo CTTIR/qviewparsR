@@ -25,13 +25,15 @@
 #' @return `qv`, invisibly, to support pipelines.
 #'
 #' @examples
-#' \dontrun{
-#'   qv <- read_qview("plate.Q-View")
-#'   qv |>
-#'     write_qview_xlsx("plate.xlsx") |>
-#'     write_qview_csv("plate_csv/")  |>
-#'     write_qview_rds("plate.rds")
-#' }
+#' path <- system.file("extdata", "example.Q-View", package = "qviewparsR")
+#' qv <- read_qview(path, verbose = FALSE)
+#'
+#' out <- tempfile()
+#' dir.create(out)
+#' qv |>
+#'   write_qview_rds(file.path(out, "plate.rds")) |>
+#'   write_qview_csv(file.path(out, "plate_csv"))
+#' list.files(out, recursive = TRUE)
 #'
 #' @family qview-export
 #' @name write_qview

@@ -37,9 +37,10 @@ setting up new plates or cross-validating Q-View imports against
 the original template.
 }
 \examples{
-\dontrun{
-  layout <- read_qview_template("plate-template.csv")
-}
+path <- system.file("extdata", "example-template.csv",
+                    package = "qviewparsR")
+layout <- read_qview_template(path)
+head(layout)
 
 }
 \seealso{

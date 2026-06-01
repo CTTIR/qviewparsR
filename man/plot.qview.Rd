@@ -32,6 +32,14 @@ intensity per analyte.
 
 Requires the \code{ggplot2} package (Suggested).
 }
+\examples{
+\dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+path <- system.file("extdata", "example.Q-View", package = "qviewparsR")
+qv <- read_qview(path, verbose = FALSE)
+plot(qv, type = "plate_map")
+plot(qv, type = "replicate_scatter")
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 Other qview-methods:
 \code{\link[=as_tibble.qview]{as_tibble.qview()}},
