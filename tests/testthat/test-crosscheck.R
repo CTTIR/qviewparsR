@@ -23,7 +23,9 @@
         }
       }
       i <- i + 9L
-    } else i <- i + 1L
+    } else {
+      i <- i + 1L
+    }
   }
   out <- do.call(rbind.data.frame, c(rows, stringsAsFactors = FALSE))
   out[!is.na(out$grid), , drop = FALSE]

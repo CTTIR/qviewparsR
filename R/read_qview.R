@@ -192,7 +192,9 @@ read_qview <- function(path,
       parent <- if (i + 2L <= length(lines) && !is_num[i + 2L] &&
                     startsWith(lines[i + 2L], "\\")) {
         lines[i + 2L]
-      } else NA_character_
+      } else {
+        NA_character_
+      }
       rows[[length(rows) + 1L]] <- tibble::tibble(
         name = name, size_bytes = size, parent = parent
       )
@@ -353,8 +355,8 @@ read_qview <- function(path,
     "^,",            patterns,                          ")")
   captured <- character()
   for (i in which(mask)) {
-    s <- starts[i]; L <- r$lengths[i]
-    txt <- rawToChar(raw[s:(s + L - 1L)])
+    s <- starts[i]; len <- r$lengths[i]
+    txt <- rawToChar(raw[s:(s + len - 1L)])
     parts <- unlist(strsplit(txt, "[\r\n]+"))
     if (length(parts) == 0L) next
     keep <- grepl(any_pattern, parts, perl = TRUE)
@@ -505,7 +507,9 @@ read_qview <- function(path,
         concentration = conc_rows$value,
         dilution      = conc_rows$dilution
       )
-    } else NULL,
+    } else {
+      NULL
+    },
     curve_fit = .qv_extract_curve_fit(lines, analytes)
   )
 }
@@ -538,7 +542,7 @@ read_qview <- function(path,
                           is_sample   = logical(),
                           is_control  = logical(),
                           well_type   = factor(character(),
-                            levels = c("standard","negative","sample","control"))))
+                            levels = c("standard", "negative", "sample", "control"))))
   }
   base <- trimws(sub("\\s*\\([^)]*\\)\\s*$", "", groups))
   classify <- function(g) {
