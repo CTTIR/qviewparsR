@@ -83,10 +83,31 @@ compiled code -- all logic is pure R.
 
 ## Installation
 
+`qviewparsR` is **pure R** -- no compiled code, no Java runtime, no H2
+database driver, and no system libraries -- so it installs identically on
+**Windows, macOS, and Linux**. The only hard prerequisite is
+**R >= 4.1.0**.
+
+From CRAN (once released):
+
+```r
+install.packages("qviewparsR")
+```
+
+Development version from GitHub:
+
 ```r
 # install.packages("pak")
 pak::pak("CTTIR/qviewparsR")
 ```
+
+Platform notes: on **Windows** no *Rtools* is required (the package
+compiles nothing and its CRAN dependencies arrive as binaries); on
+**macOS** nothing beyond R is needed; on **Linux** the package itself is
+pure R, but a few dependencies (`dplyr`, `readr`, `tidyr`, `openxlsx2`)
+contain C++ and build from source unless you use a binary repository
+(for example the Posit Public Package Manager or r2u), which avoids
+needing a compiler.
 
 The package depends on a small tidyverse-aligned core
 (`cli`, `dplyr`, `lifecycle`, `openxlsx2`, `readr`, `rlang`, `tibble`,
