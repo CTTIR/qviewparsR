@@ -10,11 +10,44 @@ working R installation.
 
 ## Installation
 
+`qviewparsR` is **pure R** — no compiled code, no Java runtime, no H2
+database driver, and no system libraries — so it installs the same way
+on **Windows, macOS, and Linux**. The only hard prerequisite is **R \>=
+4.1.0**.
+
+From CRAN (once released) you get a ready-to-use binary:
+
+``` r
+
+install.packages("qviewparsR")
+```
+
+Or the development version from GitHub:
+
 ``` r
 
 # install.packages("pak")
 pak::pak("CTTIR/qviewparsR")
 ```
+
+### Platform notes
+
+- **Windows** — no *Rtools* required: `qviewparsR` itself compiles
+  nothing, and its CRAN dependencies install as pre-built binaries.
+- **macOS** — nothing beyond R (no XQuartz needed).
+- **Linux** — the package is pure R, but a few dependencies (`dplyr`,
+  `readr`, `tidyr`, `openxlsx2`) contain C++ and build from source
+  unless you use a binary repository such as the [Posit Public Package
+  Manager](https://packagemanager.posit.co) or
+  [r2u](https://eddelbuettel.github.io/r2u/) — which avoids needing a
+  compiler. Otherwise install a build toolchain (e.g. `build-essential`
+  on Debian/Ubuntu).
+
+Installing the package pulls in its required imports automatically. The
+optional features need a few extra packages: plotting uses `ggplot2`
+(plus `patchwork` for the overview figure), and the interactive app
+([`qview_app()`](https://cttir.github.io/qviewparsR/reference/qview_app.md))
+uses `shiny`, `bslib`, and `DT`.
 
 ## Quick start
 
@@ -174,6 +207,24 @@ You can always retrieve the up-to-date entry directly from R:
 
 citation("qviewparsR")
 ```
+
+## Use of LLM tools
+
+Portions of this package were prepared with assistance from large
+language model tooling for narrowly defined, non-authorial tasks:
+copyediting, prose smoothing, Markdown/LaTeX formatting, scaffolding of
+boilerplate files (CI configs, build scripts), code refactoring. The
+tools used were [Chat
+AI](https://kisski.gwdg.de/leistungen/2-02-llm-service/), the LLM
+service of KISSKI (GWDG), and a self-hosted **Mistral Small (24B,
+Apache-2.0)** run locally via [Ollama](https://ollama.com/) and the
+`ollamar` R package — local inference only, with no data sent to third
+parties for the self-hosted model.
+
+All scientific claims, methodological choices, analyses,
+interpretations, and conclusions are the author’s own. No LLM-generated
+text was incorporated without review and revision, and every reference
+was verified against its DOI, arXiv ID, or ISBN.
 
 ## License
 

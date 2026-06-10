@@ -11,11 +11,14 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" sizes="any" href="favicon.ico">
 <link rel="manifest" href="site.webmanifest">
-<script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<script src="lightswitch.js"></script><script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/Inter-0.4.10/font.css" rel="stylesheet">
+<link href="deps/JetBrains_Mono-0.4.10/font.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="qviewparsR">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
+<meta property="og:title" content="qviewparsR">
 <meta name="description" content="Pure-R parser for `.Q-View` binary multiplex ELISA project files.
 ">
 <meta property="og:description" content="Pure-R parser for `.Q-View` binary multiplex ELISA project files.
@@ -26,7 +29,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="index.html">qviewparsR</a>
 
@@ -67,14 +70,32 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
+<p><code>qviewparsR</code> is <strong>pure R</strong> — no compiled code, no Java runtime, no H2 database driver, and no system libraries — so it installs the same way on <strong>Windows, macOS, and Linux</strong>. The only hard prerequisite is <strong>R &gt;= 4.1.0</strong>.</p>
+<p>From CRAN (once released) you get a ready-to-use binary:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"qviewparsR"</span><span class="op">)</span></span></code></pre></div>
+<p>Or the development version from GitHub:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"CTTIR/qviewparsR"</span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="platform-notes">Platform notes<a class="anchor" aria-label="anchor" href="#platform-notes"></a>
+</h3>
+<ul>
+<li>
+<strong>Windows</strong> — no <em>Rtools</em> required: <code>qviewparsR</code> itself compiles nothing, and its CRAN dependencies install as pre-built binaries.</li>
+<li>
+<strong>macOS</strong> — nothing beyond R (no XQuartz needed).</li>
+<li>
+<strong>Linux</strong> — the package is pure R, but a few dependencies (<code>dplyr</code>, <code>readr</code>, <code>tidyr</code>, <code>openxlsx2</code>) contain C++ and build from source unless you use a binary repository such as the <a href="https://packagemanager.posit.co" class="external-link">Posit Public Package Manager</a> or <a href="https://eddelbuettel.github.io/r2u/" class="external-link">r2u</a> — which avoids needing a compiler. Otherwise install a build toolchain (e.g. <code>build-essential</code> on Debian/Ubuntu).</li>
+</ul>
+<p>Installing the package pulls in its required imports automatically. The optional features need a few extra packages: plotting uses <code>ggplot2</code> (plus <code>patchwork</code> for the overview figure), and the interactive app (<code><a href="reference/qview_app.html">qview_app()</a></code>) uses <code>shiny</code>, <code>bslib</code>, and <code>DT</code>.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/CTTIR/qviewparsR" class="external-link">qviewparsR</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">qv</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_qview.html">read_qview</a></span><span class="op">(</span><span class="st">"path/to/project.Q-View"</span><span class="op">)</span></span>
@@ -407,16 +428,22 @@
 <p>Heller R, Mannes M (2026). <em>qviewparsR: Read .Q-View Multiplex ELISA Project Files</em>. R package version 1.0.0. <a href="https://github.com/CTTIR/qviewparsR" class="external-link uri">https://github.com/CTTIR/qviewparsR</a></p>
 </blockquote>
 <p>BibTeX:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="va">@Manual</span>{<span class="ot">qviewparsR</span>,</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="dt">title</span>  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="dt">author</span> = {Raban Heller and Marco Mannes},</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="dt">year</span>   = {2026},</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="dt">note</span>   = {R package version 1.0.0},</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="dt">url</span>    = {https://github.com/CTTIR/qviewparsR}</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="va">@Manual</span>{<span class="ot">qviewparsR</span>,</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="dt">title</span>  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="dt">author</span> = {Raban Heller and Marco Mannes},</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="dt">year</span>   = {2026},</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="dt">note</span>   = {R package version 1.0.0},</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="dt">url</span>    = {https://github.com/CTTIR/qviewparsR}</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>}</span></code></pre></div>
 <p>You can always retrieve the up-to-date entry directly from R:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"qviewparsR"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="use-of-llm-tools">Use of LLM tools<a class="anchor" aria-label="anchor" href="#use-of-llm-tools"></a>
+</h2>
+<p>Portions of this package were prepared with assistance from large language model tooling for narrowly defined, non-authorial tasks: copyediting, prose smoothing, Markdown/LaTeX formatting, scaffolding of boilerplate files (CI configs, build scripts), code refactoring. The tools used were <a href="https://kisski.gwdg.de/leistungen/2-02-llm-service/" class="external-link">Chat AI</a>, the LLM service of KISSKI (GWDG), and a self-hosted <strong>Mistral Small (24B, Apache-2.0)</strong> run locally via <a href="https://ollama.com/" class="external-link">Ollama</a> and the <code>ollamar</code> R package — local inference only, with no data sent to third parties for the self-hosted model.</p>
+<p>All scientific claims, methodological choices, analyses, interpretations, and conclusions are the author’s own. No LLM-generated text was incorporated without review and revision, and every reference was verified against its DOI, arXiv ID, or ISBN.</p>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
@@ -460,6 +487,10 @@
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://github.com/CTTIR/qviewparsR/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/CTTIR/qviewparsR/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://github.com/CTTIR/qviewparsR/actions/workflows/pkgdown.yaml" class="external-link"><img src="https://github.com/CTTIR/qviewparsR/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a></li>
+<li><a href="https://CRAN.R-project.org/package=qviewparsR" class="external-link"><img src="https://www.r-pkg.org/badges/version/qviewparsR" alt="CRAN status"></a></li>
+<li><a href="https://app.codecov.io/gh/CTTIR/qviewparsR?branch=main" class="external-link"><img src="https://codecov.io/gh/CTTIR/qviewparsR/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
 <li><a href="https://opensource.org/licenses/MIT" class="external-link"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a></li>
 </ul>
 </div>

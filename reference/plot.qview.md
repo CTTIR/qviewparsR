@@ -49,3 +49,13 @@ Other qview-methods:
 [`is_qview()`](https://cttir.github.io/qviewparsR/reference/is_qview.md),
 [`print.qview()`](https://cttir.github.io/qviewparsR/reference/print.qview.md),
 [`summary.qview()`](https://cttir.github.io/qviewparsR/reference/summary.qview.md)
+
+## Examples
+
+``` r
+path <- system.file("extdata", "example.Q-View", package = "qviewparsR")
+qv <- read_qview(path, verbose = FALSE)
+plot(qv, type = "plate_map")
+
+plot(qv, type = "replicate_scatter")
+```

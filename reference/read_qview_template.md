@@ -53,7 +53,19 @@ Other qview-reader:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-  layout <- read_qview_template("plate-template.csv")
-} # }
+path <- system.file("extdata", "example-template.csv",
+                    package = "qviewparsR")
+layout <- read_qview_template(path)
+#> ✔ Parsed Q-View template: 96 wells, 19 unique samples from
+#>   /home/runner/work/_temp/Library/qviewparsR/extdata/example-template.csv.
+head(layout)
+#> # A tibble: 6 × 6
+#>   well  plate_row plate_col sample_id group_type dilution
+#>   <chr> <chr>         <int> <chr>     <chr>         <dbl>
+#> 1 A1    A                 1 Cal 1     calibrator       NA
+#> 2 B1    B                 1 Cal 2     calibrator       NA
+#> 3 C1    C                 1 Cal 3     calibrator       NA
+#> 4 D1    D                 1 Cal 4     calibrator       NA
+#> 5 E1    E                 1 Cal 5     calibrator       NA
+#> 6 F1    F                 1 Cal 6     calibrator       NA
 ```

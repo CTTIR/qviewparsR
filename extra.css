@@ -1,0 +1,102 @@
+/* qviewparsR pkgdown — monochrome theme aligned with the Shiny app */
+
+:root {
+  --qv-fg:    #212121;
+  --qv-bg:    #fafafa;
+  --qv-line:  #e0e0e0;
+  --qv-mute:  #666666;
+  --qv-card:  #ffffff;
+  --qv-cap:   #f0f0f0;
+}
+
+body, .navbar, .container, .container-xxl, .container-xl,
+.container-lg, .container-md, .container-sm {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--qv-fg);
+  background: var(--qv-bg);
+}
+
+code, pre, kbd, samp, .pre {
+  font-family: "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: 0.02em;
+  font-weight: 600;
+}
+
+a, a:visited {
+  color: var(--qv-fg);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+a:hover { color: #000000; text-decoration-thickness: 2px; }
+
+.navbar {
+  background: var(--qv-card) !important;
+  border-bottom: 1px solid var(--qv-line);
+}
+.navbar .nav-link, .navbar .navbar-brand { color: var(--qv-fg) !important; }
+.navbar .nav-link.active { font-weight: 600; }
+
+.btn, .btn-primary {
+  background: var(--qv-fg);
+  border-color: var(--qv-fg);
+  color: #ffffff;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+.btn:hover, .btn-primary:hover {
+  background: #000000; border-color: #000000; color: #ffffff;
+}
+.btn-outline-primary {
+  background: transparent; color: var(--qv-fg); border-color: var(--qv-fg);
+}
+.btn-outline-primary:hover { background: var(--qv-fg); color: #ffffff; }
+
+pre, code {
+  background: var(--qv-card);
+  border: 1px solid var(--qv-line);
+  color: var(--qv-fg);
+}
+pre { padding: 0.9rem 1rem; border-radius: 0.25rem; }
+
+table {
+  border-collapse: collapse;
+}
+table th { border-bottom: 1px solid var(--qv-fg) !important; }
+table tr:hover { background: var(--qv-cap); }
+
+.section h1 { border-bottom: 1px solid var(--qv-line); padding-bottom: .35rem; }
+
+.template-home .package-logo, .package-summary img.logo {
+  filter: none;  /* keep the hex untouched */
+}
+
+blockquote {
+  border-left: 3px solid var(--qv-fg);
+  padding: 0.25rem 0.9rem;
+  color: var(--qv-fg);
+  background: var(--qv-card);
+}
+
+/* dark mode (pkgdown 2.x sets data-bs-theme on <html>) */
+[data-bs-theme="dark"] {
+  --qv-fg:#dadada; --qv-bg:#212121; --qv-line:#424242;
+  --qv-mute:#9e9e9e; --qv-card:#2a2a2a; --qv-cap:#1a1a1a;
+}
+[data-bs-theme="dark"] body,
+[data-bs-theme="dark"] .navbar { background: var(--qv-bg); color: var(--qv-fg); }
+[data-bs-theme="dark"] a, [data-bs-theme="dark"] a:visited { color: var(--qv-fg); }
+[data-bs-theme="dark"] .btn-primary, [data-bs-theme="dark"] .btn {
+  background: var(--qv-fg); border-color: var(--qv-fg); color: #1a1a1a;
+}
+[data-bs-theme="dark"] .btn-primary:hover, [data-bs-theme="dark"] .btn:hover {
+  background: #ffffff; border-color: #ffffff; color: #000000;
+}
+[data-bs-theme="dark"] pre, [data-bs-theme="dark"] code {
+  background: var(--qv-cap); border-color: var(--qv-line); color: var(--qv-fg);
+}
+[data-bs-theme="dark"] table tr:hover { background: var(--qv-cap); }

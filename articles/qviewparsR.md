@@ -1,25 +1,36 @@
 # Reading and analysing .Q-View files with qviewparsR
 
-## What this package does
+![qviewparsR hex sticker](../reference/figures/logo.svg)
 
-`qviewparsR` is a pure-R parser for the binary `.Q-View` project file
-format used in chemiluminescent multiplex ELISA plate imaging and
-quantification. A single `.Q-View` file bundles:
+## qviewparsR
 
-- a plain-text manifest header,
-- an embedded H2 SQL database (with project metadata, the analyte panel,
-  plate geometry, sample-to-well assignments, replicate pixel
-  intensities, and – if the user generated a report inside the producing
-  application – a fully rendered CSV report stored as a CLOB), and
-- one or more binary LOB segments holding the raw chemiluminescent plate
-  images.
+Pure-R parser for `.Q-View` multiplex ELISA project files.
 
-[`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md)
-extracts everything except the raw images and returns it as a list of
-tidy tibbles, with no Java runtime, no H2 database driver, and no
-compiled code anywhere in the package.
+A `.Q-View` file is a single-file binary container that bundles a
+plain-text manifest, an embedded H2 SQL database with project metadata /
+analyte panel / sample assignments / replicate pixel intensities (and –
+when generated – a fully rendered CSV report stored as a CLOB), and one
+or more LOB segments holding the raw chemiluminescent plate images.
 
-## Installation
+`qviewparsR` extracts everything except the raw images and returns it as
+tidy tibbles. There is no Java runtime, no H2 database driver, no
+compiled code – all logic is pure R.
+
+### Installation
+
+`qviewparsR` is **pure R** – no compiled code, no Java runtime, no H2
+database driver, and no system libraries – so it installs identically on
+**Windows, macOS, and Linux**. The only hard prerequisite is **R \>=
+4.1.0**.
+
+From CRAN (once released):
+
+``` r
+
+install.packages("qviewparsR")
+```
+
+Development version from GitHub:
 
 ``` r
 
@@ -27,14 +38,20 @@ compiled code anywhere in the package.
 pak::pak("CTTIR/qviewparsR")
 ```
 
-`qviewparsR` requires R \>= 4.1.0 plus a small set of tidyverse-aligned
-dependencies (`cli`, `dplyr`, `lifecycle`, `openxlsx2`, `readr`,
-`rlang`, `tibble`, `tidyr`). Plotting requires `ggplot2` (Suggested);
-the Shiny front-end additionally requires `shiny`, `bslib`, and `DT`.
+Platform notes: on **Windows** no *Rtools* is required (the package
+compiles nothing and its CRAN dependencies arrive as binaries); on
+**macOS** nothing beyond R is needed; on **Linux** the package itself is
+pure R, but a few dependencies (`dplyr`, `readr`, `tidyr`, `openxlsx2`)
+contain C++ and build from source unless you use a binary repository
+(for example the Posit Public Package Manager or r2u), which avoids
+needing a compiler.
 
-## A complete walk-through
+The package depends on a small tidyverse-aligned core (`cli`, `dplyr`,
+`lifecycle`, `openxlsx2`, `readr`, `rlang`, `tibble`, `tidyr`). Plotting
+requires `ggplot2`; the publication overview adds `patchwork`; the Shiny
+front-end adds `shiny`, `bslib`, `DT`, `withr`.
 
-The end-to-end workflow is short:
+### A complete walk-through
 
 ``` r
 
@@ -44,7 +61,7 @@ qv <- read_qview("path/to/plate.Q-View")
 qv                          # one-screen summary
 
 qv$analytes                 # spot_number, analyte, unit, lod, lloq, uloq
-qv$well_groups              # one row per sample/calibrator/control
+qv$well_groups              # one row per sample / calibrator / control
 qv$pixel_intensities        # long-format replicate readings
 qv$summary_statistics       # per-group mean / std-dev / CV rows
 qv$plate_layout             # one row per plate well
@@ -58,11 +75,11 @@ always returns a list of class `qview` with eleven slots described in
 Empty slots are zero-row tibbles rather than `NULL`, so downstream code
 can rely on shape stability.
 
-## The naming convention
+### The naming convention
 
 The producing software rewrites identifiers from the original
-well-assignment template CSV before it stores them. The mapping is
-systematic and reversible:
+well-assignment template before storing them. The mapping is systematic
+and reversible:
 
 | Template value                | Stored as                       |
 |-------------------------------|---------------------------------|
@@ -80,27 +97,21 @@ to apply it across every sample-id column at once:
 
 qv <- read_qview("path/to/plate.Q-View", strip_prefix = TRUE)
 unique(qv$well_groups$sample_id)
-```
-
-The vectorised helper is also useful on its own:
-
-``` r
 
 strip_qview_prefix(c("ICal 1", "GLow", "HHigh", "NFD24277364"))
 #> [1] "Cal 1"      "Low"        "High"       "FD24277364"
 ```
 
-## Coercion and tidy-data idioms
+### Coercion and tidy-data idioms
 
 [`as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)
 returns the long-format `pixel_intensities` table – the primary tabular
-payload – so a parsed object can drop straight into a dplyr / ggplot2
+payload – so a parsed object drops straight into a dplyr / ggplot2
 pipeline:
 
 ``` r
 
 library(dplyr)
-library(tibble)
 
 qv |>
   as_tibble() |>
@@ -110,19 +121,12 @@ qv |>
             .groups = "drop")
 ```
 
+### Visualisation
+
 The
-[`is_qview()`](https://cttir.github.io/qviewparsR/reference/is_qview.md)
-predicate lets package-aware functions guard their inputs:
-
-``` r
-
-is_qview(qv)      # TRUE
-is_qview(list())  # FALSE
-```
-
-## Visualisation
-
-Three quick-look plot types are built in (ggplot2 required):
+[`plot.qview()`](https://cttir.github.io/qviewparsR/reference/plot.qview.md)
+method offers three quick-look views, all coloured on the same viridis
+ramp the Shiny app uses:
 
 ``` r
 
@@ -142,7 +146,7 @@ plot(qv, type = "plate_map") +
   labs(title = NULL, subtitle = "QC overview")
 ```
 
-## Exporting
+### Exporting
 
 Three writers cover the common destinations. All return the parsed
 object invisibly, so they compose with `|>`:
@@ -151,32 +155,30 @@ object invisibly, so they compose with `|>`:
 
 qv |>
   write_qview_xlsx("plate.xlsx") |>      # one sheet per parsed table
-  write_qview_csv ("plate_csv/") |>      # one CSV file per parsed table
+  write_qview_csv ("plate_csv/") |>      # one CSV per parsed table
   write_qview_rds ("plate.rds")          # full lossless R round-trip
 ```
 
-Add `overwrite = TRUE` to
 [`write_qview_xlsx()`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
-/
+and
 [`write_qview_rds()`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
-to replace existing destinations.
+accept `overwrite = TRUE` to replace existing destinations.
 
 The legacy aliases
 [`qview_to_xlsx()`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
 and
 [`qview_to_csv_dir()`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
-still work but are flagged with
-[`lifecycle::deprecate_warn()`](https://lifecycle.r-lib.org/reference/deprecate_soft.html)
-and will be removed in a future release.
+still work but emit
+[`lifecycle::deprecate_warn()`](https://lifecycle.r-lib.org/reference/deprecate_soft.html);
+switch to the new names.
 
-## Cross-validating against a template CSV
+### Cross-validating against a template CSV
 
-Every well assignment is already embedded in the Q-View file. If you
+Every well assignment is already embedded in the `.Q-View` file. If you
 also have the original well-assignment template CSV the producing
 application imported,
 [`read_qview_template()`](https://cttir.github.io/qviewparsR/reference/read_qview_template.md)
-parses it into a tibble that aligns with `qv$plate_layout` for
-cross-validation:
+parses it into a tibble that aligns with `qv$plate_layout`:
 
 ``` r
 
@@ -189,29 +191,34 @@ qv$plate_layout |>
 
 Any rows surviving the filter expose template-vs-Q-View mismatches.
 
-## Interactive front-end
+### Interactive front-end
 
 For non-coding collaborators,
 [`qview_app()`](https://cttir.github.io/qviewparsR/reference/qview_app.md)
-launches a small Shiny application with the same workflow exposed
-visually:
+launches a Shiny app in the same monochrome aesthetic (light + dark
+mode) with the hex sticker in the upper-left corner:
 
 ``` r
 
-qview_app()
+qview_app()             # 512 MB upload cap by default
+qview_app(max_upload_mb = 1024)
 ```
 
-The app accepts a `.Q-View` upload (and optionally a template CSV),
-shows every parsed table and the three plots in tabs, and offers
-one-click downloads as `xlsx`, `rds`, or a zipped CSV directory.
+The app accepts a `.Q-View` upload (and optionally a template CSV) and
+exposes:
 
-## Error handling
+- a publication-ready 2x2 **Overview** figure (plate layout / pixel
+  intensity distribution / replicate concordance / mean PI by well type)
+  with high-DPI PNG and vector PDF export;
+- every parsed table with its own xlsx download;
+- one-click **xlsx / rds / csv-zip** of the whole project;
+- a built-in dark/light toggle and per-card max/restore.
 
-Every exported function validates its inputs early and raises a
-structured
+### Error handling
+
+Every exported function validates inputs early and raises a structured
 [`cli::cli_abort()`](https://cli.r-lib.org/reference/cli_abort.html)
-error that points at the user’s call, not at internal helpers. Typical
-shapes you may see:
+error pointing at the user’s call rather than at internal helpers, e.g.:
 
     Error in `read_qview()`:
     ! `path` must be an existing file.
@@ -222,20 +229,33 @@ shapes you may see:
     x "junk.bin" is missing the expected container header.
     i Expected a numeric container version followed by "Q-View Project".
 
-The messages carry an `i` bullet whenever there is an actionable hint.
+The `i` bullet always carries an actionable hint when one exists.
 
-## Where to go next
+### Citation
 
-- [`?read_qview`](https://cttir.github.io/qviewparsR/reference/read_qview.md)
-  – exhaustive description of every output slot.
-- [`?write_qview`](https://cttir.github.io/qviewparsR/reference/write_qview.md)
-  – the three exporters share one help page.
-- [`?summary.qview`](https://cttir.github.io/qviewparsR/reference/summary.qview.md)
-  – detail on the per-well-type aggregation.
-- [`?qview_app`](https://cttir.github.io/qviewparsR/reference/qview_app.md)
-  – launching the interactive app.
+``` r
 
-The `inst/extdata/` directory does **not** ship a Q-View fixture because
-the binary format is large; instead, the test suite skips cleanly when
-no fixture is present (`tests/testthat/test-read_qview.R` documents the
-lookup paths).
+citation("qviewparsR")
+```
+
+> Heller R, Mannes M (2026). *qviewparsR: Read .Q-View Multiplex ELISA
+> Project Files*. R package version 1.0.0.
+> <https://github.com/CTTIR/qviewparsR>
+
+## Use of LLM tools
+
+Portions of this package were prepared with assistance from large
+language model tooling for narrowly defined, non-authorial tasks:
+copyediting, prose smoothing, Markdown/LaTeX formatting, scaffolding of
+boilerplate files (CI configs, build scripts), code refactoring. The
+tools used were [Chat
+AI](https://kisski.gwdg.de/leistungen/2-02-llm-service/), the LLM
+service of KISSKI (GWDG), and a self-hosted **Mistral Small (24B,
+Apache-2.0)** run locally via [Ollama](https://ollama.com/) and the
+`ollamar` R package — local inference only, with no data sent to third
+parties for the self-hosted model.
+
+All scientific claims, methodological choices, analyses,
+interpretations, and conclusions are the author’s own. No LLM-generated
+text was incorporated without review and revision, and every reference
+was verified against its DOI, arXiv ID, or ISBN.

@@ -124,11 +124,60 @@ Other qview-reader:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-  qv <- read_qview("plate.Q-View")
-  qv
-  qv$analytes
-  qv$pixel_intensities
+# A small synthetic .Q-View ships with the package:
+path <- system.file("extdata", "example.Q-View", package = "qviewparsR")
+qv <- read_qview(path)
+#> ✔ Parsed example.Q-View: 5 well groups x 3 analytes (20 replicate rows).
+#> ℹ Q-View Version: "3.13"
+qv
+#> 
+#> ── Q-View project: "Example ELISA project" ─────────────────────────────────────
+#> • Plate: "Plate 1"
+#> • Image: "example-plate (01 Jan 2024 12:00)"
+#> • Imager: "#000000 (00000)"
+#> • Product: "EXAMPLE-LOT"
+#> • Software: v"3.13"
+#> • Template: "example-template"
+#> • Created: "01 Jan 2024 12:05"
+#> 
+#> ── Analytes (3) ──
+#> 
+#> Ba (ng/ml), Bb (ug/ml), Ref Spot (N/A)
+#> 
+#> ── Well groups (5) ──
+#> 
+#> • standard: 2
+#> • negative: 1
+#> • control: 1
+#> • sample: 1
+#> 
+#> ── Data ──
+#> 
+#> • replicate rows: 20
+#> • summary stat rows: 0
+#> • concentrations: 4 rows
+#> • curve fit: 3 analytes
+qv$analytes
+#> # A tibble: 3 × 8
+#>   spot_number analyte  unit       lod    lloq  uloq assay_control_low
+#>         <int> <chr>    <chr>    <dbl>   <dbl> <dbl>             <dbl>
+#> 1           1 Ba       ng/ml  0.065    0.26    18.9                NA
+#> 2           2 Bb       ug/ml  0.00051  0.0029   0.2                NA
+#> 3           3 Ref Spot N/A   NA       NA       NA                5000
+#> # ℹ 1 more variable: assay_control_high <dbl>
+head(qv$pixel_intensities)
+#> # A tibble: 6 × 8
+#>   well_group sample_id well  replicate analyte unit  pixel_intensity dilution
+#>   <chr>      <chr>     <chr>     <int> <chr>   <chr>           <dbl>    <dbl>
+#> 1 ICal 1     ICal 1    A1            1 Ba      ng/ml            8671       NA
+#> 2 ICal 1     ICal 1    A1            1 Bb      ug/ml           19982       NA
+#> 3 ICal 1     ICal 1    A2            2 Ba      ng/ml           17838       NA
+#> 4 ICal 1     ICal 1    A2            2 Bb      ug/ml           23848       NA
+#> 5 N12345     N12345    A3            1 Ba      ng/ml            1200       NA
+#> 6 N12345     N12345    A3            1 Bb      ug/ml            1300       NA
+
+if (requireNamespace("ggplot2", quietly = TRUE)) {
   plot(qv, type = "plate_map")
-} # }
+}
+
 ```

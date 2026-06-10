@@ -6,6 +6,24 @@ Initial release. Pure-R parser for `.Q-View` binary project files
 (chemiluminescent multiplex ELISA plate imaging and quantification). No
 Java runtime, no H2 database driver, no compiled code.
 
+### Reliability
+
+- [`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md)
+  now resolves the superseded MVCC page versions that the embedded H2
+  container retains. A version truncated at a 2048-byte page boundary
+  (fewer analytes, or a number cut mid-digit) is no longer mistaken for
+  the current reading: for each physical (well, replicate, analyte) the
+  value occurring most often across the committed page copies wins,
+  breaking ties toward the most complete source row. Per-well pixel
+  intensities now match Q-View’s own grid exports to 1e-6, and each well
+  appears once in `plate_layout`.
+- [`read_qview_template()`](https://cttir.github.io/qviewparsR/reference/read_qview_template.md)
+  auto-detects the field separator, so semicolon-delimited
+  (European-locale) and tab-delimited templates parse the same as
+  comma-delimited ones.
+- `plot(type = "replicate_scatter")` no longer errors when a well-group
+  label maps to more than one well; duplicate readings are averaged.
+
 ### Reader
 
 - `read_qview(path, strip_prefix = FALSE)`: parses a `.Q-View` container

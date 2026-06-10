@@ -13,9 +13,9 @@ qview_app(max_upload_mb = 512, ...)
 - max_upload_mb:
 
   Numeric. Maximum upload size per request, in megabytes. Q-View project
-  files routinely exceed Shiny's 5 MB default; this argument bumps the
-  limit for the duration of the running app and restores the previous
-  value on exit. Default `512` MB.
+  files routinely exceed the Shiny upload default of 5 MB; this argument
+  bumps the limit for the duration of the running app and restores the
+  previous value on exit. Default `512` MB.
 
 - ...:
 

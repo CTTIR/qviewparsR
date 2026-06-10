@@ -29,7 +29,9 @@ Other qview-methods:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-  is_qview(read_qview("plate.Q-View"))
-} # }
+path <- system.file("extdata", "example.Q-View", package = "qviewparsR")
+is_qview(read_qview(path, verbose = FALSE))
+#> [1] TRUE
+is_qview(list())
+#> [1] FALSE
 ```
