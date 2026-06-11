@@ -2,7 +2,7 @@
 
 ## Authors
 
-- **Raban Heller**. Author, maintainer, copyright holder.
+- **R. Heller**. Author, maintainer, copyright holder.
   [](https://orcid.org/0000-0001-8006-9742)
 
 - **Marco Mannes**. Author.
@@ -18,7 +18,7 @@ Project Files*. R package version 1.0.0,
 
     @Manual{,
       title = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},
-      author = {Raban Heller and Marco Mannes},
+      author = {R. Heller and Marco Mannes},
       year = {2026},
       note = {R package version 1.0.0},
       url = {https://github.com/CTTIR/qviewparsR},
