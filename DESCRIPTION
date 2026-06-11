@@ -2,7 +2,7 @@ Package: qviewparsR
 Title: Read .Q-View Multiplex ELISA Project Files
 Version: 1.0.0
 Authors@R: c(
-    person("Raban", "Heller",
+    person("R.", "Heller",
            email = "raban.heller@charite.de",
            role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0001-8006-9742")),

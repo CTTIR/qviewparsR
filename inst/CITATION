@@ -4,7 +4,7 @@ bibentry(
   bibtype = "Manual",
   title   = "qviewparsR: Read .Q-View Multiplex ELISA Project Files",
   author  = c(
-    person("Raban", "Heller",
+    person("R.", "Heller",
            comment = c(ORCID = "0000-0001-8006-9742")),
     person("Marco", "Mannes")
   ),
