@@ -53,7 +53,7 @@
     <!-- Well colour key:
          standards col 1-2:  viridis purple  #440154
          standards hi-conc:  viridis yellow  #FDE725
-         samples:            viridis teal    #21908C
+         samples:            viridis teal    #0F6E56
          controls:           viridis green   #35B779
          blank:              dim             #1a2240
          zoom well:          magenta glow    #CC00CC
@@ -64,13 +64,13 @@
     <circle cx="128" cy="175" r="9" fill="#472D7B" opacity="0.9"/>
     <circle cx="156" cy="175" r="9" fill="#3B528B" opacity="0.88"/>
     <circle cx="184" cy="175" r="9" fill="#2C728E" opacity="0.88"/>
-    <circle cx="212" cy="175" r="9" fill="#21908C" opacity="0.9"/>
-    <circle cx="240" cy="175" r="9" fill="#27AD81" opacity="0.9"/>
+    <circle cx="212" cy="175" r="9" fill="#0F6E56" opacity="0.9"/>
+    <circle cx="240" cy="175" r="9" fill="#1D9E75" opacity="0.9"/>
     <circle cx="268" cy="175" r="9" fill="#5DC863" opacity="0.88"/>
     <circle cx="296" cy="175" r="9" fill="#AADC32" opacity="0.88"/>
     <circle cx="324" cy="175" r="9" fill="#FDE725" opacity="0.92"/>  <!-- std high -->
-    <circle cx="352" cy="175" r="9" fill="#21908C" opacity="0.85"/>  <!-- sample -->
-    <circle cx="380" cy="175" r="9" fill="#21908C" opacity="0.85"/>
+    <circle cx="352" cy="175" r="9" fill="#0F6E56" opacity="0.85"/>  <!-- sample -->
+    <circle cx="380" cy="175" r="9" fill="#0F6E56" opacity="0.85"/>
     <circle cx="408" cy="175" r="9" fill="#35B779" opacity="0.85"/>  <!-- ctrl -->
 
     <!-- ROW B -->
@@ -78,39 +78,39 @@
     <circle cx="128" cy="197" r="9" fill="#472D7B" opacity="0.88"/>
     <circle cx="156" cy="197" r="9" fill="#3B528B" opacity="0.85"/>
     <circle cx="184" cy="197" r="9" fill="#2C728E" opacity="0.85"/>
-    <circle cx="212" cy="197" r="9" fill="#21908C" opacity="0.85"/>
-    <circle cx="240" cy="197" r="9" fill="#27AD81" opacity="0.85"/>
+    <circle cx="212" cy="197" r="9" fill="#0F6E56" opacity="0.85"/>
+    <circle cx="240" cy="197" r="9" fill="#1D9E75" opacity="0.85"/>
     <circle cx="268" cy="197" r="9" fill="#5DC863" opacity="0.85"/>
     <circle cx="296" cy="197" r="9" fill="#AADC32" opacity="0.85"/>
     <circle cx="324" cy="197" r="9" fill="#FDE725" opacity="0.88"/>
-    <circle cx="352" cy="197" r="9" fill="#21908C" opacity="0.82"/>
-    <circle cx="380" cy="197" r="9" fill="#21908C" opacity="0.82"/>
+    <circle cx="352" cy="197" r="9" fill="#0F6E56" opacity="0.82"/>
+    <circle cx="380" cy="197" r="9" fill="#0F6E56" opacity="0.82"/>
     <circle cx="408" cy="197" r="9" fill="#35B779" opacity="0.82"/>
 
     <!-- ROW C -->
     <circle cx="100" cy="219" r="9" fill="#1a2240" opacity="0.9"/>  <!-- blank -->
     <circle cx="128" cy="219" r="9" fill="#1a2240" opacity="0.9"/>
-    <circle cx="156" cy="219" r="9" fill="#21908C" opacity="0.85"/>
-    <circle cx="184" cy="219" r="9" fill="#21908C" opacity="0.85"/>
-    <circle cx="212" cy="219" r="9" fill="#21908C" opacity="0.82"/>
-    <circle cx="240" cy="219" r="9" fill="#21908C" opacity="0.82"/>
-    <circle cx="268" cy="219" r="9" fill="#27AD81" opacity="0.82"/>
-    <circle cx="296" cy="219" r="9" fill="#27AD81" opacity="0.8"/>
-    <circle cx="324" cy="219" r="9" fill="#27AD81" opacity="0.8"/>
-    <circle cx="352" cy="219" r="9" fill="#21908C" opacity="0.8"/>
-    <circle cx="380" cy="219" r="9" fill="#21908C" opacity="0.8"/>
+    <circle cx="156" cy="219" r="9" fill="#0F6E56" opacity="0.85"/>
+    <circle cx="184" cy="219" r="9" fill="#0F6E56" opacity="0.85"/>
+    <circle cx="212" cy="219" r="9" fill="#0F6E56" opacity="0.82"/>
+    <circle cx="240" cy="219" r="9" fill="#0F6E56" opacity="0.82"/>
+    <circle cx="268" cy="219" r="9" fill="#1D9E75" opacity="0.82"/>
+    <circle cx="296" cy="219" r="9" fill="#1D9E75" opacity="0.8"/>
+    <circle cx="324" cy="219" r="9" fill="#1D9E75" opacity="0.8"/>
+    <circle cx="352" cy="219" r="9" fill="#0F6E56" opacity="0.8"/>
+    <circle cx="380" cy="219" r="9" fill="#0F6E56" opacity="0.8"/>
     <circle cx="408" cy="219" r="9" fill="#35B779" opacity="0.8"/>
 
     <!-- ROW D -->
     <circle cx="100" cy="241" r="9" fill="#1a2240" opacity="0.9"/>
     <circle cx="128" cy="241" r="9" fill="#1a2240" opacity="0.9"/>
-    <circle cx="156" cy="241" r="9" fill="#21908C" opacity="0.82"/>
-    <circle cx="184" cy="241" r="9" fill="#21908C" opacity="0.82"/>
-    <circle cx="212" cy="241" r="9" fill="#21908C" opacity="0.8"/>
-    <circle cx="240" cy="241" r="9" fill="#21908C" opacity="0.8"/>
-    <circle cx="268" cy="241" r="9" fill="#27AD81" opacity="0.8"/>
-    <circle cx="296" cy="241" r="9" fill="#27AD81" opacity="0.78"/>
-    <circle cx="324" cy="241" r="9" fill="#27AD81" opacity="0.78"/>
+    <circle cx="156" cy="241" r="9" fill="#0F6E56" opacity="0.82"/>
+    <circle cx="184" cy="241" r="9" fill="#0F6E56" opacity="0.82"/>
+    <circle cx="212" cy="241" r="9" fill="#0F6E56" opacity="0.8"/>
+    <circle cx="240" cy="241" r="9" fill="#0F6E56" opacity="0.8"/>
+    <circle cx="268" cy="241" r="9" fill="#1D9E75" opacity="0.8"/>
+    <circle cx="296" cy="241" r="9" fill="#1D9E75" opacity="0.78"/>
+    <circle cx="324" cy="241" r="9" fill="#1D9E75" opacity="0.78"/>
     <circle cx="352" cy="241" r="9" fill="#2C728E" opacity="0.78"/>
     <circle cx="380" cy="241" r="9" fill="#2C728E" opacity="0.78"/>
     <circle cx="408" cy="241" r="9" fill="#35B779" opacity="0.78"/>
@@ -120,10 +120,10 @@
     <circle cx="128" cy="263" r="9" fill="#1a2240" opacity="0.9"/>
     <circle cx="156" cy="263" r="9" fill="#2C728E" opacity="0.8"/>
     <circle cx="184" cy="263" r="9" fill="#2C728E" opacity="0.8"/>
-    <circle cx="212" cy="263" r="9" fill="#21908C" opacity="0.78"/>
-    <circle cx="240" cy="263" r="9" fill="#21908C" opacity="0.78"/>
-    <circle cx="268" cy="263" r="9" fill="#27AD81" opacity="0.78"/>
-    <circle cx="296" cy="263" r="9" fill="#27AD81" opacity="0.75"/>
+    <circle cx="212" cy="263" r="9" fill="#0F6E56" opacity="0.78"/>
+    <circle cx="240" cy="263" r="9" fill="#0F6E56" opacity="0.78"/>
+    <circle cx="268" cy="263" r="9" fill="#1D9E75" opacity="0.78"/>
+    <circle cx="296" cy="263" r="9" fill="#1D9E75" opacity="0.75"/>
     <circle cx="324" cy="263" r="9" fill="#5DC863" opacity="0.75"/>
     <circle cx="352" cy="263" r="9" fill="#2C728E" opacity="0.75"/>
     <circle cx="380" cy="263" r="9" fill="#2C728E" opacity="0.75"/>
@@ -133,42 +133,42 @@
     <circle cx="100" cy="285" r="9" fill="#1a2240" opacity="0.9"/>
     <circle cx="128" cy="285" r="9" fill="#1a2240" opacity="0.9"/>
     <circle cx="156" cy="285" r="9" fill="#2C728E" opacity="0.78"/>
-    <circle cx="184" cy="285" r="9" fill="#21908C" opacity="0.78"/>
-    <circle cx="212" cy="285" r="9" fill="#21908C" opacity="0.75"/>
-    <circle cx="240" cy="285" r="9" fill="#27AD81" opacity="0.75"/>
+    <circle cx="184" cy="285" r="9" fill="#0F6E56" opacity="0.78"/>
+    <circle cx="212" cy="285" r="9" fill="#0F6E56" opacity="0.75"/>
+    <circle cx="240" cy="285" r="9" fill="#1D9E75" opacity="0.75"/>
     <circle cx="268" cy="285" r="9" fill="#5DC863" opacity="0.75"/>
     <circle cx="296" cy="285" r="9" fill="#AADC32" opacity="0.72"/>
     <circle cx="324" cy="285" r="9" fill="#FDE725" opacity="0.75"/>
-    <circle cx="352" cy="285" r="9" fill="#21908C" opacity="0.72"/>
-    <circle cx="380" cy="285" r="9" fill="#21908C" opacity="0.72"/>
+    <circle cx="352" cy="285" r="9" fill="#0F6E56" opacity="0.72"/>
+    <circle cx="380" cy="285" r="9" fill="#0F6E56" opacity="0.72"/>
     <circle cx="408" cy="285" r="9" fill="#35B779" opacity="0.72"/>
 
     <!-- ROW G -->
     <circle cx="100" cy="307" r="9" fill="#1a2240" opacity="0.9"/>
     <circle cx="128" cy="307" r="9" fill="#1a2240" opacity="0.9"/>
-    <circle cx="156" cy="307" r="9" fill="#21908C" opacity="0.75"/>
-    <circle cx="184" cy="307" r="9" fill="#21908C" opacity="0.75"/>
-    <circle cx="212" cy="307" r="9" fill="#27AD81" opacity="0.72"/>
-    <circle cx="240" cy="307" r="9" fill="#27AD81" opacity="0.72"/>
+    <circle cx="156" cy="307" r="9" fill="#0F6E56" opacity="0.75"/>
+    <circle cx="184" cy="307" r="9" fill="#0F6E56" opacity="0.75"/>
+    <circle cx="212" cy="307" r="9" fill="#1D9E75" opacity="0.72"/>
+    <circle cx="240" cy="307" r="9" fill="#1D9E75" opacity="0.72"/>
     <circle cx="268" cy="307" r="9" fill="#5DC863" opacity="0.72"/>
     <circle cx="296" cy="307" r="9" fill="#5DC863" opacity="0.7"/>
     <circle cx="324" cy="307" r="9" fill="#AADC32" opacity="0.7"/>
-    <circle cx="352" cy="307" r="9" fill="#21908C" opacity="0.7"/>
-    <circle cx="380" cy="307" r="9" fill="#21908C" opacity="0.7"/>
+    <circle cx="352" cy="307" r="9" fill="#0F6E56" opacity="0.7"/>
+    <circle cx="380" cy="307" r="9" fill="#0F6E56" opacity="0.7"/>
     <circle cx="408" cy="307" r="9" fill="#35B779" opacity="0.7"/>
 
     <!-- ROW H -->
     <circle cx="100" cy="329" r="9" fill="#1a2240" opacity="0.9"/>
     <circle cx="128" cy="329" r="9" fill="#1a2240" opacity="0.9"/>
-    <circle cx="156" cy="329" r="9" fill="#21908C" opacity="0.72"/>
-    <circle cx="184" cy="329" r="9" fill="#21908C" opacity="0.72"/>
-    <circle cx="212" cy="329" r="9" fill="#27AD81" opacity="0.7"/>
-    <circle cx="240" cy="329" r="9" fill="#27AD81" opacity="0.7"/>
+    <circle cx="156" cy="329" r="9" fill="#0F6E56" opacity="0.72"/>
+    <circle cx="184" cy="329" r="9" fill="#0F6E56" opacity="0.72"/>
+    <circle cx="212" cy="329" r="9" fill="#1D9E75" opacity="0.7"/>
+    <circle cx="240" cy="329" r="9" fill="#1D9E75" opacity="0.7"/>
     <circle cx="268" cy="329" r="9" fill="#5DC863" opacity="0.7"/>
     <circle cx="296" cy="329" r="9" fill="#5DC863" opacity="0.68"/>
     <circle cx="324" cy="329" r="9" fill="#AADC32" opacity="0.68"/>
-    <circle cx="352" cy="329" r="9" fill="#21908C" opacity="0.68"/>
-    <circle cx="380" cy="329" r="9" fill="#21908C" opacity="0.68"/>
+    <circle cx="352" cy="329" r="9" fill="#0F6E56" opacity="0.68"/>
+    <circle cx="380" cy="329" r="9" fill="#0F6E56" opacity="0.68"/>
     <circle cx="408" cy="329" r="9" fill="#35B779" opacity="0.68"/>
 
     <!-- ══════════════════════════════════════════════════════ -->
@@ -191,10 +191,10 @@
     <!-- Spots represent different analytes — chemiluminescent -->
     <!-- Spot colours: viridis teal, yellow, magenta, green, cyan, orange, purple, red, white -->
     <circle cx="159" cy="400" r="7" fill="#440154" opacity="0.9"/>   <!-- A1 -->
-    <circle cx="180" cy="400" r="7" fill="#21908C" opacity="0.92"/>  <!-- A2 -->
+    <circle cx="180" cy="400" r="7" fill="#0F6E56" opacity="0.92"/>  <!-- A2 -->
     <circle cx="201" cy="400" r="7" fill="#FDE725" opacity="0.9"/>   <!-- A3 -->
 
-    <circle cx="159" cy="420" r="7" fill="#27AD81" opacity="0.9"/>   <!-- B1 -->
+    <circle cx="159" cy="420" r="7" fill="#1D9E75" opacity="0.9"/>   <!-- B1 -->
     <circle cx="180" cy="420" r="8" fill="#CC44CC" opacity="0.95"/>  <!-- B2 — hot spot -->
     <circle cx="201" cy="420" r="7" fill="#5DC863" opacity="0.88"/>  <!-- B3 -->
 
@@ -232,17 +232,17 @@
 
     <!-- Arrow -->
     <line x1="345" y1="390" x2="375" y2="390"
-      stroke="#21908C" stroke-width="2" stroke-linecap="round" opacity="0.75"/>
-    <polygon points="372,386 380,390 372,394" fill="#21908C" opacity="0.75"/>
+      stroke="#0F6E56" stroke-width="2" stroke-linecap="round" opacity="0.75"/>
+    <polygon points="372,386 380,390 372,394" fill="#0F6E56" opacity="0.75"/>
     <!-- Crack lines on arrow -->
     <line x1="356" y1="383" x2="362" y2="397" stroke="#FDE725" stroke-width="1.2" opacity="0.6"/>
     <line x1="363" y1="383" x2="357" y2="397" stroke="#FDE725" stroke-width="1" opacity="0.5"/>
 
     <!-- Tidy table icon -->
     <rect x="383" y="372" width="64" height="38" rx="4"
-      fill="#061414" stroke="#21908C" stroke-width="1.2" opacity="0.92"/>
+      fill="#061414" stroke="#0F6E56" stroke-width="1.2" opacity="0.92"/>
     <!-- Table header -->
-    <rect x="385" y="374" width="60" height="8" rx="2" fill="#21908C" opacity="0.35"/>
+    <rect x="385" y="374" width="60" height="8" rx="2" fill="#0F6E56" opacity="0.35"/>
     <text font-family="monospace" font-size="5.5" fill="#80CBC4" opacity="0.8" x="388" y="381">sample analyte value</text>
     <!-- Table rows -->
     <line x1="385" y1="383" x2="445" y2="383" stroke="#1a3a3a" stroke-width="0.7" opacity="0.6"/>
@@ -253,14 +253,14 @@
     <text font-family="monospace" font-size="5"   fill="#3a6a5a" opacity="0.6" x="388" y="406">A02    IL-6    2104</text>
     <!-- tibble label -->
     <text font-family="monospace" font-size="6.5" font-weight="700"
-      fill="#21908C" opacity="0.7" text-anchor="middle" x="415" y="420">tibble</text>
+      fill="#0F6E56" opacity="0.7" text-anchor="middle" x="415" y="420">tibble</text>
 
     <!-- ══════════════════════════════════════════════════════ -->
     <!-- LEGEND — well types, top-right -->
     <!-- ══════════════════════════════════════════════════════ -->
     <circle cx="300" cy="360" r="4.5" fill="#440154" opacity="0.9"/>
     <text font-family="monospace" font-size="6.5" fill="#888899" x="308" y="363">std</text>
-    <circle cx="330" cy="360" r="4.5" fill="#21908C" opacity="0.9"/>
+    <circle cx="330" cy="360" r="4.5" fill="#0F6E56" opacity="0.9"/>
     <text font-family="monospace" font-size="6.5" fill="#888899" x="338" y="363">sample</text>
     <circle cx="382" cy="360" r="4.5" fill="#35B779" opacity="0.9"/>
     <text font-family="monospace" font-size="6.5" fill="#888899" x="390" y="363">ctrl</text>
@@ -269,11 +269,8 @@
 
   <!-- Hex border — viridis teal -->
   <polygon points="250,30 455,145 455,375 250,490 45,375 45,145"
-    fill="none" stroke="#21908C" stroke-width="11" stroke-linejoin="round"/>
+    fill="none" stroke="#0F6E56" stroke-width="11" stroke-linejoin="round"/>
   <polygon points="250,44 441,153 441,367 250,476 59,367 59,153"
-    fill="none" stroke="#27AD81" stroke-width="1.5" stroke-linejoin="round" opacity="0.5"/>
-
-  <!-- Package name -->
-  <text font-family="monospace" font-weight="700" font-size="22"
-    fill="#80CBC4" text-anchor="middle" x="250" y="545" letter-spacing="1">qviewparsR</text>
+    fill="none" stroke="#1D9E75" stroke-width="1.5" stroke-linejoin="round" opacity="0.5"/>
+  
 </svg>
