@@ -22,3 +22,8 @@ Thumbs.db
 .vscode/
 .idea/
 .data/
+*.tmp
+*.log
+*~
+*.bak
+*.orig
