@@ -16,3 +16,4 @@
 ^LICENSE\.md$
 ^revdep$
 ^README\.Rmd$
+^_coverage$
