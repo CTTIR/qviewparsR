@@ -221,11 +221,6 @@ Apache-2.0)** run locally via [Ollama](https://ollama.com/) and the
 `ollamar` R package — local inference only, with no data sent to third
 parties for the self-hosted model.
 
-All scientific claims, methodological choices, analyses,
-interpretations, and conclusions are the author’s own. No LLM-generated
-text was incorporated without review and revision, and every reference
-was verified against its DOI, arXiv ID, or ISBN.
-
 ## License
 
 MIT (c) 2026 Raban Heller.
