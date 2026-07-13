@@ -96,6 +96,7 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 \code{\link[=print.qview]{print.qview()}}, \code{\link[=plot.qview]{plot.qview()}}.
 
 Other qview-reader:
+\code{\link[=read_qview_report]{read_qview_report()}},
 \code{\link[=read_qview_template]{read_qview_template()}}
 }
 \concept{qview-reader}

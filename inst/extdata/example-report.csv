@@ -1,0 +1,19 @@
+Project: Example ELISA project,,,,,,
+Plate: Plate 1,,,,,,
+Image: example-plate (01 Jan 2024 12:00),,,,,,
+Product: EXAMPLE-LOT,,,,,,
+User: Demo,,,,,,
+Report Created: 01 Jan 2024 12:05,,,,,,
+Q-View Version: 3.13,,,,,,
+Well Assignment Template: example-template,,,,,,
+,,,,,,
+Well Group,Statistic,Well,Error Codes,Ba (ng/mL),Bb (ug/mL),Ref Spot (N/A)
+Assay,Upper Limit of Quantification,,,Incalculable,Incalculable,65535
+Lot,Upper Limit of Quantification,,,30.8,0.42,535.9
+Lot,Lower Limit of Quantification,,,0.31,0.003,1.76
+Lot,Limit of Detection,,,0.047,0.00066,1.17
+,,,,,,
+Cal 1,Reduced Concentration (Replicate 1),A1,,27.99,0.41,519
+Cal 1,Reduced Concentration (Replicate 2),A2,,Incalculable High,0.47,519
+N12345,Reduced Concentration,A3,,2.5,0.05,520
+N23456,Reduced Concentration,A4,,< 0.31,> 0.42,521

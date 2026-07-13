@@ -45,6 +45,7 @@ head(layout)
 }
 \seealso{
 Other qview-reader:
-\code{\link[=read_qview]{read_qview()}}
+\code{\link[=read_qview]{read_qview()}},
+\code{\link[=read_qview_report]{read_qview_report()}}
 }
 \concept{qview-reader}
