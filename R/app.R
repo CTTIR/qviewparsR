@@ -517,11 +517,15 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
     filename = function() filename_stamp("_overview.pdf"),
     content  = function(file) {
       p <- rx_overview(); shiny::req(p)
+      # cairo_pdf embeds fonts nicely but is unavailable on some R builds
+      # (e.g. macOS without cairo); fall back to the base pdf device so the
+      # download works everywhere.
+      pdf_device <- if (isTRUE(capabilities("cairo"))) grDevices::cairo_pdf else grDevices::pdf
       ggplot2::ggsave(
         file, p,
         width  = if (is.null(input$plot_w_in)) 12 else input$plot_w_in,
         height = if (is.null(input$plot_h_in)) 9  else input$plot_h_in,
-        units  = "in", device = grDevices::cairo_pdf
+        units  = "in", device = pdf_device
       )
     }
   )
