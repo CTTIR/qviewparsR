@@ -178,7 +178,7 @@ returned object.
 
 | Category | Functions |
 |----------|-----------|
-| Reader | `read_qview()` |
+| Reader | `read_qview()`, `read_qview_report()` |
 | Helpers | `strip_qview_prefix()`, `well_label()` |
 | Optional | `read_qview_template()` |
 | Methods | `print.qview()`, `plot.qview()` |
@@ -191,7 +191,7 @@ returned object.
 If you use `qviewparsR` in academic work, please cite:
 
 > Heller R, Mannes M (2026). _qviewparsR: Read .Q-View Multiplex ELISA
-> Project Files_. R package version 1.0.0.
+> Project Files_. R package version 1.1.0.
 > <https://github.com/CTTIR/qviewparsR>
 
 BibTeX:
@@ -201,7 +201,7 @@ BibTeX:
   title  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},
   author = {Raban Heller and Marco Mannes},
   year   = {2026},
-  note   = {R package version 1.0.0},
+  note   = {R package version 1.1.0},
   url    = {https://github.com/CTTIR/qviewparsR}
 }
 ```

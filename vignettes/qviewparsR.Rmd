@@ -136,6 +136,27 @@ summary(qv)                 # mean / SD / CV per well type x analyte
 slots described in `?read_qview`. Empty slots are zero-row tibbles
 rather than `NULL`, so downstream code can rely on shape stability.
 
+## Reading flat report exports
+
+Sometimes only the flat report Q-View writes next to the binary
+container is kept -- the `..._auto_report` or
+`..._auto_all-parameters_report` file, as `.csv` or `.xlsx`. When the
+original `.Q-View` project is unavailable, `read_qview_report()` parses
+that export and returns the same `qview` object `read_qview()` builds:
+
+```r
+rep <- read_qview_report("path/to/plate_auto_report.csv")
+is_qview(rep)               # TRUE -- same class as read_qview()
+rep$concentrations          # long-format, with an out-of-range `flag`
+```
+
+It differs from `read_qview()` in two deliberate ways: it captures the
+plain `"Reduced Concentration"` point estimate (one row per sample, with
+`statistic == "reduced"`), and it preserves out-of-range cells instead
+of dropping them -- a `"< 52.50"` cell becomes `concentration = 52.50`
+with `flag = "<"` (`">"` for the upper bound, `"incalculable"` for
+`Incalculable`), so limit-of-quantification information survives import.
+
 ## The naming convention
 
 The producing software rewrites identifiers from the original
