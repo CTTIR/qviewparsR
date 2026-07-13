@@ -1,5 +1,28 @@
 # Changelog
 
+## qviewparsR 1.1.0
+
+### New features
+
+- [`read_qview_report()`](https://cttir.github.io/qviewparsR/reference/read_qview_report.md)
+  reads the **flat report exports** Q-View writes next to the binary
+  container – the `..._auto_report` and `..._auto_all-parameters_report`
+  files, as either `.csv` or `.xlsx` – and returns the same `qview`
+  object
+  [`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md)
+  builds. Use it when only the exports were kept and the original
+  `.Q-View` project file is unavailable. It differs from
+  [`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md)
+  in two deliberate ways:
+  - it captures the plain `"Reduced Concentration"` **point estimate**
+    (one row per sample) with `statistic == "reduced"`; and
+  - it **preserves out-of-range cells** instead of dropping them: a
+    `"< 52.50"` cell yields `concentration = 52.50` with a new `flag`
+    column set to `"<"` (`">"` for upper bound, `"incalculable"` for
+    `Incalculable`), so limit-of-quantification information survives
+    import. A small `example-report.csv` fixture ships in
+    `inst/extdata/`.
+
 ## qviewparsR 1.0.0
 
 Initial release. Pure-R parser for `.Q-View` binary project files

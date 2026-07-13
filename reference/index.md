@@ -2,10 +2,12 @@
 
 ## Reader
 
-Parse a Q-View binary project file.
+Parse a Q-View binary project file, or its flat report exports.
 
 - [`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md)
   **\[experimental\]** : Read a .Q-View project file
+- [`read_qview_report()`](https://cttir.github.io/qviewparsR/reference/read_qview_report.md)
+  **\[experimental\]** : Read a Q-View report export (CSV or XLSX)
 
 ## Helpers
 

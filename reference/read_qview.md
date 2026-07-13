@@ -119,6 +119,7 @@ system dependencies beyond a working R installation.
 [`plot.qview()`](https://cttir.github.io/qviewparsR/reference/plot.qview.md).
 
 Other qview-reader:
+[`read_qview_report()`](https://cttir.github.io/qviewparsR/reference/read_qview_report.md),
 [`read_qview_template()`](https://cttir.github.io/qviewparsR/reference/read_qview_template.md)
 
 ## Examples

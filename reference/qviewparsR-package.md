@@ -47,12 +47,12 @@ Useful links:
 
 ## Author
 
-**Maintainer**: Raban Heller <raban.heller@charite.de>
+**Maintainer**: R. Heller <raban.heller@charite.de>
 ([ORCID](https://orcid.org/0000-0001-8006-9742)) \[copyright holder\]
 
 Authors:
 
-- Raban Heller <raban.heller@charite.de>
+- R. Heller <raban.heller@charite.de>
   ([ORCID](https://orcid.org/0000-0001-8006-9742)) \[copyright holder\]
 
-- Marco Mannes
+- Marco Mannes \[copyright holder\]

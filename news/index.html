@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">qviewparsR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,17 @@
       <small>Source: <a href="https://github.com/CTTIR/qviewparsR/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.1.0" id="qviewparsr-110">qviewparsR 1.1.0<a class="anchor" aria-label="anchor" href="#qviewparsr-110"></a></h2>
+<div class="section level3">
+<h3 id="new-features-1-1-0">New features<a class="anchor" aria-label="anchor" href="#new-features-1-1-0"></a></h3>
+<ul><li>
+<code><a href="../reference/read_qview_report.html">read_qview_report()</a></code> reads the <strong>flat report exports</strong> Q-View writes next to the binary container – the <code>..._auto_report</code> and <code>..._auto_all-parameters_report</code> files, as either <code>.csv</code> or <code>.xlsx</code> – and returns the same <code>qview</code> object <code><a href="../reference/read_qview.html">read_qview()</a></code> builds. Use it when only the exports were kept and the original <code>.Q-View</code> project file is unavailable. It differs from <code><a href="../reference/read_qview.html">read_qview()</a></code> in two deliberate ways:
+<ul><li>it captures the plain <code>"Reduced Concentration"</code> <strong>point estimate</strong> (one row per sample) with <code>statistic == "reduced"</code>; and</li>
+<li>it <strong>preserves out-of-range cells</strong> instead of dropping them: a <code>"&lt; 52.50"</code> cell yields <code>concentration = 52.50</code> with a new <code>flag</code> column set to <code>"&lt;"</code> (<code>"&gt;"</code> for upper bound, <code>"incalculable"</code> for <code>Incalculable</code>), so limit-of-quantification information survives import. A small <code>example-report.csv</code> fixture ships in <code>inst/extdata/</code>.</li>
+</ul></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.0" id="qviewparsr-100">qviewparsR 1.0.0<a class="anchor" aria-label="anchor" href="#qviewparsr-100"></a></h2>
 <p>Initial release. Pure-R parser for <code>.Q-View</code> binary project files (chemiluminescent multiplex ELISA plate imaging and quantification). No Java runtime, no H2 database driver, no compiled code.</p>
@@ -95,7 +106,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

@@ -1,4 +1,4 @@
 # License
 
     YEAR: 2026
-    COPYRIGHT HOLDER: Raban Heller
+    COPYRIGHT HOLDER: Raban Heller and Marco Mannes

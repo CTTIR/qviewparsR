@@ -48,7 +48,8 @@ Q-View imports against the original template.
 ## See also
 
 Other qview-reader:
-[`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md)
+[`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md),
+[`read_qview_report()`](https://cttir.github.io/qviewparsR/reference/read_qview_report.md)
 
 ## Examples
 
