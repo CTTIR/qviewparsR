@@ -55,4 +55,4 @@ Authors:
 - R. Heller <raban.heller@charite.de>
   ([ORCID](https://orcid.org/0000-0001-8006-9742)) \[copyright holder\]
 
-- Marco Mannes \[copyright holder\]
+- M. Mannes \[copyright holder\]

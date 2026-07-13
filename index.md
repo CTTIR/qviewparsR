@@ -194,7 +194,7 @@ BibTeX:
 ``` bibtex
 @Manual{qviewparsR,
   title  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},
-  author = {Raban Heller and Marco Mannes},
+  author = {R. Heller and M. Mannes},
   year   = {2026},
   note   = {R package version 1.1.0},
   url    = {https://github.com/CTTIR/qviewparsR}
@@ -223,4 +223,4 @@ parties for the self-hosted model.
 
 ## License
 
-MIT (c) 2026 Raban Heller and Marco Mannes.
+MIT (c) 2026 R. Heller and M. Mannes.
