@@ -46,7 +46,7 @@ The `concentrations` tibble carries one extra column, `flag` (`NA` /
 `report_csv` echoes the full export in file order (metadata preamble,
 blank spacer rows, the analyte header, then the data rows), whereas
 [`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md)'s
-`report_csv` holds only the de-duplicated report data lines.
+`report_csv` holds only the unique report data lines.
 
 ## Details
 
