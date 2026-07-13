@@ -266,7 +266,7 @@ citation("qviewparsR")
 ```
 
 > Heller R, Mannes M (2026). *qviewparsR: Read .Q-View Multiplex ELISA
-> Project Files*. R package version 1.1.0.
+> Project Files*. R package version 1.0.0.
 > <https://github.com/CTTIR/qviewparsR>
 
 ## Use of LLM tools
