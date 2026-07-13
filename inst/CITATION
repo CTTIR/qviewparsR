@@ -1,5 +1,13 @@
 citHeader("To cite qviewparsR in publications, use:")
 
+## `meta` is supplied by R when reading the CITATION (the package DESCRIPTION);
+## fall back to the installed description so citation() also works standalone.
+## Avoid packageVersion(), which errors while the package is not yet installed
+## (e.g. during R CMD check --as-cran incoming-feasibility).
+if (!exists("meta") || is.null(meta)) meta <- packageDescription("qviewparsR")
+vers <- meta[["Version"]]
+if (is.null(vers) || is.na(vers)) vers <- "unknown"
+
 bibentry(
   bibtype = "Manual",
   title   = "qviewparsR: Read .Q-View Multiplex ELISA Project Files",
@@ -9,7 +17,6 @@ bibentry(
     person("Marco", "Mannes")
   ),
   year    = format(Sys.Date(), "%Y"),
-  note    = sprintf("R package version %s",
-                    utils::packageVersion("qviewparsR")),
+  note    = sprintf("R package version %s", vers),
   url     = "https://github.com/CTTIR/qviewparsR"
 )

@@ -39,12 +39,12 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Raban Heller \email{raban.heller@charite.de} (\href{https://orcid.org/0000-0001-8006-9742}{ORCID}) [copyright holder]
+\strong{Maintainer}: R. Heller \email{raban.heller@charite.de} (\href{https://orcid.org/0000-0001-8006-9742}{ORCID}) [copyright holder]
 
 Authors:
 \itemize{
-  \item Raban Heller \email{raban.heller@charite.de} (\href{https://orcid.org/0000-0001-8006-9742}{ORCID}) [copyright holder]
-  \item Marco Mannes
+  \item R. Heller \email{raban.heller@charite.de} (\href{https://orcid.org/0000-0001-8006-9742}{ORCID}) [copyright holder]
+  \item Marco Mannes [copyright holder]
 }
 
 }

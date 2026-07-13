@@ -223,4 +223,4 @@ third parties for the self-hosted model.
 
 ## License
 
-MIT (c) 2026 Raban Heller.
+MIT (c) 2026 Raban Heller and Marco Mannes.

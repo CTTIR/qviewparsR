@@ -1,5 +1,6 @@
 ---
 title: "Reading and analysing .Q-View files with qviewparsR"
+author: "R. Heller and M. Mannes"
 output:
   rmarkdown::html_vignette:
     css: null

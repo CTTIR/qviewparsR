@@ -17,9 +17,10 @@ home:
 
 reference:
   - title: Reader
-    desc: Parse a Q-View binary project file.
+    desc: Parse a Q-View binary project file, or its flat report exports.
     contents:
       - read_qview
+      - read_qview_report
 
   - title: Helpers
     desc: Naming convention and plate-coordinate utilities.
