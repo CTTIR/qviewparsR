@@ -30,8 +30,7 @@ The \code{concentrations} tibble carries one extra column, \code{flag}
 (\code{NA} / \code{"<"} / \code{">"} / \code{"incalculable"}), relative to \code{\link[=read_qview]{read_qview()}}.
 \code{report_csv} echoes the full export in file order (metadata preamble,
 blank spacer rows, the analyte header, then the data rows), whereas
-\code{\link[=read_qview]{read_qview()}}'s \code{report_csv} holds only the de-duplicated report data
-lines.
+\code{\link[=read_qview]{read_qview()}}'s \code{report_csv} holds only the unique report data lines.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}

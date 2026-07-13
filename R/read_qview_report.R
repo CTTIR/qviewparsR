@@ -39,8 +39,7 @@
 #'   (`NA` / `"<"` / `">"` / `"incalculable"`), relative to [read_qview()].
 #'   `report_csv` echoes the full export in file order (metadata preamble,
 #'   blank spacer rows, the analyte header, then the data rows), whereas
-#'   [read_qview()]'s `report_csv` holds only the de-duplicated report data
-#'   lines.
+#'   [read_qview()]'s `report_csv` holds only the unique report data lines.
 #'
 #' @examples
 #' path <- system.file("extdata", "example-report.csv",
