@@ -17,3 +17,4 @@
 ^revdep$
 ^README\.Rmd$
 ^_coverage$
+^vignettes/qviewparsR\.R$

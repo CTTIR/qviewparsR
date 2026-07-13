@@ -20,6 +20,12 @@ identifiers, analyte panel, well-group counts by type, and whether
 the embedded report carries quantitative concentrations or only
 qualitative pixel intensities.
 }
+\examples{
+qv <- read_qview(system.file("extdata", "example.Q-View",
+                             package = "qviewparsR"), verbose = FALSE)
+print(qv)
+
+}
 \seealso{
 Other qview-methods:
 \code{\link[=as_tibble.qview]{as_tibble.qview()}},

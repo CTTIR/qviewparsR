@@ -28,6 +28,11 @@ is_qview <- function(x) inherits(x, "qview")
 #'
 #' @return `x`, invisibly.
 #'
+#' @examples
+#' qv <- read_qview(system.file("extdata", "example.Q-View",
+#'                              package = "qviewparsR"), verbose = FALSE)
+#' print(qv)
+#'
 #' @family qview-methods
 #'
 #' @export
