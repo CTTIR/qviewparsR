@@ -173,7 +173,7 @@ returns a list with class `qview`:
 
 | Category | Functions |
 |----|----|
-| Reader | [`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md) |
+| Reader | [`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md), [`read_qview_report()`](https://cttir.github.io/qviewparsR/reference/read_qview_report.md) |
 | Helpers | [`strip_qview_prefix()`](https://cttir.github.io/qviewparsR/reference/strip_qview_prefix.md), [`well_label()`](https://cttir.github.io/qviewparsR/reference/well_label.md) |
 | Optional | [`read_qview_template()`](https://cttir.github.io/qviewparsR/reference/read_qview_template.md) |
 | Methods | [`print.qview()`](https://cttir.github.io/qviewparsR/reference/print.qview.md), [`plot.qview()`](https://cttir.github.io/qviewparsR/reference/plot.qview.md) |
@@ -186,7 +186,7 @@ returns a list with class `qview`:
 If you use `qviewparsR` in academic work, please cite:
 
 > Heller R, Mannes M (2026). *qviewparsR: Read .Q-View Multiplex ELISA
-> Project Files*. R package version 1.0.0.
+> Project Files*. R package version 1.1.0.
 > <https://github.com/CTTIR/qviewparsR>
 
 BibTeX:
@@ -196,7 +196,7 @@ BibTeX:
   title  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},
   author = {Raban Heller and Marco Mannes},
   year   = {2026},
-  note   = {R package version 1.0.0},
+  note   = {R package version 1.1.0},
   url    = {https://github.com/CTTIR/qviewparsR}
 }
 ```
