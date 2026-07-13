@@ -17,8 +17,7 @@ read_qview_report(
 
 - path:
 
-  Character. Path to a Q-View report export (`.csv`, `.xlsx`, or
-  `.xls`).
+  Character. Path to a Q-View report export (`.csv` or `.xlsx`).
 
 - strip_prefix:
 
@@ -37,13 +36,17 @@ read_qview_report(
 
 ## Value
 
-A list with class `"qview"`, structured exactly as the
+A list with class `"qview"`, structured as the
 [`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md)
-return value. Container-only slots (`manifest`, `segments`) are zero-row
-tibbles; `metadata$container_version` is `NA`. The `concentrations`
-tibble carries one extra column, `flag` (`NA` / `"<"` / `">"` /
-`"incalculable"`), relative to
+return value, with these deviations. Container-only slots (`manifest`,
+`segments`) are zero-row tibbles; `metadata$container_version` is `NA`.
+The `concentrations` tibble carries one extra column, `flag` (`NA` /
+`"<"` / `">"` / `"incalculable"`), relative to
 [`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md).
+`report_csv` echoes the full export in file order (metadata preamble,
+blank spacer rows, the analyte header, then the data rows), whereas
+[`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md)'s
+`report_csv` holds only the de-duplicated report data lines.
 
 ## Details
 
