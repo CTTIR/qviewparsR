@@ -25,19 +25,22 @@
 #'     `flag = NA`.
 #' }
 #'
-#' @param path Character. Path to a Q-View report export (`.csv`, `.xlsx`,
-#'   or `.xls`).
+#' @param path Character. Path to a Q-View report export (`.csv` or `.xlsx`).
 #' @param strip_prefix Logical. If `TRUE`, reverse Q-View's internal naming
 #'   convention via [strip_qview_prefix()]. Default `FALSE`.
 #' @param verbose Logical. Print a short summary after parsing. Default `TRUE`.
 #' @param call The execution environment of the calling function. Used for
 #'   error reporting; experts only.
 #'
-#' @return A list with class `"qview"`, structured exactly as the
-#'   [read_qview()] return value. Container-only slots (`manifest`,
+#' @return A list with class `"qview"`, structured as the [read_qview()]
+#'   return value, with these deviations. Container-only slots (`manifest`,
 #'   `segments`) are zero-row tibbles; `metadata$container_version` is `NA`.
 #'   The `concentrations` tibble carries one extra column, `flag`
 #'   (`NA` / `"<"` / `">"` / `"incalculable"`), relative to [read_qview()].
+#'   `report_csv` echoes the full export in file order (metadata preamble,
+#'   blank spacer rows, the analyte header, then the data rows), whereas
+#'   [read_qview()]'s `report_csv` holds only the de-duplicated report data
+#'   lines.
 #'
 #' @examples
 #' path <- system.file("extdata", "example-report.csv",
@@ -140,13 +143,7 @@ read_qview_report <- function(path,
 
 .qv_read_export_rows <- function(path, call = rlang::caller_env()) {
   ext <- tolower(tools::file_ext(path))
-  if (ext %in% c("xlsx", "xls")) {
-    if (!requireNamespace("openxlsx2", quietly = TRUE)) {
-      cli::cli_abort(
-        c("Reading an {.val {ext}} export needs the {.pkg openxlsx2} package.",
-          "i" = "Install it, or pass the {.val .csv} export instead."),
-        call = call)
-    }
+  if (ext == "xlsx") {
     m <- openxlsx2::wb_to_df(
       openxlsx2::wb_load(path), sheet = 1L, col_names = FALSE,
       skip_empty_rows = FALSE, skip_empty_cols = FALSE)
@@ -232,7 +229,7 @@ read_qview_report <- function(path,
   n <- nrow(out)
   numify <- function(f) suppressWarnings(as.numeric(.qv_value_number(f[-seq_len(4L)][seq_len(n)])))
   vals <- list()
-  for (i in seq(hdr_idx + 1L, length(rows))) {
+  for (i in seq_len(length(rows) - hdr_idx) + hdr_idx) {
     f <- rows[[i]]
     if (length(f) < 4L) { if (length(f) == 0L || !nzchar(paste(f, collapse = ""))) break else next }
     if (nzchar(f[[1L]])) section <- f[[1L]]
@@ -290,7 +287,7 @@ read_qview_report <- function(path,
   current_group <- NA_character_
   acc <- list()
   csv_lines <- character()
-  for (i in seq(hdr_idx + 1L, length(rows))) {
+  for (i in seq_len(length(rows) - hdr_idx) + hdr_idx) {
     f <- rows[[i]]
     if (length(f) < 4L) next
     csv_lines <- c(csv_lines, paste(f, collapse = ","))
@@ -302,9 +299,14 @@ read_qview_report <- function(path,
     if (length(values) == 0L) next
     info <- .qv_classify_statistic(statistic_raw)
     if (is.na(info$family)) next
-    # plain point estimate (e.g. "Reduced Concentration", "Pixel Intensity"):
-    # family set but no Average/StdDev/CV/Replicate qualifier -> the reduced value
-    if (is.na(info$kind)) info$kind <- "reduced"
+    # Plain point estimate: only "Reduced Concentration" (the value the exports
+    # headline) is captured, as statistic == "reduced". Other unqualified rows
+    # (Theoretical / Backfit / Expected Concentration, bare Pixel Intensity) are
+    # dropped -- matching read_qview(), which skips NA-kind rows -- so the two
+    # readers stay consistent and no duplicate (well, analyte) keys appear.
+    if (is.na(info$kind)) {
+      if (grepl("^Reduced Concentration", statistic_raw)) info$kind <- "reduced" else next
+    }
     if (length(values) >= n) values <- values[seq_len(n)] else length(values) <- n
     cells <- lapply(values, .qv_parse_value_cell)
     acc[[length(acc) + 1L]] <- tibble::tibble(

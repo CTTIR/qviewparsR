@@ -12,8 +12,7 @@ read_qview_report(
 )
 }
 \arguments{
-\item{path}{Character. Path to a Q-View report export (\code{.csv}, \code{.xlsx},
-or \code{.xls}).}
+\item{path}{Character. Path to a Q-View report export (\code{.csv} or \code{.xlsx}).}
 
 \item{strip_prefix}{Logical. If \code{TRUE}, reverse Q-View's internal naming
 convention via \code{\link[=strip_qview_prefix]{strip_qview_prefix()}}. Default \code{FALSE}.}
@@ -24,11 +23,15 @@ convention via \code{\link[=strip_qview_prefix]{strip_qview_prefix()}}. Default 
 error reporting; experts only.}
 }
 \value{
-A list with class \code{"qview"}, structured exactly as the
-\code{\link[=read_qview]{read_qview()}} return value. Container-only slots (\code{manifest},
+A list with class \code{"qview"}, structured as the \code{\link[=read_qview]{read_qview()}}
+return value, with these deviations. Container-only slots (\code{manifest},
 \code{segments}) are zero-row tibbles; \code{metadata$container_version} is \code{NA}.
 The \code{concentrations} tibble carries one extra column, \code{flag}
 (\code{NA} / \code{"<"} / \code{">"} / \code{"incalculable"}), relative to \code{\link[=read_qview]{read_qview()}}.
+\code{report_csv} echoes the full export in file order (metadata preamble,
+blank spacer rows, the analyte header, then the data rows), whereas
+\code{\link[=read_qview]{read_qview()}}'s \code{report_csv} holds only the de-duplicated report data
+lines.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
