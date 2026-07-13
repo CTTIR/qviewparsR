@@ -353,11 +353,11 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
       ),
       shiny::h3("Authors"),
       shiny::tags$ul(
-        shiny::tags$li("Raban Heller (aut, cre, cph)"),
-        shiny::tags$li("Marco Mannes (aut)")
+        shiny::tags$li("R. Heller (aut, cre, cph)"),
+        shiny::tags$li("M. Mannes (aut, cph)")
       ),
       shiny::h3("License"),
-      shiny::p("MIT (c) 2026 Raban Heller. See ",
+      shiny::p("MIT (c) 2026 R. Heller and M. Mannes. See ",
                shiny::tags$code("LICENSE"), " in the repository."),
       shiny::h3("Project links"),
       shiny::tags$ul(
@@ -382,15 +382,15 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
       shiny::tags$blockquote(
         "Heller R, Mannes M (2026). ",
         shiny::tags$em("qviewparsR: Read .Q-View Multiplex ELISA Project Files. "),
-        "R package version 1.0.0. https://github.com/CTTIR/qviewparsR"
+        "R package version 1.1.0. https://github.com/CTTIR/qviewparsR"
       ),
       shiny::h4("BibTeX"),
       shiny::tags$pre(
 "@Manual{qviewparsR,
   title  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},
-  author = {Raban Heller and Marco Mannes},
+  author = {R. Heller and M. Mannes},
   year   = {2026},
-  note   = {R package version 1.0.0},
+  note   = {R package version 1.1.0},
   url    = {https://github.com/CTTIR/qviewparsR}
 }"
       ),

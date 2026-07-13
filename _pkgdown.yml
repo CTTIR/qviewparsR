@@ -60,7 +60,7 @@ articles:
     contents:
       - qviewparsR
 
-navbar:
-  structure:
-    left:  [intro, reference, articles, news]
-    right: [search, github]
+# navbar (with themakR's far-right dark/light `lightswitch`), footer, and home
+# sidebar are inherited from themakR via `template: package: themakR`. Do NOT
+# re-declare `navbar:` here -- overriding its structure drops the `lightswitch`
+# component and disables the dark/light toggle.
