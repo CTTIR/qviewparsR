@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">qviewparsR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,9 +38,9 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.0.0" id="qviewparsr-100">qviewparsR 1.0.0<a class="anchor" aria-label="anchor" href="#qviewparsr-100"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.1.9" id="qviewparsr-019">qviewparsR 0.1.9<a class="anchor" aria-label="anchor" href="#qviewparsr-019"></a></h2>
 <div class="section level3">
-<h3 id="new-features-1-0-0">New features<a class="anchor" aria-label="anchor" href="#new-features-1-0-0"></a></h3>
+<h3 id="new-features-0-1-9">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-9"></a></h3>
 <ul><li>
 <code><a href="../reference/read_qview_report.html">read_qview_report()</a></code> reads the <strong>flat report exports</strong> Q-View writes next to the binary container – the <code>..._auto_report</code> and <code>..._auto_all-parameters_report</code> files, as either <code>.csv</code> or <code>.xlsx</code> – and returns the same <code>qview</code> object <code><a href="../reference/read_qview.html">read_qview()</a></code> builds. Use it when only the exports were kept and the original <code>.Q-View</code> project file is unavailable. It differs from <code><a href="../reference/read_qview.html">read_qview()</a></code> in two deliberate ways:
 <ul><li>it captures the plain <code>"Reduced Concentration"</code> <strong>point estimate</strong> (one row per sample) with <code>statistic == "reduced"</code>; and</li>
@@ -49,10 +49,10 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.0.0" id="qviewparsr-100-1">qviewparsR 1.0.0<a class="anchor" aria-label="anchor" href="#qviewparsr-100-1"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.1.9" id="qviewparsr-019-1">qviewparsR 0.1.9<a class="anchor" aria-label="anchor" href="#qviewparsr-019-1"></a></h2>
 <p>Initial release. Pure-R parser for <code>.Q-View</code> binary project files (chemiluminescent multiplex ELISA plate imaging and quantification). No Java runtime, no H2 database driver, no compiled code.</p>
 <div class="section level3">
-<h3 id="reliability-1-0-0">Reliability<a class="anchor" aria-label="anchor" href="#reliability-1-0-0"></a></h3>
+<h3 id="reliability-0-1-9">Reliability<a class="anchor" aria-label="anchor" href="#reliability-0-1-9"></a></h3>
 <ul><li>
 <code><a href="../reference/read_qview.html">read_qview()</a></code> now resolves the superseded MVCC page versions that the embedded H2 container retains. A version truncated at a 2048-byte page boundary (fewer analytes, or a number cut mid-digit) is no longer mistaken for the current reading: for each physical (well, replicate, analyte) the value occurring most often across the committed page copies wins, breaking ties toward the most complete source row. Per-well pixel intensities now match Q-View’s own grid exports to 1e-6, and each well appears once in <code>plate_layout</code>.</li>
 <li>
@@ -61,21 +61,21 @@
 <code>plot(type = "replicate_scatter")</code> no longer errors when a well-group label maps to more than one well; duplicate readings are averaged.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="reader-1-0-0">Reader<a class="anchor" aria-label="anchor" href="#reader-1-0-0"></a></h3>
+<h3 id="reader-0-1-9">Reader<a class="anchor" aria-label="anchor" href="#reader-0-1-9"></a></h3>
 <ul><li>
 <code>read_qview(path, strip_prefix = FALSE)</code>: parses a <code>.Q-View</code> container and returns a list of class <code>qview</code> with project metadata, the analyte panel (units, LOD / LLOQ / ULOQ, assay-control range), well-group sample assignments, per-well replicate pixel intensities, summary statistics, optional back-calculated concentrations, curve fits, and a plate layout (all tidy tibbles).</li>
 <li>
 <code><a href="../reference/read_qview_template.html">read_qview_template()</a></code>: parses the companion well-assignment template CSV (NxM layout with Group Name / Group Type / Dilution Factor sections).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="helpers-1-0-0">Helpers<a class="anchor" aria-label="anchor" href="#helpers-1-0-0"></a></h3>
+<h3 id="helpers-0-1-9">Helpers<a class="anchor" aria-label="anchor" href="#helpers-0-1-9"></a></h3>
 <ul><li>
 <code><a href="../reference/strip_qview_prefix.html">strip_qview_prefix()</a></code>: reverses the producer-side naming convention (<code>ICal N</code> -&gt; <code>Cal N</code>, <code>GLow</code> -&gt; <code>Low</code>, <code>HHigh</code> -&gt; <code>High</code>, <code>NFD...</code> / <code>N1234...</code> -&gt; original sample ID).</li>
 <li>
 <code><a href="../reference/well_label.html">well_label()</a></code>: vectorised plate-coordinate helper.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="methods-1-0-0">Methods<a class="anchor" aria-label="anchor" href="#methods-1-0-0"></a></h3>
+<h3 id="methods-0-1-9">Methods<a class="anchor" aria-label="anchor" href="#methods-0-1-9"></a></h3>
 <ul><li>
 <code><a href="../reference/is_qview.html">is_qview()</a></code>: predicate for the S3 class.</li>
 <li>
@@ -88,12 +88,12 @@
 <code><a href="../reference/as_tibble.qview.html">as_tibble.qview()</a></code>: long-format pixel-intensity tibble.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="export-1-0-0">Export<a class="anchor" aria-label="anchor" href="#export-1-0-0"></a></h3>
+<h3 id="export-0-1-9">Export<a class="anchor" aria-label="anchor" href="#export-0-1-9"></a></h3>
 <ul><li>
 <code><a href="../reference/write_qview.html">write_qview_xlsx()</a></code>, <code><a href="../reference/write_qview.html">write_qview_csv()</a></code>, <code><a href="../reference/write_qview.html">write_qview_rds()</a></code>: pipe-friendly writers that return the parsed object invisibly. <code><a href="../reference/write_qview.html">qview_to_xlsx()</a></code> / <code><a href="../reference/write_qview.html">qview_to_csv_dir()</a></code> are kept as <code><a href="https://lifecycle.r-lib.org/reference/deprecate_soft.html" class="external-link">lifecycle::deprecate_warn()</a></code> aliases for back-compatibility.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="interactive-front-end-1-0-0">Interactive front-end<a class="anchor" aria-label="anchor" href="#interactive-front-end-1-0-0"></a></h3>
+<h3 id="interactive-front-end-0-1-9">Interactive front-end<a class="anchor" aria-label="anchor" href="#interactive-front-end-0-1-9"></a></h3>
 <ul><li>
 <code><a href="../reference/qview_app.html">qview_app()</a></code>: monochrome bslib Shiny app with built-in dark/light toggle, hex-sticker brand, large upload cap (default 512 MB), per-table xlsx download, and a publication-ready 2x2 Overview tab (plate layout / pixel-intensity distribution / replicate concordance / mean PI by well type) with high-DPI PNG and vector PDF export.</li>
 </ul></div>
