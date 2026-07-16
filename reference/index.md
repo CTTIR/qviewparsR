@@ -32,6 +32,9 @@ Print, summarise, plot, and coerce a parsed `qview` object.
 - [`print(`*`<qview>`*`)`](https://cttir.github.io/qviewparsR/reference/print.qview.md)
   : Print a Q-View object
 
+- [`print(`*`<qview_summary>`*`)`](https://cttir.github.io/qviewparsR/reference/print.qview_summary.md)
+  **\[experimental\]** : Print a qview_summary object
+
 - [`summary(`*`<qview>`*`)`](https://cttir.github.io/qviewparsR/reference/summary.qview.md)
   : Summary statistics for a Q-View object
 

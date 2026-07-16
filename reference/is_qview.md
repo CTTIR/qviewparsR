@@ -24,6 +24,7 @@ Other qview-methods:
 [`as_tibble.qview()`](https://cttir.github.io/qviewparsR/reference/as_tibble.qview.md),
 [`plot.qview()`](https://cttir.github.io/qviewparsR/reference/plot.qview.md),
 [`print.qview()`](https://cttir.github.io/qviewparsR/reference/print.qview.md),
+[`print.qview_summary()`](https://cttir.github.io/qviewparsR/reference/print.qview_summary.md),
 [`summary.qview()`](https://cttir.github.io/qviewparsR/reference/summary.qview.md)
 
 ## Examples

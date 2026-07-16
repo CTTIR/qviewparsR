@@ -1,23 +1,20 @@
-# Summary statistics for a Q-View object
+# Print a qview_summary object
 
-Per-analyte mean, standard deviation, and coefficient of variation
-(`sd / mean`) of pixel intensities, by well-group type. Calibrator /
-standard wells are reported separately so calibration variability is
-easy to inspect.
+**\[experimental\]**
 
 ## Usage
 
 ``` r
-# S3 method for class 'qview'
-summary(object, ...)
+# S3 method for class 'qview_summary'
+print(x, ...)
 ```
 
 ## Arguments
 
-- object:
+- x:
 
-  A `qview` object returned by
-  [`read_qview()`](https://cttir.github.io/qviewparsR/reference/read_qview.md).
+  A `qview_summary` object returned by
+  [`summary.qview()`](https://cttir.github.io/qviewparsR/reference/summary.qview.md).
 
 - ...:
 
@@ -25,10 +22,7 @@ summary(object, ...)
 
 ## Value
 
-A
-[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
-with one row per `well_type` x `analyte` combination, columns:
-`well_type`, `analyte`, `unit`, `n`, `mean`, `sd`, `cv`, `min`, `max`.
+`x`, invisibly.
 
 ## See also
 
@@ -37,7 +31,7 @@ Other qview-methods:
 [`is_qview()`](https://cttir.github.io/qviewparsR/reference/is_qview.md),
 [`plot.qview()`](https://cttir.github.io/qviewparsR/reference/plot.qview.md),
 [`print.qview()`](https://cttir.github.io/qviewparsR/reference/print.qview.md),
-[`print.qview_summary()`](https://cttir.github.io/qviewparsR/reference/print.qview_summary.md)
+[`summary.qview()`](https://cttir.github.io/qviewparsR/reference/summary.qview.md)
 
 ## Examples
 

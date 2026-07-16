@@ -1,6 +1,6 @@
 # Changelog
 
-## qviewparsR 1.0.0
+## qviewparsR 0.1.8
 
 ### New features
 
@@ -23,7 +23,7 @@
     import. A small `example-report.csv` fixture ships in
     `inst/extdata/`.
 
-## qviewparsR 1.0.0
+## qviewparsR 0.1.8
 
 Initial release. Pure-R parser for `.Q-View` binary project files
 (chemiluminescent multiplex ELISA plate imaging and quantification). No
