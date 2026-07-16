@@ -33,6 +33,7 @@ Other qview-methods:
 \code{\link[=as_tibble.qview]{as_tibble.qview()}},
 \code{\link[=is_qview]{is_qview()}},
 \code{\link[=plot.qview]{plot.qview()}},
-\code{\link[=print.qview]{print.qview()}}
+\code{\link[=print.qview]{print.qview()}},
+\code{\link[=print.qview_summary]{print.qview_summary()}}
 }
 \concept{qview-methods}

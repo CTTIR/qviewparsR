@@ -134,6 +134,22 @@ summary.qview <- function(object, ...) {
 }
 
 
+#' Print a qview_summary object
+#'
+#' @description
+#' `r lifecycle::badge("experimental")`
+#'
+#' @param x A `qview_summary` object returned by [summary.qview()].
+#' @param ... Unused; for S3 generic compatibility.
+#'
+#' @return `x`, invisibly.
+#'
+#' @examples
+#' path <- system.file("extdata", "example.Q-View", package = "qviewparsR")
+#' qv <- read_qview(path, verbose = FALSE)
+#' summary(qv)
+#'
+#' @family qview-methods
 #' @export
 print.qview_summary <- function(x, ...) {
   rlang::check_dots_empty()
