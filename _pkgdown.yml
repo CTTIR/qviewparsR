@@ -34,6 +34,7 @@ reference:
     contents:
       - is_qview
       - print.qview
+      - print.qview_summary
       - summary.qview
       - plot.qview
       - as_tibble.qview
