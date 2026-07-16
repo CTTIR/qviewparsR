@@ -1,6 +1,6 @@
 #' Reverse the Q-View internal naming convention
 #'
-#' `r lifecycle::badge("experimental")`
+#' `r lifecycle::badge("stable")`
 #'
 #' On import, the producing software prefixes well-assignment template names
 #' with single-letter codes:

@@ -12,7 +12,7 @@
 #' the original template.
 #'
 #' @description
-#' `r lifecycle::badge("experimental")`
+#' `r lifecycle::badge("stable")`
 #'
 #' @param path Path to the template file (csv).
 #' @param verbose Logical. Print a short summary after parsing.

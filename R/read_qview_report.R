@@ -1,6 +1,6 @@
 #' Read a Q-View report export (CSV or XLSX)
 #'
-#' `r lifecycle::badge("experimental")`
+#' `r lifecycle::badge("stable")`
 #'
 #' Parses one of the flat report files Q-View exports next to the native
 #' `.Q-View` container -- the `..._auto_report` or

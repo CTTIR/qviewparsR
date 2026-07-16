@@ -1,6 +1,6 @@
 #' Read a .Q-View project file
 #'
-#' `r lifecycle::badge("experimental")`
+#' `r lifecycle::badge("stable")`
 #'
 #' Parses a `.Q-View` binary container (a chemiluminescent multiplex
 #' ELISA project file holding an embedded H2 database plus binary LOB

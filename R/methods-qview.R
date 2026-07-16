@@ -1,6 +1,6 @@
 #' Test whether an object is a `qview`
 #'
-#' `r lifecycle::badge("experimental")`
+#' `r lifecycle::badge("stable")`
 #'
 #' @param x An object to test.
 #'
@@ -137,7 +137,7 @@ summary.qview <- function(object, ...) {
 #' Print a qview_summary object
 #'
 #' @description
-#' `r lifecycle::badge("experimental")`
+#' `r lifecycle::badge("stable")`
 #'
 #' @param x A `qview_summary` object returned by [summary.qview()].
 #' @param ... Unused; for S3 generic compatibility.

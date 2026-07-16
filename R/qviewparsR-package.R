@@ -1,7 +1,7 @@
 #' qviewparsR: Read .Q-View Multiplex ELISA Project Files
 #'
 #' @description
-#' `r lifecycle::badge("experimental")`
+#' `r lifecycle::badge("stable")`
 #'
 #' Pure-R parser for `.Q-View` binary project files used in
 #' chemiluminescent multiplex ELISA plate imaging and quantification.

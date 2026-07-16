@@ -1,6 +1,6 @@
 #' Write a Q-View object to disk
 #'
-#' `r lifecycle::badge("experimental")`
+#' `r lifecycle::badge("stable")`
 #'
 #' Three writers, one for each common destination. All return the input
 #' `qv` invisibly so they compose with the pipe.

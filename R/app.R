@@ -1,6 +1,6 @@
 #' Launch the qviewparsR Q-View Shiny app
 #'
-#' `r lifecycle::badge("experimental")`
+#' `r lifecycle::badge("stable")`
 #'
 #' Interactive front-end for [read_qview()]. Uploads a `.Q-View` file
 #' (and optionally an accompanying well-assignment template CSV),

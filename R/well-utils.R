@@ -1,6 +1,6 @@
 #' Convert plate row / column to a well label
 #'
-#' `r lifecycle::badge("experimental")`
+#' `r lifecycle::badge("stable")`
 #'
 #' Converts 0-based or 1-based row and column indices to the standard
 #' `"A1"` ... `"H12"` plate notation. Vectorised.
