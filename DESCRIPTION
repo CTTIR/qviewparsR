@@ -1,6 +1,6 @@
 Package: qviewparsR
 Title: Read .Q-View Multiplex ELISA Project Files
-Version: 0.1.8
+Version: 1.0.0
 Authors@R: c(
     person("R.", "Heller",
            email = "raban.heller@uni-ulm.de",

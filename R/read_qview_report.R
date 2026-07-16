@@ -382,3 +382,4 @@ read_qview_report <- function(path,
   if (length(rows) == 0L) return(NULL)
   vapply(rows, function(f) paste(f, collapse = ","), character(1L))
 }
+# Version 1.0.0

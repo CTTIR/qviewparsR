@@ -156,7 +156,7 @@ qview_to_xlsx <- function(qv,
                           overwrite = FALSE,
                           call = rlang::caller_env()) {
   lifecycle::deprecate_warn(
-    "0.1.8", "qview_to_xlsx()", "write_qview_xlsx()"
+    "1.0.0", "qview_to_xlsx()", "write_qview_xlsx()"
   )
   write_qview_xlsx(qv, path, template = template,
                    overwrite = overwrite, call = call)
@@ -170,7 +170,8 @@ qview_to_csv_dir <- function(qv,
                              template = NULL,
                              call = rlang::caller_env()) {
   lifecycle::deprecate_warn(
-    "0.1.8", "qview_to_csv_dir()", "write_qview_csv()"
+    "1.0.0", "qview_to_csv_dir()", "write_qview_csv()"
   )
   write_qview_csv(qv, path = dir, template = template, call = call)
 }
+# Version 1.0.0

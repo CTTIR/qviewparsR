@@ -160,3 +160,4 @@ read_qview_template <- function(path,
   if (max(counts) == 0L) return(",")
   cand[which.max(counts)]
 }
+# Version 1.0.0
