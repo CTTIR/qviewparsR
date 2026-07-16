@@ -186,7 +186,7 @@ returns a list with class `qview`:
 If you use `qviewparsR` in academic work, please cite:
 
 > Heller R, Mannes M (2026). *qviewparsR: Read .Q-View Multiplex ELISA
-> Project Files*. R package version 1.1.0.
+> Project Files*. R package version 1.0.0.
 > <https://github.com/CTTIR/qviewparsR>
 
 BibTeX:
@@ -196,7 +196,7 @@ BibTeX:
   title  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},
   author = {R. Heller and M. Mannes},
   year   = {2026},
-  note   = {R package version 1.1.0},
+  note   = {R package version 1.0.0},
   url    = {https://github.com/CTTIR/qviewparsR}
 }
 ```

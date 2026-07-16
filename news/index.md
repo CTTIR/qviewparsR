@@ -1,6 +1,6 @@
 # Changelog
 
-## qviewparsR 1.1.0
+## qviewparsR 1.0.0
 
 ### New features
 
