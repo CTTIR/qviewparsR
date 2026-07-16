@@ -39,4 +39,4 @@ strip_qview_prefix <- function(x) {
   out[ndig] <- sub("^N", "", x[ndig])
   out
 }
-# Version 1.0.0
+# Version 0.1.9

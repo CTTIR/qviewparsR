@@ -673,4 +673,4 @@ read_qview <- function(path,
                   rawToChar(raw, multiple = TRUE), " ")
   any(grepl("Q-View Project", paste0(ascii, collapse = ""), fixed = TRUE))
 }
-# Version 1.0.0
+# Version 0.1.9

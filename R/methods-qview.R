@@ -513,4 +513,4 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
 
 # null-coalescing helper local to this file (keeps R >= 4.1 compatibility).
 `%||%` <- function(a, b) if (is.null(a) || (length(a) == 1L && is.na(a))) b else a
-# Version 1.0.0
+# Version 0.1.9

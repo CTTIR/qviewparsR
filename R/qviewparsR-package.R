@@ -28,4 +28,4 @@
 #' @importFrom rlang .data
 ## usethis namespace: end
 NULL
-# Version 1.0.0
+# Version 0.1.9
