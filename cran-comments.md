@@ -28,6 +28,6 @@ raised by the package itself.)
 * The package is a lean parser and export pipeline with no compiled
   code. Vignette and tests skip cleanly when no Q-View fixture is
   available. No examples access the network.
-* `read_qview_report()` (new in 1.1.0) reads the flat report exports
+* `read_qview_report()` (new in 1.0.0) reads the flat report exports
   Q-View writes alongside the binary container; a small synthetic
   `example-report.csv` fixture ships in `inst/extdata/`.
