@@ -192,12 +192,15 @@ If you use `qviewparsR` in academic work, please cite:
 BibTeX:
 
 ``` bibtex
-@Manual{qviewparsR,
-  title  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},
-  author = {R. Heller and M. Mannes},
-  year   = {2026},
-  note   = {R package version 0.1.9},
-  url    = {https://github.com/CTTIR/qviewparsR}
+@software{heller_2026_21395352,
+  author    = {Heller, Raban and Mannes, Marco},
+  title     = {qviewparsR - Read .Q-View Multiplex ELISA Project Files},
+  month     = jul,
+  year      = 2026,
+  publisher = {Zenodo},
+  version   = {1.0.0},
+  doi       = {10.5281/zenodo.21395352},
+  url       = {https://doi.org/10.5281/zenodo.21395352},
 }
 ```
 
