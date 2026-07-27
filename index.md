@@ -15,7 +15,8 @@ database driver, and no system libraries — so it installs the same way
 on **Windows, macOS, and Linux**. The only hard prerequisite is **R \>=
 4.1.0**.
 
-From CRAN (once released) you get a ready-to-use binary:
+Install the released version from
+[CRAN](https://CRAN.R-project.org/package=qviewparsR):
 
 ``` r
 
@@ -183,13 +184,29 @@ returns a list with class `qview`:
 
 ## Citation
 
-If you use `qviewparsR` in academic work, please cite:
+If you use `qviewparsR` in academic work, please cite the CRAN release:
 
 > Heller R, Mannes M (2026). *qviewparsR: Read .Q-View Multiplex ELISA
-> Project Files*. R package version 0.1.9.
-> <https://github.com/CTTIR/qviewparsR>
+> Project Files*.
+> <doi:%5B10.32614/CRAN.package.qviewparsR>\](<https://doi.org/10.32614/CRAN.package.qviewparsR>).
+> R package version 1.0.0,
+> <https://CRAN.R-project.org/package=qviewparsR>.
 
 BibTeX:
+
+``` bibtex
+@Manual{qviewparsR,
+  title  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},
+  author = {R. Heller and M. Mannes},
+  year   = {2026},
+  note   = {R package version 1.0.0},
+  doi    = {10.32614/CRAN.package.qviewparsR},
+  url    = {https://CRAN.R-project.org/package=qviewparsR},
+}
+```
+
+To cite a specific archived source snapshot instead, use the Zenodo
+software DOI:
 
 ``` bibtex
 @software{heller_2026_21395352,
