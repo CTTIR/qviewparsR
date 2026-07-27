@@ -1,6 +1,10 @@
 # qviewparsR 1.0.0
 
-# qviewparsR 0.1.9
+First release on CRAN
+(doi:[10.32614/CRAN.package.qviewparsR](https://doi.org/10.32614/CRAN.package.qviewparsR)).
+Pure-R parser for `.Q-View` binary project files (chemiluminescent
+multiplex ELISA plate imaging and quantification). No Java runtime, no
+H2 database driver, no compiled code.
 
 ## New features
 
@@ -17,12 +21,6 @@
       column set to `"<"` (`">"` for upper bound, `"incalculable"` for
       `Incalculable`), so limit-of-quantification information survives import.
   A small `example-report.csv` fixture ships in `inst/extdata/`.
-
-# qviewparsR 0.1.9
-
-Initial release. Pure-R parser for `.Q-View` binary project files
-(chemiluminescent multiplex ELISA plate imaging and quantification).
-No Java runtime, no H2 database driver, no compiled code.
 
 ## Reliability
 

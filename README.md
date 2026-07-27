@@ -1,11 +1,15 @@
 # qviewparsR <img src="man/figures/logo.svg" align="right" height="139" alt="qviewparsR hex sticker" />
 
 <!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/qviewparsR)](https://CRAN.R-project.org/package=qviewparsR)
+[![CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/qviewparsR)](https://CRAN.R-project.org/package=qviewparsR)
 [![R-CMD-check](https://github.com/CTTIR/qviewparsR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/CTTIR/qviewparsR/actions/workflows/R-CMD-check.yaml)
 [![pkgdown](https://github.com/CTTIR/qviewparsR/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/CTTIR/qviewparsR/actions/workflows/pkgdown.yaml)
 [![Codecov test coverage](https://codecov.io/gh/CTTIR/qviewparsR/branch/main/graph/badge.svg)](https://app.codecov.io/gh/CTTIR/qviewparsR?branch=main)
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CRAN DOI](https://img.shields.io/badge/DOI-10.32614%2FCRAN.package.qviewparsR-1f6feb.svg)](https://doi.org/10.32614/CRAN.package.qviewparsR)
+[![Zenodo DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21395352.svg)](https://doi.org/10.5281/zenodo.21395352)
 <!-- badges: end -->
 
 `qviewparsR` is a pure-R parser for the binary `.Q-View` project file
@@ -23,7 +27,8 @@ database driver, and no system libraries — so it installs the same way on
 **Windows, macOS, and Linux**. The only hard prerequisite is **R >=
 4.1.0**.
 
-From CRAN (once released) you get a ready-to-use binary:
+Install the released version from
+[CRAN](https://CRAN.R-project.org/package=qviewparsR):
 
 ```r
 install.packages("qviewparsR")
@@ -187,13 +192,29 @@ returned object.
 
 ## Citation
 
-If you use `qviewparsR` in academic work, please cite:
+If you use `qviewparsR` in academic work, please cite the CRAN release:
 
 > Heller R, Mannes M (2026). _qviewparsR: Read .Q-View Multiplex ELISA
-> Project Files_. R package version 0.1.9.
-> <https://github.com/CTTIR/qviewparsR>
+> Project Files_.
+> doi:[10.32614/CRAN.package.qviewparsR](https://doi.org/10.32614/CRAN.package.qviewparsR).
+> R package version 1.0.0,
+> <https://CRAN.R-project.org/package=qviewparsR>.
 
 BibTeX:
+
+```bibtex
+@Manual{qviewparsR,
+  title  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},
+  author = {R. Heller and M. Mannes},
+  year   = {2026},
+  note   = {R package version 1.0.0},
+  doi    = {10.32614/CRAN.package.qviewparsR},
+  url    = {https://CRAN.R-project.org/package=qviewparsR},
+}
+```
+
+To cite a specific archived source snapshot instead, use the Zenodo
+software DOI:
 
 ```bibtex
 @software{heller_2026_21395352,
