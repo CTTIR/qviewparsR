@@ -1,5 +1,7 @@
 # qviewparsR
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21395352.svg)](https://doi.org/10.5281/zenodo.21395352)
+
 `qviewparsR` is a pure-R parser for the binary `.Q-View` project file
 format used in chemiluminescent multiplex ELISA plate imaging and
 quantification. It extracts the embedded report and returns it as tidy

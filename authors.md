@@ -15,7 +15,7 @@ Source:
 
 Heller R, Mannes M (2026). *qviewparsR: Read .Q-View Multiplex ELISA
 Project Files*.
-[doi:10.32614/CRAN.package.qviewparsR](https://doi.org/10.32614/CRAN.package.qviewparsR).
+[doi:10.5281/zenodo.21395352](https://doi.org/10.5281/zenodo.21395352).
 R package version 1.0.0,
 <https://CRAN.R-project.org/package=qviewparsR>.
 
@@ -24,6 +24,6 @@ R package version 1.0.0,
       author = {R. Heller and M. Mannes},
       year = {2026},
       note = {R package version 1.0.0},
-      doi = {10.32614/CRAN.package.qviewparsR},
+      doi = {10.5281/zenodo.21395352},
       url = {https://CRAN.R-project.org/package=qviewparsR},
     }
