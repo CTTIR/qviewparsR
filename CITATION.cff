@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+type: software
+title: 'qviewparsR: Read .Q-View Multiplex ELISA project files'
+version: 1.0.0
+date-released: '2026-08-11'
+doi: 10.5281/zenodo.21395352
+authors:
+- family-names: Heller
+  given-names: Raban
+  orcid: https://orcid.org/0000-0001-8006-9742
+- family-names: Mannes
+  given-names: Marco
+  orcid: https://orcid.org/0009-0003-4875-8275
+repository-code: https://github.com/CTTIR/qviewparsR
+license: MIT
