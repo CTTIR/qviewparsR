@@ -1,5 +1,7 @@
 # qviewparsR <img src="man/figures/logo.svg" align="right" height="139" alt="qviewparsR hex sticker" />
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21395352.svg)](https://doi.org/10.5281/zenodo.21395352)
+
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/qviewparsR)](https://CRAN.R-project.org/package=qviewparsR)
 [![CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/qviewparsR)](https://CRAN.R-project.org/package=qviewparsR)
