@@ -3,6 +3,8 @@ url: https://cttir.github.io/qviewparsR/
 template:
   package: themakR
 
+llm-docs: false
+
 development:
   mode: auto
 includes:

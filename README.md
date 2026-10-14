@@ -1,17 +1,16 @@
 # qviewparsR <img src="man/figures/logo.svg" align="right" height="139" alt="qviewparsR hex sticker" />
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21395352.svg)](https://doi.org/10.5281/zenodo.21395352)
+[![Zenodo DOI: 10.5281/zenodo.21395352](man/figures/doi-zenodo.svg)](https://doi.org/10.5281/zenodo.21395352)
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/qviewparsR)](https://CRAN.R-project.org/package=qviewparsR)
 [![CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/qviewparsR)](https://CRAN.R-project.org/package=qviewparsR)
-[![R-CMD-check](https://github.com/CTTIR/qviewparsR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/CTTIR/qviewparsR/actions/workflows/R-CMD-check.yaml)
-[![pkgdown](https://github.com/CTTIR/qviewparsR/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/CTTIR/qviewparsR/actions/workflows/pkgdown.yaml)
+[![R-CMD-check](https://github.com/CTTIR/qviewparsR/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main&event=push)](https://github.com/CTTIR/qviewparsR/actions/workflows/R-CMD-check.yaml)
+[![pkgdown](https://github.com/CTTIR/qviewparsR/actions/workflows/pkgdown.yaml/badge.svg?branch=main&event=push)](https://github.com/CTTIR/qviewparsR/actions/workflows/pkgdown.yaml)
 [![Codecov test coverage](https://codecov.io/gh/CTTIR/qviewparsR/branch/main/graph/badge.svg)](https://app.codecov.io/gh/CTTIR/qviewparsR?branch=main)
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CRAN DOI](https://img.shields.io/badge/DOI-10.32614%2FCRAN.package.qviewparsR-1f6feb.svg)](https://doi.org/10.32614/CRAN.package.qviewparsR)
-[![Zenodo DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21395352.svg)](https://doi.org/10.5281/zenodo.21395352)
 <!-- badges: end -->
 
 `qviewparsR` is a pure-R parser for the binary `.Q-View` project file
