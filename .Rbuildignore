@@ -18,3 +18,8 @@
 ^README\.Rmd$
 ^_coverage$
 ^vignettes/qviewparsR\.R$
+
+^\.local-private$
+^AGENTS\.md$
+^CLAUDE.*$
+^admin$
