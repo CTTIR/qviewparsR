@@ -1,4 +1,4 @@
-# qviewparsR <img src="man/figures/logo.svg" align="right" height="139" alt="qviewparsR hex sticker" />
+# qviewparsR <img src="man/figures/logo.png" align="right" width="120" height="139" alt="qviewparsR hex logo" />
 
 [![Zenodo DOI: 10.5281/zenodo.21395352](man/figures/doi-zenodo.svg)](https://doi.org/10.5281/zenodo.21395352)
 
@@ -257,3 +257,7 @@ must be reviewed and revised before inclusion, and references must be verified
 against their DOI, arXiv ID or ISBN.
 
 Local software setup: vLLM with Python/PyTorch, plus R and RStudio.
+
+## Branding
+
+Editable R artwork and regeneration instructions are in [tools/branding](https://github.com/CTTIR/qviewparsR/blob/main/tools/branding/README.md).
