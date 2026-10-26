@@ -7,9 +7,6 @@ llm-docs: false
 
 development:
   mode: auto
-includes:
-  in_header: |
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
 
 home:
