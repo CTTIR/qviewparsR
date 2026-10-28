@@ -200,14 +200,13 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
     system.file("shiny", "qview", "www", package = "qviewparsR")
   )
   bslib::page_sidebar(
-    title = NULL,
+    title = NULL, window_title = "qviewparsR",
     theme = .qv_theme(dark = FALSE),
     fillable = TRUE,
     shiny::tags$head(shiny::tags$style(shiny::HTML(.qv_css))),
     shiny::div(
       class = "qv-brand",
-      shiny::tags$img(src = "qv_www/logo_hex.svg",
-                      alt = "qviewparsR hex", class = "qv-hex"),
+      .cttir_brand_logo(),
       shiny::span(class = "qv-title", "qviewparsR"),
       shiny::span(class = "qv-sub", "Q-View parser"),
       shiny::div(

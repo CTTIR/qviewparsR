@@ -1,5 +1,9 @@
 # qviewparsR 1.0.0
 
+* Standardize the named v5 package logo across README, documentation pages
+  and available application headers, with matching light and dark artwork.
+
+
 First release on CRAN
 (doi:[10.32614/CRAN.package.qviewparsR](https://doi.org/10.32614/CRAN.package.qviewparsR)).
 Pure-R parser for `.Q-View` binary project files (chemiluminescent
