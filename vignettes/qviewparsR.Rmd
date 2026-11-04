@@ -38,7 +38,7 @@ resource_files:
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment  = "#>",
-  eval     = FALSE,
+  eval     = TRUE,
   fig.align = "center",
   fig.width = 7, fig.height = 4.5,
   dpi = 96
@@ -101,8 +101,8 @@ intensities (and -- when generated -- a fully rendered CSV report
 stored as a CLOB), and one or more LOB segments holding the raw
 chemiluminescent plate images.
 
-`qviewparsR` extracts everything except the raw images and returns it
-as tidy tibbles. There is no Java runtime, no H2 database driver, no
+`qviewparsR` extracts the available embedded report fields as tidy tibbles.
+It does not reconstruct database transactions or extract raw images. There is no Java runtime, no H2 database driver, no
 compiled code -- all logic is pure R.
 
 ## Installation
@@ -121,7 +121,7 @@ install.packages("qviewparsR")
 Development version from GitHub:
 
 ```r
-# install.packages("pak")
+if (!requireNamespace("pak", quietly = TRUE)) install.packages("pak")
 pak::pak("CTTIR/qviewparsR")
 ```
 
@@ -134,16 +134,17 @@ contain C++ and build from source unless you use a binary repository
 needing a compiler.
 
 The package depends on a small tidyverse-aligned core
-(`cli`, `dplyr`, `lifecycle`, `openxlsx2`, `readr`, `rlang`, `tibble`,
+(`cli`, `dplyr`, `fs`, `lifecycle`, `openxlsx2`, `readr`, `rlang`, `tibble`,
 `tidyr`). Plotting requires `ggplot2`; the publication overview adds
 `patchwork`; the Shiny front-end adds `shiny`, `bslib`, `DT`, `withr`.
 
 ## A complete walk-through
 
-```r
+```{r bundled-project}
 library(qviewparsR)
 
-qv <- read_qview("path/to/plate.Q-View")
+project <- system.file("extdata", "example.Q-View", package = "qviewparsR")
+qv <- read_qview(project, verbose = FALSE)
 qv                          # one-screen summary
 
 qv$analytes                 # spot_number, analyte, unit, lod, lloq, uloq
@@ -155,9 +156,11 @@ qv$plate_layout             # one row per plate well
 summary(qv)                 # mean / SD / CV per well type x analyte
 ```
 
-`read_qview()` always returns a list of class `qview` with eleven
-slots described in `?read_qview`. Empty slots are zero-row tibbles
-rather than `NULL`, so downstream code can rely on shape stability.
+`read_qview()` returns the list of class `qview` described in
+`?read_qview`. Optional concentrations or curve fits can be `NULL` when
+they are absent; check before using them. Reports currently support A1–H12.
+Conflicting embedded observations are refused: obtain a fresh producer report
+rather than assume the most frequent copy represents the current transaction.
 
 ## Reading flat report exports
 
@@ -167,18 +170,19 @@ container is kept -- the `..._auto_report` or
 original `.Q-View` project is unavailable, `read_qview_report()` parses
 that export and returns the same `qview` object `read_qview()` builds:
 
-```r
-rep <- read_qview_report("path/to/plate_auto_report.csv")
+```{r bundled-report}
+report_path <- system.file("extdata", "example-report.csv", package = "qviewparsR")
+rep <- read_qview_report(report_path, verbose = FALSE)
 is_qview(rep)               # TRUE -- same class as read_qview()
 rep$concentrations          # long-format, with an out-of-range `flag`
 ```
 
-It differs from `read_qview()` in two deliberate ways: it captures the
-plain `"Reduced Concentration"` point estimate (one row per sample, with
-`statistic == "reduced"`), and it preserves out-of-range cells instead
-of dropping them -- a `"< 52.50"` cell becomes `concentration = 52.50`
-with `flag = "<"` (`">"` for the upper bound, `"incalculable"` for
-`Incalculable`), so limit-of-quantification information survives import.
+Both readers preserve recognized missing and censored measurements, with
+`raw_value` and `flag` alongside the numeric value. A `"< 52.50"` cell
+has value 52.50 and flag `<`: it is a bound, not an observed concentration.
+`Incalculable` remains missing and flagged. Numeric plots and summary estimates
+exclude censored and missing values; summary counts expose both categories.
+Malformed nonblank numeric values are errors, not silently missing data.
 
 ## The naming convention
 
@@ -196,8 +200,8 @@ systematic and reversible:
 `strip_qview_prefix()` reverses the rewrite. Pass `strip_prefix = TRUE`
 to `read_qview()` to apply it across every sample-id column at once:
 
-```r
-qv <- read_qview("path/to/plate.Q-View", strip_prefix = TRUE)
+```{r naming}
+qv <- read_qview(project, strip_prefix = TRUE, verbose = FALSE)
 unique(qv$well_groups$sample_id)
 
 strip_qview_prefix(c("ICal 1", "GLow", "HHigh", "NFD24277364"))
@@ -210,12 +214,12 @@ strip_qview_prefix(c("ICal 1", "GLow", "HHigh", "NFD24277364"))
 primary tabular payload -- so a parsed object drops straight into a
 dplyr / ggplot2 pipeline:
 
-```r
+```{r tidy-analysis}
 library(dplyr)
 
 qv |>
   as_tibble() |>
-  filter(replicate == 1L) |>
+  filter(replicate == 1L, is.na(flag), is.finite(pixel_intensity)) |>
   group_by(analyte, unit) |>
   summarise(median_pi = median(pixel_intensity, na.rm = TRUE),
             .groups = "drop")
@@ -223,10 +227,10 @@ qv |>
 
 ## Visualisation
 
-The `plot.qview()` method offers three quick-look views, all coloured
-on the same viridis ramp the Shiny app uses:
+The `plot.qview()` method offers three quick-look views. Plate and intensity
+maps use viridis palettes; the scatterplot compares replicate pairs:
 
-```r
+```{r plots, eval = requireNamespace("ggplot2", quietly = TRUE), fig.alt = c("Synthetic 96-well plate showing standard, negative, sample, control and unassigned wells.", "Replicate-one pixel intensity by well for synthetic Ba and Bb measurements; fill encodes intensity on the shared PI scale.", "Synthetic Ba and Bb replicate-two versus replicate-one pixel intensities, with a dashed identity line in each panel.")}
 plot(qv, type = "plate_map")          # 96-well plate, fill = well type
 plot(qv, type = "intensity_heatmap")  # facet per analyte, fill = PI
 plot(qv, type = "replicate_scatter")  # rep 1 vs rep 2 per analyte
@@ -235,7 +239,7 @@ plot(qv, type = "replicate_scatter")  # rep 1 vs rep 2 per analyte
 Each call returns a `ggplot` object, so themes, scales, and labels can
 be added on top:
 
-```r
+```{r plot-theme, eval = requireNamespace("ggplot2", quietly = TRUE), fig.alt = "Synthetic plate map with a black-and-white theme, showing the same well assignments as the preceding plate map."}
 library(ggplot2)
 plot(qv, type = "plate_map") +
   theme_bw(base_size = 12) +
@@ -247,15 +251,20 @@ plot(qv, type = "plate_map") +
 Three writers cover the common destinations. All return the parsed
 object invisibly, so they compose with `|>`:
 
-```r
+```{r export}
+out <- tempfile("qview-vignette-")
+dir.create(out)
 qv |>
-  write_qview_xlsx("plate.xlsx") |>      # one sheet per parsed table
-  write_qview_csv ("plate_csv/") |>      # one CSV per parsed table
-  write_qview_rds ("plate.rds")          # full lossless R round-trip
+  write_qview_xlsx(file.path(out, "plate.xlsx")) |>
+  write_qview_csv(file.path(out, "plate_csv")) |>
+  write_qview_rds(file.path(out, "plate.rds"))
+stopifnot(identical(readRDS(file.path(out, "plate.rds")), qv))
 ```
 
-`write_qview_xlsx()` and `write_qview_rds()` accept `overwrite = TRUE`
-to replace existing destinations.
+All writers require `overwrite = TRUE` to replace existing output. CSV
+replacement is for a dedicated bundle directory and refuses unrelated files.
+Keep archival CSV as data: spreadsheet applications may interpret text beginning
+with formula characters. Import such columns explicitly as text when viewing them.
 
 The legacy aliases `qview_to_xlsx()` and `qview_to_csv_dir()` still
 work but emit `lifecycle::deprecate_warn()`; switch to the new names.
@@ -267,15 +276,20 @@ you also have the original well-assignment template CSV the producing
 application imported, `read_qview_template()` parses it into a tibble
 that aligns with `qv$plate_layout`:
 
-```r
-tmpl <- read_qview_template("path/to/template.csv")
+```{r template}
+tmpl <- read_qview_template(system.file("extdata", "example-template.csv",
+                                       package = "qviewparsR"), verbose = FALSE)
 
 qv$plate_layout |>
-  dplyr::left_join(tmpl, by = "well", suffix = c("_qview", "_template")) |>
-  dplyr::filter(sample_id_qview != sample_id_template)
+  dplyr::full_join(tmpl, by = "well", suffix = c("_qview", "_template")) |>
+  dplyr::filter(xor(is.na(sample_id_qview), is.na(sample_id_template)) |
+                  (!is.na(sample_id_qview) & !is.na(sample_id_template) &
+                     sample_id_qview != sample_id_template))
 ```
 
-Any rows surviving the filter expose template-vs-Q-View mismatches.
+Rows surviving the filter expose differing or one-sided missing sample
+assignments, including wells present on only one side. The bundled files are
+synthetic examples, not independent instrument-validation evidence.
 
 ## Interactive front-end
 
@@ -297,6 +311,13 @@ exposes:
 * every parsed table with its own xlsx download;
 * one-click **xlsx / rds / csv-zip** of the whole project;
 * a built-in dark/light toggle and per-card max/restore.
+
+Changing uploads or parsing settings clears previous results; parse again
+before exporting. The downloaded metadata retains original upload names and
+settings. PNG dimensions must be 3–30 inches, DPI 72–1200, and the product of
+width, height and squared DPI must not exceed 50 million pixels. PDF exports
+remain vector graphics. Invalid settings produce an error rather than a
+silently resized figure.
 
 ## Error handling
 

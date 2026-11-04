@@ -18,15 +18,18 @@ format used in chemiluminescent multiplex ELISA plate imaging and
 quantification. It extracts the embedded report and returns it as tidy
 tibbles.
 
-No Java runtime, no H2 database driver, no system dependencies beyond a
-working R installation.
+No Java runtime or H2 database driver is needed. Required R dependencies
+are installed with the package; source installations may need a compiler
+for those dependencies (see the platform notes below).
 
 ## Installation
 
 `qviewparsR` is **pure R** — no compiled code, no Java runtime, no H2
 database driver, and no system libraries — so it installs the same way on
-**Windows, macOS, and Linux**. The only hard prerequisite is **R >=
-4.1.0**.
+**Windows, macOS, and Linux**. The package requires **R >= 4.1.0** and its declared R dependencies.
+
+The 1.0.1 reliability changes described here are source changes. Use the
+GitHub installation below until CRAN lists version 1.0.1 or later.
 
 Install the released version from
 [CRAN](https://CRAN.R-project.org/package=qviewparsR):
@@ -38,7 +41,7 @@ install.packages("qviewparsR")
 Or the development version from GitHub:
 
 ```r
-# install.packages("pak")
+if (!requireNamespace("pak", quietly = TRUE)) install.packages("pak")
 pak::pak("CTTIR/qviewparsR")
 ```
 
@@ -87,6 +90,63 @@ summary(qv)
 # Interactive front-end (upload, visualise, download)
 qview_app()
 ```
+
+### Try the bundled example
+
+This path needs no instrument files or optional plotting packages:
+
+```r
+library(qviewparsR)
+project <- system.file("extdata", "example.Q-View", package = "qviewparsR")
+qv <- read_qview(project, verbose = FALSE)
+summary(qv)
+out <- tempfile("qview-example-")
+dir.create(out)
+write_qview_csv(qv, file.path(out, "tables"))
+write_qview_rds(qv, file.path(out, "project.rds"))
+stopifnot(identical(readRDS(file.path(out, "project.rds")), qv))
+list.files(out, recursive = TRUE)
+```
+
+CSV exports retain exact text. Spreadsheet applications can interpret text
+starting with formula characters; import such columns explicitly as text.
+Use RDS for a lossless R round trip. Replacing an existing export requires
+`overwrite = TRUE`; use a dedicated directory for CSV bundles.
+
+### Interpretation and recovery
+
+The binary reader extracts embedded reports; it does not reconstruct H2
+transactions or establish which conflicting database record is current.
+Version 1.0.1 refuses conflicting observations instead of selecting the most
+frequent value. Export a fresh CSV or XLSX report from Q-View and use
+`read_qview_report()` when a binary report is ambiguous. Keep the original
+container and producer export for provenance.
+
+Reports currently support wells A1–H12. Malformed numeric values, ambiguous
+analyte identities, invalid wells and malformed template geometry are errors.
+Recognized missing and censored measurements retain their original decoded
+text and flags. A `<` or `>` concentration is a bound, not an exact observation;
+summary estimates and numeric plots exclude censored and missing values.
+Summary counts distinguish observed, missing and censored records. Flat text
+reports use UTF-8 when valid and otherwise fall back to Latin-1; XLSX text is
+already decoded. The selected flat-file encoding is recorded in metadata.
+Binary report text outside the supported printable representation is refused
+rather than silently stripped; use the producer flat export instead. No step
+imputes zero or independently validates the producer's calibration.
+
+These changes make some formerly accepted inputs fail deliberately. Do not
+remove conflicting records merely to obtain a successful import; reconcile
+them with the producer export. The bundled examples are synthetic. Checks
+against private instrument exports remain unperformed when those files are
+unavailable.
+
+### App results and graphics
+
+Changing an upload or parsing option clears the previous results; parse again
+before downloading. Exported metadata records the original upload name and
+parsing settings. PNG downloads accept dimensions of 3–30 inches and 72–1200
+DPI, with a total limit of 50 million pixels. Reduce dimensions or DPI when the
+limit is exceeded, or use the vector PDF download.
 
 ## What is a `.Q-View` file?
 
@@ -174,7 +234,7 @@ returned object.
 | `well_groups` | `well_group`, `sample_id`, type flags (`is_standard`, `is_negative`, `is_sample`, `is_control`), `well_type` factor |
 | `pixel_intensities` | Long-format per-well replicate readings |
 | `summary_statistics` | Per-group `average`, `std_dev`, `cv` rows |
-| `concentrations` | Long-format concentrations, or `NULL` if the report is qualitative |
+| `concentrations` | Long-format concentrations, or `NULL` if no concentration rows were recovered |
 | `curve_fit` | Per-analyte regression model |
 | `report_csv` | Raw CSV report lines |
 | `plate_layout` | One row per plate well with sample assignment + well type |
@@ -193,7 +253,10 @@ returned object.
 
 ## Citation
 
-If you use `qviewparsR` in academic work, please cite the CRAN release:
+If you use `qviewparsR` in academic work, please cite the CRAN release.
+`CITATION.cff` and `.zenodo.json` retain the archived 1.0.0 record; they do not
+assert that the 1.0.1 source patch has been released or archived. For a source
+snapshot, also record its Git commit.
 
 > Heller R, Mannes M (2026). _qviewparsR: Read .Q-View Multiplex ELISA
 > Project Files_.

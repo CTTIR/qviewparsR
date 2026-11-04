@@ -27,3 +27,6 @@
 ^\.zenodo\.json$
 ^CITATION\.cff$
 ^tools/branding$
+
+^planning$
+^\.git$

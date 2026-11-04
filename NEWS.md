@@ -1,3 +1,32 @@
+# qviewparsR 1.0.1
+
+## Measurement integrity
+
+* Refuse conflicting embedded records rather than infer a current database
+  transaction from page-copy frequency. Use a fresh producer CSV/XLSX export
+  with `read_qview_report()` if a binary report contains ambiguous records.
+* Preserve sample identities and decoded quoting/encoding; reject malformed
+  nonblank numbers, unsupported report wells and ambiguous analyte keys.
+* Retain recognized missing/censored measurements and raw values. Summaries
+  distinguish observed, missing and censored counts; numeric plots exclude
+  bounds and missing values. All-missing groups have `NA` estimates.
+* Validate template geometry, unique assignments and positive finite dilution.
+* Print imported analyte names and units literally, without evaluating
+  brace-delimited expressions as diagnostic formatting code.
+
+## App and export reliability
+
+* Clear stale results when uploads or parsing options change; bound image
+  export memory and prevent plot-error logging from causing reactive loops.
+* Stage exports before replacement; require explicit CSV overwrite and
+  preserve unrelated files. CSV bundles include segment metadata.
+
+These are compatibility changes for ambiguous/malformed inputs and existing
+CSV destinations. Version 1.0.0's majority-vote MVCC claim below describes the
+old implementation and is superseded: copy frequency cannot prove transaction
+recency or scientific correctness. No instrument validation or CRAN acceptance
+of this patch is implied.
+
 # qviewparsR 1.0.0
 
 * Standardize the named v5 package logo across README, documentation pages
