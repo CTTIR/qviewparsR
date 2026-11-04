@@ -208,7 +208,8 @@ test_that("failed restoration retains a discoverable intact backup", {
   backup <- file.path(list.files(d, pattern = "^\\.qview-export-",
                                  all.files = TRUE, full.names = TRUE), "previous")
   expect_length(backup, 1L)
-  expect_match(conditionMessage(error), normalizePath(backup), fixed = TRUE)
+  expect_match(gsub("\\", "/", conditionMessage(error), fixed = TRUE),
+               normalizePath(backup, winslash = "/"), fixed = TRUE)
   expect_identical(.export_tree_hashes(backup), before)
   expect_false(dir.exists(out))
 })
@@ -261,7 +262,8 @@ test_that("unexpected inspection failure after backup retains recovery data", {
   backup <- file.path(list.files(d, pattern = "^\\.qview-export-",
                                  all.files = TRUE, full.names = TRUE), "previous")
   expect_length(backup, 1L)
-  expect_match(conditionMessage(error), normalizePath(dirname(backup)), fixed = TRUE)
+  expect_match(gsub("\\", "/", conditionMessage(error), fixed = TRUE),
+               normalizePath(dirname(backup), winslash = "/"), fixed = TRUE)
   expect_identical(.export_bytes(backup), before)
 })
 
