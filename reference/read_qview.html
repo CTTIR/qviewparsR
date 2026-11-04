@@ -15,7 +15,7 @@
     <!-- Standard logo aliases contain the named v5 light and dark hexes. -->
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo" data-cttir-dark-src="../reference/figures/logo-dark.svg">qviewparsR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,7 +47,7 @@
     </div>
 
     <div class="ref-description section level2">
-    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a></p>
+    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="figures/lifecycle-stable.svg" alt="[Stable]"></a></p>
     </div>
 
     <div class="section level2">
@@ -121,15 +121,16 @@ averages, std-dev, and CV statistics: <code>well_group</code>, <code>sample_id</
 
 <dt><code>concentrations</code></dt>
 <dd><p>Long-format concentration tibble or <code>NULL</code>
-if the regression model is <code>"Qualitative"</code>.</p></dd>
+when no supported concentration rows were extracted.</p></dd>
 
 <dt><code>curve_fit</code></dt>
 <dd><p>Tibble with <code>analyte</code>, <code>regression_model</code>, or
 <code>NULL</code> if not reported.</p></dd>
 
 <dt><code>report_csv</code></dt>
-<dd><p>Character vector of the raw CSV report lines,
-or <code>NULL</code> if no report was generated.</p></dd>
+<dd><p>Extracted candidate report lines in source order,
+including repeated copies, or <code>NULL</code> if none were found. This is not
+a complete or transaction-verified CLOB.</p></dd>
 
 <dt><code>plate_layout</code></dt>
 <dd><p>Tibble with one row per well: <code>well</code>,
@@ -137,7 +138,12 @@ or <code>NULL</code> if no report was generated.</p></dd>
 <code>well_type</code>, <code>dilution</code>.</p></dd>
 
 
-</dl></div>
+</dl><p>Measurement tables preserve decoded <code>raw_value</code>, <code>flag</code>, <code>error_codes</code>
+and <code>statistic_label</code>. Missing and incalculable cells remain explicit rows;
+censored numeric cells retain their bound and flag, not an invented point
+estimate. Nonblank malformed or nonfinite numeric values are refused.
+See <code><a href="read_qview_report.html">read_qview_report()</a></code> for the shared value and identity rules.</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Parses a <code>.Q-View</code> binary container (a chemiluminescent multiplex
@@ -146,12 +152,16 @@ segments) and extracts the assay data: project metadata, analyte
 panel with units, well-group sample assignments, per-well replicate
 pixel intensities, summary statistics, and (when present) the
 embedded CSV report.</p>
-<p>The file format is reverse-engineered from public binary inspection:
-it begins with a plain-text manifest, followed by three concatenated
-H2 database segments. The fully-formatted report Q-View renders for
-the user is stored as a CLOB inside the main H2 segment. This
-parser scans the binary for that CLOB, reassembles it across H2 page
-boundaries (2048-byte pages), and parses it as CSV.</p>
+<p>This reverse-engineered reader scans printable report text inside the
+container. It does not open the H2 database or establish transaction
+recency. Identical repeated records are collapsed; conflicting candidate
+records and incomplete analyte rows are refused rather than selecting
+values by page-copy frequency. An authoritative flat CSV/XLSX report can
+be read with <code><a href="read_qview_report.html">read_qview_report()</a></code> when binary extraction is ambiguous.
+The binary scan is limited to printable ASCII spans, not a general CLOB
+decoder, and cannot recover a complete report across arbitrary page or
+encoding boundaries. Report wells are limited to A1 through H12.
+Sample and Assay/Lot continuation never crosses an opaque binary gap.</p>
 <p>Parsing is done in pure R: no Java runtime, no H2 database driver,
 no system dependencies beyond a working R installation.</p>
     </div>
@@ -208,15 +218,17 @@ no system dependencies beyond a working R installation.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>           3 Ref Spot N/A   <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span>                <span style="text-decoration: underline;">5</span>000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 1 more variable: assay_control_high &lt;dbl&gt;</span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">qv</span><span class="op">$</span><span class="va">pixel_intensities</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 8</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 12</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   well_group sample_id well  replicate analyte unit  pixel_intensity dilution</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> ICal 1     ICal 1    A1            1 Ba      ng/ml            <span style="text-decoration: underline;">8</span>671       <span style="color: #BB0000;">NA</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> ICal 1     ICal 1    A1            1 Bb      ug/ml           <span style="text-decoration: underline;">19</span>982       <span style="color: #BB0000;">NA</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> ICal 1     ICal 1    A2            2 Ba      ng/ml           <span style="text-decoration: underline;">17</span>838       <span style="color: #BB0000;">NA</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> ICal 1     ICal 1    A2            2 Bb      ug/ml           <span style="text-decoration: underline;">23</span>848       <span style="color: #BB0000;">NA</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> N12345     N12345    A3            1 Ba      ng/ml            <span style="text-decoration: underline;">1</span>200       <span style="color: #BB0000;">NA</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> N12345     N12345    A3            1 Bb      ug/ml            <span style="text-decoration: underline;">1</span>300       <span style="color: #BB0000;">NA</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> ICal 2     ICal 2    B1            1 Ba      ng/ml            <span style="text-decoration: underline;">4</span>000       <span style="color: #BB0000;">NA</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> ICal 2     ICal 2    B1            1 Bb      ug/ml            <span style="text-decoration: underline;">5</span>000       <span style="color: #BB0000;">NA</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 4 more variables: raw_value &lt;chr&gt;, flag &lt;chr&gt;, error_codes &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   statistic_label &lt;chr&gt;</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"ggplot2"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">qv</span>, type <span class="op">=</span> <span class="st">"plate_map"</span><span class="op">)</span></span></span>

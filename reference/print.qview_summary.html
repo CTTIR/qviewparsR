@@ -15,7 +15,7 @@
     <!-- Standard logo aliases contain the named v5 light and dark hexes. -->
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo" data-cttir-dark-src="../reference/figures/logo-dark.svg">qviewparsR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,7 +47,7 @@
     </div>
 
     <div class="ref-description section level2">
-    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a></p>
+    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="figures/lifecycle-stable.svg" alt="[Stable]"></a></p>
     </div>
 
     <div class="section level2">
@@ -90,17 +90,18 @@
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Q-View summary</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Mean / SD / CV of pixel intensities, grouped by well type:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 8 × 9</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   well_type analyte unit      n   mean      sd      cv   min   max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> standard  Ba      ng/ml     4  <span style="text-decoration: underline;">8</span>652. <span style="text-decoration: underline;">6</span>500.   0.751    <span style="text-decoration: underline;">4</span>000 <span style="text-decoration: underline;">17</span>838</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> standard  Bb      ug/ml     4 <span style="text-decoration: underline;">13</span>482. <span style="text-decoration: underline;">9</span>864.   0.732    <span style="text-decoration: underline;">5</span>000 <span style="text-decoration: underline;">23</span>848</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> negative  Ba      ng/ml     2   305     7.07 0.023<span style="text-decoration: underline;">2</span>    300   310</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> negative  Bb      ug/ml     2   405     7.07 0.017<span style="text-decoration: underline;">5</span>    400   410</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> sample    Ba      ng/ml     2  <span style="text-decoration: underline;">1</span>225    35.4  0.028<span style="text-decoration: underline;">9</span>   <span style="text-decoration: underline;">1</span>200  <span style="text-decoration: underline;">1</span>250</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> sample    Bb      ug/ml     2  <span style="text-decoration: underline;">1</span>325    35.4  0.026<span style="text-decoration: underline;">7</span>   <span style="text-decoration: underline;">1</span>300  <span style="text-decoration: underline;">1</span>350</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> control   Ba      ng/ml     2 <span style="text-decoration: underline;">12</span>050    70.7  0.005<span style="text-decoration: underline;">87</span> <span style="text-decoration: underline;">12</span>000 <span style="text-decoration: underline;">12</span>100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">8</span> control   Bb      ug/ml     2 <span style="text-decoration: underline;">15</span>050    70.7  0.004<span style="text-decoration: underline;">70</span> <span style="text-decoration: underline;">15</span>000 <span style="text-decoration: underline;">15</span>100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 8 × 12</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   well_type analyte unit      n   mean      sd      cv   min   max n_observed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> standard  Ba      ng/ml     4  <span style="text-decoration: underline;">8</span>652. <span style="text-decoration: underline;">6</span>500.   0.751    <span style="text-decoration: underline;">4</span>000 <span style="text-decoration: underline;">17</span>838          4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> standard  Bb      ug/ml     4 <span style="text-decoration: underline;">13</span>482. <span style="text-decoration: underline;">9</span>864.   0.732    <span style="text-decoration: underline;">5</span>000 <span style="text-decoration: underline;">23</span>848          4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> negative  Ba      ng/ml     2   305     7.07 0.023<span style="text-decoration: underline;">2</span>    300   310          2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> negative  Bb      ug/ml     2   405     7.07 0.017<span style="text-decoration: underline;">5</span>    400   410          2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> sample    Ba      ng/ml     2  <span style="text-decoration: underline;">1</span>225    35.4  0.028<span style="text-decoration: underline;">9</span>   <span style="text-decoration: underline;">1</span>200  <span style="text-decoration: underline;">1</span>250          2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> sample    Bb      ug/ml     2  <span style="text-decoration: underline;">1</span>325    35.4  0.026<span style="text-decoration: underline;">7</span>   <span style="text-decoration: underline;">1</span>300  <span style="text-decoration: underline;">1</span>350          2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> control   Ba      ng/ml     2 <span style="text-decoration: underline;">12</span>050    70.7  0.005<span style="text-decoration: underline;">87</span> <span style="text-decoration: underline;">12</span>000 <span style="text-decoration: underline;">12</span>100          2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">8</span> control   Bb      ug/ml     2 <span style="text-decoration: underline;">15</span>050    70.7  0.004<span style="text-decoration: underline;">70</span> <span style="text-decoration: underline;">15</span>000 <span style="text-decoration: underline;">15</span>100          2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2 more variables: n_missing &lt;int&gt;, n_censored &lt;int&gt;</span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

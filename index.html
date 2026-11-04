@@ -42,7 +42,7 @@
     <!-- Standard logo aliases contain the named v5 light and dark hexes. -->
     <a class="navbar-brand me-2" href="index.html"><img src="logo.svg" alt="" class="themakr-navbar-logo" data-cttir-dark-src="reference/figures/logo-dark.svg">qviewparsR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -82,17 +82,18 @@
 <!-- badges: start -->
 
 <p><code>qviewparsR</code> is a pure-R parser for the binary <code>.Q-View</code> project file format used in chemiluminescent multiplex ELISA plate imaging and quantification. It extracts the embedded report and returns it as tidy tibbles.</p>
-<p>No Java runtime, no H2 database driver, no system dependencies beyond a working R installation.</p>
+<p>No Java runtime or H2 database driver is needed. Required R dependencies are installed with the package; source installations may need a compiler for those dependencies (see the platform notes below).</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p><code>qviewparsR</code> is <strong>pure R</strong> — no compiled code, no Java runtime, no H2 database driver, and no system libraries — so it installs the same way on <strong>Windows, macOS, and Linux</strong>. The only hard prerequisite is <strong>R &gt;= 4.1.0</strong>.</p>
+<p><code>qviewparsR</code> is <strong>pure R</strong> — no compiled code, no Java runtime, no H2 database driver, and no system libraries — so it installs the same way on <strong>Windows, macOS, and Linux</strong>. The package requires <strong>R &gt;= 4.1.0</strong> and its declared R dependencies.</p>
+<p>The 1.0.1 reliability changes described here are source changes. Use the GitHub installation below until CRAN lists version 1.0.1 or later.</p>
 <p>Install the released version from <a href="https://CRAN.R-project.org/package=qviewparsR" class="external-link">CRAN</a>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"qviewparsR"</span><span class="op">)</span></span></code></pre></div>
 <p>Or the development version from GitHub:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"pak"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"CTTIR/qviewparsR"</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="platform-notes">Platform notes<a class="anchor" aria-label="anchor" href="#platform-notes"></a>
@@ -135,6 +136,35 @@
 <span></span>
 <span><span class="co"># Interactive front-end (upload, visualise, download)</span></span>
 <span><span class="fu"><a href="reference/qview_app.html">qview_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="try-the-bundled-example">Try the bundled example<a class="anchor" aria-label="anchor" href="#try-the-bundled-example"></a>
+</h3>
+<p>This path needs no instrument files or optional plotting packages:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/CTTIR/qviewparsR" class="external-link">qviewparsR</a></span><span class="op">)</span></span>
+<span><span class="va">project</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"example.Q-View"</span>, package <span class="op">=</span> <span class="st">"qviewparsR"</span><span class="op">)</span></span>
+<span><span class="va">qv</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_qview.html">read_qview</a></span><span class="op">(</span><span class="va">project</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">qv</span><span class="op">)</span></span>
+<span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"qview-example-"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/write_qview.html">write_qview_csv</a></span><span class="op">(</span><span class="va">qv</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"tables"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/write_qview.html">write_qview_rds</a></span><span class="op">(</span><span class="va">qv</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"project.rds"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"project.rds"</span><span class="op">)</span><span class="op">)</span>, <span class="va">qv</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">out</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>CSV exports retain exact text. Spreadsheet applications can interpret text starting with formula characters; import such columns explicitly as text. Use RDS for a lossless R round trip. Replacing an existing export requires <code>overwrite = TRUE</code>; use a dedicated directory for CSV bundles.</p>
+</div>
+<div class="section level3">
+<h3 id="interpretation-and-recovery">Interpretation and recovery<a class="anchor" aria-label="anchor" href="#interpretation-and-recovery"></a>
+</h3>
+<p>The binary reader extracts embedded reports; it does not reconstruct H2 transactions or establish which conflicting database record is current. Version 1.0.1 refuses conflicting observations instead of selecting the most frequent value. Export a fresh CSV or XLSX report from Q-View and use <code><a href="reference/read_qview_report.html">read_qview_report()</a></code> when a binary report is ambiguous. Keep the original container and producer export for provenance.</p>
+<p>Reports currently support wells A1–H12. Malformed numeric values, ambiguous analyte identities, invalid wells and malformed template geometry are errors. Recognized missing and censored measurements retain their original decoded text and flags. A <code>&lt;</code> or <code>&gt;</code> concentration is a bound, not an exact observation; summary estimates and numeric plots exclude censored and missing values. Summary counts distinguish observed, missing and censored records. Flat text reports use UTF-8 when valid and otherwise fall back to Latin-1; XLSX text is already decoded. The selected flat-file encoding is recorded in metadata. Binary report text outside the supported printable representation is refused rather than silently stripped; use the producer flat export instead. No step imputes zero or independently validates the producer’s calibration.</p>
+<p>These changes make some formerly accepted inputs fail deliberately. Do not remove conflicting records merely to obtain a successful import; reconcile them with the producer export. The bundled examples are synthetic. Checks against private instrument exports remain unperformed when those files are unavailable.</p>
+</div>
+<div class="section level3">
+<h3 id="app-results-and-graphics">App results and graphics<a class="anchor" aria-label="anchor" href="#app-results-and-graphics"></a>
+</h3>
+<p>Changing an upload or parsing option clears the previous results; parse again before downloading. Exported metadata records the original upload name and parsing settings. PNG downloads accept dimensions of 3–30 inches and 72–1200 DPI, with a total limit of 50 million pixels. Reduce dimensions or DPI when the limit is exceeded, or use the vector PDF download.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="what-is-a-q-view-file">What is a <code>.Q-View</code> file?<a class="anchor" aria-label="anchor" href="#what-is-a-q-view-file"></a>
@@ -368,7 +398,7 @@
 </tr>
 <tr>
 <td><code>concentrations</code></td>
-<td>Long-format concentrations, or <code>NULL</code> if the report is qualitative</td>
+<td>Long-format concentrations, or <code>NULL</code> if no concentration rows were recovered</td>
 </tr>
 <tr>
 <td><code>curve_fit</code></td>
@@ -441,32 +471,32 @@
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<p>If you use <code>qviewparsR</code> in academic work, please cite the CRAN release:</p>
+<p>If you use <code>qviewparsR</code> in academic work, please cite the CRAN release. <code>CITATION.cff</code> and <code>.zenodo.json</code> retain the archived 1.0.0 record; they do not assert that the 1.0.1 source patch has been released or archived. For a source snapshot, also record its Git commit.</p>
 <blockquote>
 <p>Heller R, Mannes M (2026). <em>qviewparsR: Read .Q-View Multiplex ELISA Project Files</em>. <a href="doi:%5B10.32614/CRAN.package.qviewparsR" class="uri">doi:[10.32614/CRAN.package.qviewparsR</a>](<a href="https://doi.org/10.32614/CRAN.package.qviewparsR" class="external-link uri">https://doi.org/10.32614/CRAN.package.qviewparsR</a>). R package version 1.0.0, <a href="https://CRAN.R-project.org/package=qviewparsR" class="external-link uri">https://CRAN.R-project.org/package=qviewparsR</a>.</p>
 </blockquote>
 <p>BibTeX:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="va">@Manual</span>{<span class="ot">qviewparsR</span>,</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="dt">title</span>  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="dt">author</span> = {R. Heller and M. Mannes},</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="dt">year</span>   = {2026},</span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="dt">note</span>   = {R package version 1.0.0},</span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="dt">doi</span>    = {10.32614/CRAN.package.qviewparsR},</span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="dt">url</span>    = {https://CRAN.R-project.org/package=qviewparsR},</span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="va">@Manual</span>{<span class="ot">qviewparsR</span>,</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="dt">title</span>  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="dt">author</span> = {R. Heller and M. Mannes},</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="dt">year</span>   = {2026},</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="dt">note</span>   = {R package version 1.0.0},</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="dt">doi</span>    = {10.32614/CRAN.package.qviewparsR},</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="dt">url</span>    = {https://CRAN.R-project.org/package=qviewparsR},</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>}</span></code></pre></div>
 <p>To cite a specific archived source snapshot instead, use the Zenodo software DOI:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co">@software{heller_2026_21395352,</span></span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">  author    = {Heller, Raban and Mannes, Marco},</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">  title     = {qviewparsR - Read .Q-View Multiplex ELISA Project Files},</span></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">  month     = jul,</span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">  year      = 2026,</span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">  publisher = {Zenodo},</span></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">  version   = {1.0.0},</span></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">  doi       = {10.5281/zenodo.21395352},</span></span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">  url       = {https://doi.org/10.5281/zenodo.21395352},</span></span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co">@software{heller_2026_21395352,</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">  author    = {Heller, Raban and Mannes, Marco},</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">  title     = {qviewparsR - Read .Q-View Multiplex ELISA Project Files},</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">  month     = jul,</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">  year      = 2026,</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">  publisher = {Zenodo},</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">  version   = {1.0.0},</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">  doi       = {10.5281/zenodo.21395352},</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">  url       = {https://doi.org/10.5281/zenodo.21395352},</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">}</span></span></code></pre></div>
 <p>You can always retrieve the up-to-date entry directly from R:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"qviewparsR"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">

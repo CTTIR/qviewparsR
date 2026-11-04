@@ -37,7 +37,7 @@
     <!-- Standard logo aliases contain the named v5 light and dark hexes. -->
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo" data-cttir-dark-src="../reference/figures/logo-dark.svg">qviewparsR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -152,9 +152,10 @@ metadata / analyte panel / sample assignments / replicate pixel
 intensities (and – when generated – a fully rendered CSV report stored
 as a CLOB), and one or more LOB segments holding the raw
 chemiluminescent plate images.</p>
-<p><code>qviewparsR</code> extracts everything except the raw images and
-returns it as tidy tibbles. There is no Java runtime, no H2 database
-driver, no compiled code – all logic is pure R.</p>
+<p><code>qviewparsR</code> extracts the available embedded report fields
+as tidy tibbles. It does not reconstruct database transactions or
+extract raw images. There is no Java runtime, no H2 database driver, no
+compiled code – all logic is pure R.</p>
 <div class="section level3">
 <h3 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h3>
@@ -168,7 +169,7 @@ Linux</strong>. The only hard prerequisite is <strong>R &gt;=
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"qviewparsR"</span><span class="op">)</span></span></code></pre></div>
 <p>Development version from GitHub:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"pak"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"CTTIR/qviewparsR"</span><span class="op">)</span></span></code></pre></div>
 <p>Platform notes: on <strong>Windows</strong> no <em>Rtools</em> is
 required (the package compiles nothing and its CRAN dependencies arrive
@@ -179,10 +180,10 @@ dependencies (<code>dplyr</code>, <code>readr</code>,
 source unless you use a binary repository (for example the Posit Public
 Package Manager or r2u), which avoids needing a compiler.</p>
 <p>The package depends on a small tidyverse-aligned core
-(<code>cli</code>, <code>dplyr</code>, <code>lifecycle</code>,
-<code>openxlsx2</code>, <code>readr</code>, <code>rlang</code>,
-<code>tibble</code>, <code>tidyr</code>). Plotting requires
-<code>ggplot2</code>; the publication overview adds
+(<code>cli</code>, <code>dplyr</code>, <code>fs</code>,
+<code>lifecycle</code>, <code>openxlsx2</code>, <code>readr</code>,
+<code>rlang</code>, <code>tibble</code>, <code>tidyr</code>). Plotting
+requires <code>ggplot2</code>; the publication overview adds
 <code>patchwork</code>; the Shiny front-end adds <code>shiny</code>,
 <code>bslib</code>, <code>DT</code>, <code>withr</code>.</p>
 </div>
@@ -192,20 +193,137 @@ Package Manager or r2u), which avoids needing a compiler.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/CTTIR/qviewparsR" class="external-link">qviewparsR</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">qv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_qview.html">read_qview</a></span><span class="op">(</span><span class="st">"path/to/plate.Q-View"</span><span class="op">)</span></span>
+<span><span class="va">project</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"example.Q-View"</span>, package <span class="op">=</span> <span class="st">"qviewparsR"</span><span class="op">)</span></span>
+<span><span class="va">qv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_qview.html">read_qview</a></span><span class="op">(</span><span class="va">project</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">qv</span>                          <span class="co"># one-screen summary</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Q-View project: </span><span style="color: #0000BB; font-weight: bold;">"Example ELISA project"</span> <span style="color: #00BBBB;">─────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Plate: <span style="color: #0000BB;">"Plate 1"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Image: <span style="color: #0000BB;">"example-plate (01 Jan 2024 12:00)"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Imager: <span style="color: #0000BB;">"#000000 (00000)"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Product: <span style="color: #0000BB;">"EXAMPLE-LOT"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Software: v<span style="color: #0000BB;">"3.13"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Template: <span style="color: #0000BB;">"example-template"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Created: <span style="color: #0000BB;">"01 Jan 2024 12:05"</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Analytes (3)</span> ──</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Ba (ng/ml), Bb (ug/ml), Ref Spot (N/A)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Well groups (5)</span> ──</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> standard: <span style="color: #0000BB;">2</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> negative: <span style="color: #0000BB;">1</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> control: <span style="color: #0000BB;">1</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> sample: <span style="color: #0000BB;">1</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Data</span> ──</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> replicate rows: <span style="color: #0000BB;">20</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> summary stat rows: <span style="color: #0000BB;">0</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> concentrations: 4 rows</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> curve fit: 3 analytes</span></span>
 <span></span>
 <span><span class="va">qv</span><span class="op">$</span><span class="va">analytes</span>                 <span class="co"># spot_number, analyte, unit, lod, lloq, uloq</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 8</span></span></span>
+<span><span class="co">#&gt;   spot_number analyte  unit       lod    lloq  uloq assay_control_low</span></span>
+<span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           1 Ba       ng/ml  0.065    0.26    18.9                <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           2 Bb       ug/ml  0.000<span style="text-decoration: underline;">51</span>  0.002<span style="text-decoration: underline;">9</span>   0.2                <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           3 Ref Spot N/A   <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span>                <span style="text-decoration: underline;">5</span>000</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: assay_control_high &lt;dbl&gt;</span></span></span>
 <span><span class="va">qv</span><span class="op">$</span><span class="va">well_groups</span>              <span class="co"># one row per sample / calibrator / control</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 7</span></span></span>
+<span><span class="co">#&gt;   well_group sample_id is_standard is_negative is_sample is_control well_type</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ICal 1     ICal 1    TRUE        FALSE       FALSE     FALSE      standard </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ICal 2     ICal 2    TRUE        FALSE       FALSE     FALSE      standard </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> GLow       GLow      FALSE       TRUE        FALSE     FALSE      negative </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> HHigh      HHigh     FALSE       FALSE       FALSE     TRUE       control  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> N12345     N12345    FALSE       FALSE       TRUE      FALSE      sample</span></span>
 <span><span class="va">qv</span><span class="op">$</span><span class="va">pixel_intensities</span>        <span class="co"># long-format replicate readings</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 20 × 12</span></span></span>
+<span><span class="co">#&gt;    well_group sample_id well  replicate analyte unit  pixel_intensity dilution</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> ICal 1     ICal 1    A1            1 Ba      ng/ml            <span style="text-decoration: underline;">8</span>671       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> ICal 1     ICal 1    A1            1 Bb      ug/ml           <span style="text-decoration: underline;">19</span>982       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> ICal 1     ICal 1    A2            2 Ba      ng/ml           <span style="text-decoration: underline;">17</span>838       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> ICal 1     ICal 1    A2            2 Bb      ug/ml           <span style="text-decoration: underline;">23</span>848       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> ICal 2     ICal 2    B1            1 Ba      ng/ml            <span style="text-decoration: underline;">4</span>000       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> ICal 2     ICal 2    B1            1 Bb      ug/ml            <span style="text-decoration: underline;">5</span>000       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> ICal 2     ICal 2    B2            2 Ba      ng/ml            <span style="text-decoration: underline;">4</span>100       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ICal 2     ICal 2    B2            2 Bb      ug/ml            <span style="text-decoration: underline;">5</span>100       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> GLow       GLow      G1            1 Ba      ng/ml             300       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> GLow       GLow      G1            1 Bb      ug/ml             400       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> GLow       GLow      G2            2 Ba      ng/ml             310       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> GLow       GLow      G2            2 Bb      ug/ml             410       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span> HHigh      HHigh     H1            1 Ba      ng/ml           <span style="text-decoration: underline;">12</span>000       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span> HHigh      HHigh     H1            1 Bb      ug/ml           <span style="text-decoration: underline;">15</span>000       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span> HHigh      HHigh     H2            2 Ba      ng/ml           <span style="text-decoration: underline;">12</span>100       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">16</span> HHigh      HHigh     H2            2 Bb      ug/ml           <span style="text-decoration: underline;">15</span>100       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">17</span> N12345     N12345    A3            1 Ba      ng/ml            <span style="text-decoration: underline;">1</span>200       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">18</span> N12345     N12345    A3            1 Bb      ug/ml            <span style="text-decoration: underline;">1</span>300       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">19</span> N12345     N12345    A4            2 Ba      ng/ml            <span style="text-decoration: underline;">1</span>250       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">20</span> N12345     N12345    A4            2 Bb      ug/ml            <span style="text-decoration: underline;">1</span>350       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: raw_value &lt;chr&gt;, flag &lt;chr&gt;, error_codes &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   statistic_label &lt;chr&gt;</span></span></span>
 <span><span class="va">qv</span><span class="op">$</span><span class="va">summary_statistics</span>       <span class="co"># per-group mean / std-dev / CV rows</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 0 × 10</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 10 variables: well_group &lt;chr&gt;, sample_id &lt;chr&gt;, statistic &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   analyte &lt;chr&gt;, value &lt;dbl&gt;, unit &lt;chr&gt;, raw_value &lt;chr&gt;, flag &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   error_codes &lt;chr&gt;, statistic_label &lt;chr&gt;</span></span></span>
 <span><span class="va">qv</span><span class="op">$</span><span class="va">plate_layout</span>             <span class="co"># one row per plate well</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 96 × 7</span></span></span>
+<span><span class="co">#&gt;    plate_row plate_col well  well_group sample_id dilution well_type</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> A                 1 A1    ICal 1     ICal 1          <span style="color: #BB0000;">NA</span> standard </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> B                 1 B1    ICal 2     ICal 2          <span style="color: #BB0000;">NA</span> standard </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> C                 1 C1    <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> D                 1 D1    <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> E                 1 E1    <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> F                 1 F1    <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> G                 1 G1    GLow       GLow            <span style="color: #BB0000;">NA</span> negative </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> H                 1 H1    HHigh      HHigh           <span style="color: #BB0000;">NA</span> control  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> A                 2 A2    ICal 1     ICal 1          <span style="color: #BB0000;">NA</span> standard </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> B                 2 B2    ICal 2     ICal 2          <span style="color: #BB0000;">NA</span> standard </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 86 more rows</span></span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">qv</span><span class="op">)</span>                 <span class="co"># mean / SD / CV per well type x analyte</span></span></code></pre></div>
-<p><code><a href="../reference/read_qview.html">read_qview()</a></code> always returns a list of class
-<code>qview</code> with eleven slots described in
-<code><a href="../reference/read_qview.html">?read_qview</a></code>. Empty slots are zero-row tibbles rather than
-<code>NULL</code>, so downstream code can rely on shape stability.</p>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">qv</span><span class="op">)</span>                 <span class="co"># mean / SD / CV per well type x analyte</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Q-View summary</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; Mean / SD / CV of pixel intensities, grouped by well type:</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 12</span></span></span>
+<span><span class="co">#&gt;   well_type analyte unit      n   mean      sd      cv   min   max n_observed</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> standard  Ba      ng/ml     4  <span style="text-decoration: underline;">8</span>652. <span style="text-decoration: underline;">6</span>500.   0.751    <span style="text-decoration: underline;">4</span>000 <span style="text-decoration: underline;">17</span>838          4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> standard  Bb      ug/ml     4 <span style="text-decoration: underline;">13</span>482. <span style="text-decoration: underline;">9</span>864.   0.732    <span style="text-decoration: underline;">5</span>000 <span style="text-decoration: underline;">23</span>848          4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> negative  Ba      ng/ml     2   305     7.07 0.023<span style="text-decoration: underline;">2</span>    300   310          2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> negative  Bb      ug/ml     2   405     7.07 0.017<span style="text-decoration: underline;">5</span>    400   410          2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> sample    Ba      ng/ml     2  <span style="text-decoration: underline;">1</span>225    35.4  0.028<span style="text-decoration: underline;">9</span>   <span style="text-decoration: underline;">1</span>200  <span style="text-decoration: underline;">1</span>250          2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> sample    Bb      ug/ml     2  <span style="text-decoration: underline;">1</span>325    35.4  0.026<span style="text-decoration: underline;">7</span>   <span style="text-decoration: underline;">1</span>300  <span style="text-decoration: underline;">1</span>350          2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> control   Ba      ng/ml     2 <span style="text-decoration: underline;">12</span>050    70.7  0.005<span style="text-decoration: underline;">87</span> <span style="text-decoration: underline;">12</span>000 <span style="text-decoration: underline;">12</span>100          2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> control   Bb      ug/ml     2 <span style="text-decoration: underline;">15</span>050    70.7  0.004<span style="text-decoration: underline;">70</span> <span style="text-decoration: underline;">15</span>000 <span style="text-decoration: underline;">15</span>100          2</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: n_missing &lt;int&gt;, n_censored &lt;int&gt;</span></span></span></code></pre></div>
+<p><code><a href="../reference/read_qview.html">read_qview()</a></code> returns the list of class
+<code>qview</code> described in <code><a href="../reference/read_qview.html">?read_qview</a></code>. Optional
+concentrations or curve fits can be <code>NULL</code> when they are
+absent; check before using them. Reports currently support A1–H12.
+Conflicting embedded observations are refused: obtain a fresh producer
+report rather than assume the most frequent copy represents the current
+transaction.</p>
 </div>
 <div class="section level3">
 <h3 id="reading-flat-report-exports">Reading flat report exports<a class="anchor" aria-label="anchor" href="#reading-flat-report-exports"></a>
@@ -218,18 +336,32 @@ unavailable, <code><a href="../reference/read_qview_report.html">read_qview_repo
 returns the same <code>qview</code> object <code><a href="../reference/read_qview.html">read_qview()</a></code>
 builds:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_qview_report.html">read_qview_report</a></span><span class="op">(</span><span class="st">"path/to/plate_auto_report.csv"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">report_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"example-report.csv"</span>, package <span class="op">=</span> <span class="st">"qviewparsR"</span><span class="op">)</span></span>
+<span><span class="va">rep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_qview_report.html">read_qview_report</a></span><span class="op">(</span><span class="va">report_path</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/is_qview.html">is_qview</a></span><span class="op">(</span><span class="va">rep</span><span class="op">)</span>               <span class="co"># TRUE -- same class as read_qview()</span></span>
-<span><span class="va">rep</span><span class="op">$</span><span class="va">concentrations</span>          <span class="co"># long-format, with an out-of-range `flag`</span></span></code></pre></div>
-<p>It differs from <code><a href="../reference/read_qview.html">read_qview()</a></code> in two deliberate ways: it
-captures the plain <code>"Reduced Concentration"</code> point estimate
-(one row per sample, with <code>statistic == "reduced"</code>), and it
-preserves out-of-range cells instead of dropping them – a
-<code>"&lt; 52.50"</code> cell becomes
-<code>concentration = 52.50</code> with <code>flag = "&lt;"</code>
-(<code>"&gt;"</code> for the upper bound, <code>"incalculable"</code>
-for <code>Incalculable</code>), so limit-of-quantification information
-survives import.</p>
+<span><span class="co">#&gt; [1] TRUE</span></span>
+<span><span class="va">rep</span><span class="op">$</span><span class="va">concentrations</span>          <span class="co"># long-format, with an out-of-range `flag`</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 13</span></span></span>
+<span><span class="co">#&gt;   well_group sample_id well  replicate statistic analyte unit  concentration</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Cal 1      Cal 1     A1            1 replicate Ba      ng/mL         28.0 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Cal 1      Cal 1     A1            1 replicate Bb      ug/mL          0.41</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Cal 1      Cal 1     A2            2 replicate Ba      ng/mL         <span style="color: #BB0000;">NA</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Cal 1      Cal 1     A2            2 replicate Bb      ug/mL          0.47</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> N12345     N12345    A3           <span style="color: #BB0000;">NA</span> reduced   Ba      ng/mL          2.5 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> N12345     N12345    A3           <span style="color: #BB0000;">NA</span> reduced   Bb      ug/mL          0.05</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> N23456     N23456    A4           <span style="color: #BB0000;">NA</span> reduced   Ba      ng/mL          0.31</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> N23456     N23456    A4           <span style="color: #BB0000;">NA</span> reduced   Bb      ug/mL          0.42</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: dilution &lt;dbl&gt;, flag &lt;chr&gt;, raw_value &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   error_codes &lt;chr&gt;, statistic_label &lt;chr&gt;</span></span></span></code></pre></div>
+<p>Both readers preserve recognized missing and censored measurements,
+with <code>raw_value</code> and <code>flag</code> alongside the numeric
+value. A <code>"&lt; 52.50"</code> cell has value 52.50 and flag
+<code>&lt;</code>: it is a bound, not an observed concentration.
+<code>Incalculable</code> remains missing and flagged. Numeric plots and
+summary estimates exclude censored and missing values; summary counts
+expose both categories. Malformed nonblank numeric values are errors,
+not silently missing data.</p>
 </div>
 <div class="section level3">
 <h3 id="the-naming-convention">The naming convention<a class="anchor" aria-label="anchor" href="#the-naming-convention"></a>
@@ -271,10 +403,12 @@ and reversible:</p>
 <code>strip_prefix = TRUE</code> to <code><a href="../reference/read_qview.html">read_qview()</a></code> to apply
 it across every sample-id column at once:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">qv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_qview.html">read_qview</a></span><span class="op">(</span><span class="st">"path/to/plate.Q-View"</span>, strip_prefix <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">qv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_qview.html">read_qview</a></span><span class="op">(</span><span class="va">project</span>, strip_prefix <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">qv</span><span class="op">$</span><span class="va">well_groups</span><span class="op">$</span><span class="va">sample_id</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Cal 1" "Cal 2" "Low"   "High"  "12345"</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/strip_qview_prefix.html">strip_qview_prefix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ICal 1"</span>, <span class="st">"GLow"</span>, <span class="st">"HHigh"</span>, <span class="st">"NFD24277364"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Cal 1"      "Low"        "High"       "FD24277364"</span></span>
 <span><span class="co">#&gt; [1] "Cal 1"      "Low"        "High"       "FD24277364"</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -285,44 +419,69 @@ it across every sample-id column at once:</p>
 a parsed object drops straight into a dplyr / ggplot2 pipeline:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     filter, lag</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
 <span></span>
 <span><span class="va">qv</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">replicate</span> <span class="op">==</span> <span class="fl">1L</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">replicate</span> <span class="op">==</span> <span class="fl">1L</span>, <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">flag</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/is.finite.html" class="external-link">is.finite</a></span><span class="op">(</span><span class="va">pixel_intensity</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">analyte</span>, <span class="va">unit</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>median_pi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">pixel_intensity</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
-<span>            .groups <span class="op">=</span> <span class="st">"drop"</span><span class="op">)</span></span></code></pre></div>
+<span>            .groups <span class="op">=</span> <span class="st">"drop"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 3</span></span></span>
+<span><span class="co">#&gt;   analyte unit  median_pi</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Ba      ng/ml      <span style="text-decoration: underline;">4</span>000</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Bb      ug/ml      <span style="text-decoration: underline;">5</span>000</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="visualisation">Visualisation<a class="anchor" aria-label="anchor" href="#visualisation"></a>
 </h3>
-<p>The <code><a href="../reference/plot.qview.html">plot.qview()</a></code> method offers three quick-look views,
-all coloured on the same viridis ramp the Shiny app uses:</p>
+<p>The <code><a href="../reference/plot.qview.html">plot.qview()</a></code> method offers three quick-look views.
+Plate and intensity maps use viridis palettes; the scatterplot compares
+replicate pairs:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">qv</span>, type <span class="op">=</span> <span class="st">"plate_map"</span><span class="op">)</span>          <span class="co"># 96-well plate, fill = well type</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">qv</span>, type <span class="op">=</span> <span class="st">"intensity_heatmap"</span><span class="op">)</span>  <span class="co"># facet per analyte, fill = PI</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">qv</span>, type <span class="op">=</span> <span class="st">"replicate_scatter"</span><span class="op">)</span>  <span class="co"># rep 1 vs rep 2 per analyte</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">qv</span>, type <span class="op">=</span> <span class="st">"plate_map"</span><span class="op">)</span>          <span class="co"># 96-well plate, fill = well type</span></span></code></pre></div>
+<p><img src="qviewparsR_files/figure-html/plots-1.png" class="r-plt" alt="Synthetic 96-well plate showing standard, negative, sample, control and unassigned wells." width="672" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">qv</span>, type <span class="op">=</span> <span class="st">"intensity_heatmap"</span><span class="op">)</span>  <span class="co"># facet per analyte, fill = PI</span></span></code></pre></div>
+<p><img src="qviewparsR_files/figure-html/plots-2.png" class="r-plt" alt="Replicate-one pixel intensity by well for synthetic Ba and Bb measurements; fill encodes intensity on the shared PI scale." width="672" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">qv</span>, type <span class="op">=</span> <span class="st">"replicate_scatter"</span><span class="op">)</span>  <span class="co"># rep 1 vs rep 2 per analyte</span></span></code></pre></div>
+<p><img src="qviewparsR_files/figure-html/plots-3.png" class="r-plt" alt="Synthetic Ba and Bb replicate-two versus replicate-one pixel intensities, with a dashed identity line in each panel." width="672" style="display: block; margin: auto;"></p>
 <p>Each call returns a <code>ggplot</code> object, so themes, scales,
 and labels can be added on top:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">qv</span>, type <span class="op">=</span> <span class="st">"plate_map"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="cn">NULL</span>, subtitle <span class="op">=</span> <span class="st">"QC overview"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="qviewparsR_files/figure-html/plot-theme-1.png" class="r-plt" alt="Synthetic plate map with a black-and-white theme, showing the same well assignments as the preceding plate map." width="672" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
 <h3 id="exporting">Exporting<a class="anchor" aria-label="anchor" href="#exporting"></a>
 </h3>
 <p>Three writers cover the common destinations. All return the parsed
 object invisibly, so they compose with <code>|&gt;</code>:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">qv</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/write_qview.html">write_qview_xlsx</a></span><span class="op">(</span><span class="st">"plate.xlsx"</span><span class="op">)</span> <span class="op">|&gt;</span>      <span class="co"># one sheet per parsed table</span></span>
-<span>  <span class="fu"><a href="../reference/write_qview.html">write_qview_csv</a></span> <span class="op">(</span><span class="st">"plate_csv/"</span><span class="op">)</span> <span class="op">|&gt;</span>      <span class="co"># one CSV per parsed table</span></span>
-<span>  <span class="fu"><a href="../reference/write_qview.html">write_qview_rds</a></span> <span class="op">(</span><span class="st">"plate.rds"</span><span class="op">)</span>          <span class="co"># full lossless R round-trip</span></span></code></pre></div>
-<p><code><a href="../reference/write_qview.html">write_qview_xlsx()</a></code> and <code><a href="../reference/write_qview.html">write_qview_rds()</a></code>
-accept <code>overwrite = TRUE</code> to replace existing
-destinations.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"qview-vignette-"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span></span>
+<span><span class="va">qv</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/write_qview.html">write_qview_xlsx</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"plate.xlsx"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/write_qview.html">write_qview_csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"plate_csv"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/write_qview.html">write_qview_rds</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"plate.rds"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"plate.rds"</span><span class="op">)</span><span class="op">)</span>, <span class="va">qv</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>All writers require <code>overwrite = TRUE</code> to replace existing
+output. CSV replacement is for a dedicated bundle directory and refuses
+unrelated files. Keep archival CSV as data: spreadsheet applications may
+interpret text beginning with formula characters. Import such columns
+explicitly as text when viewing them.</p>
 <p>The legacy aliases <code><a href="../reference/write_qview.html">qview_to_xlsx()</a></code> and
 <code><a href="../reference/write_qview.html">qview_to_csv_dir()</a></code> still work but emit
 <code><a href="https://lifecycle.r-lib.org/reference/deprecate_soft.html" class="external-link">lifecycle::deprecate_warn()</a></code>; switch to the new names.</p>
@@ -335,14 +494,36 @@ file. If you also have the original well-assignment template CSV the
 producing application imported, <code><a href="../reference/read_qview_template.html">read_qview_template()</a></code>
 parses it into a tibble that aligns with
 <code>qv$plate_layout</code>:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tmpl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_qview_template.html">read_qview_template</a></span><span class="op">(</span><span class="st">"path/to/template.csv"</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tmpl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_qview_template.html">read_qview_template</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"example-template.csv"</span>,</span>
+<span>                                       package <span class="op">=</span> <span class="st">"qviewparsR"</span><span class="op">)</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">qv</span><span class="op">$</span><span class="va">plate_layout</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">tmpl</span>, by <span class="op">=</span> <span class="st">"well"</span>, suffix <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"_qview"</span>, <span class="st">"_template"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">sample_id_qview</span> <span class="op">!=</span> <span class="va">sample_id_template</span><span class="op">)</span></span></code></pre></div>
-<p>Any rows surviving the filter expose template-vs-Q-View
-mismatches.</p>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">full_join</a></span><span class="op">(</span><span class="va">tmpl</span>, by <span class="op">=</span> <span class="st">"well"</span>, suffix <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"_qview"</span>, <span class="st">"_template"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Logic.html" class="external-link">xor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">sample_id_qview</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">sample_id_template</span><span class="op">)</span><span class="op">)</span> <span class="op">|</span></span>
+<span>                  <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">sample_id_qview</span><span class="op">)</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">sample_id_template</span><span class="op">)</span> <span class="op">&amp;</span></span>
+<span>                     <span class="va">sample_id_qview</span> <span class="op">!=</span> <span class="va">sample_id_template</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 87 × 12</span></span></span>
+<span><span class="co">#&gt;    plate_row_qview plate_col_qview well  well_group sample_id_qview</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> C                             1 C1    <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span>             </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> D                             1 D1    <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span>             </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> E                             1 E1    <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span>             </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> F                             1 F1    <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span>             </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> C                             2 C2    <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span>             </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> D                             2 D2    <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span>             </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> E                             2 E2    <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span>             </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> F                             2 F2    <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span>             </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> B                             3 B3    <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span>             </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> C                             3 C3    <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span>             </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 77 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: dilution_qview &lt;dbl&gt;, well_type &lt;fct&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   plate_row_template &lt;chr&gt;, plate_col_template &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   sample_id_template &lt;chr&gt;, group_type &lt;chr&gt;, dilution_template &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>Rows surviving the filter expose differing or one-sided missing
+sample assignments, including wells present on only one side. The
+bundled files are synthetic examples, not independent
+instrument-validation evidence.</p>
 </div>
 <div class="section level3">
 <h3 id="interactive-front-end">Interactive front-end<a class="anchor" aria-label="anchor" href="#interactive-front-end"></a>
@@ -350,7 +531,7 @@ mismatches.</p>
 <p>For non-coding collaborators, <code><a href="../reference/qview_app.html">qview_app()</a></code> launches a
 Shiny app in the same monochrome aesthetic (light + dark mode) with the
 hex sticker in the upper-left corner:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/qview_app.html">qview_app</a></span><span class="op">(</span><span class="op">)</span>             <span class="co"># 512 MB upload cap by default</span></span>
 <span><span class="fu"><a href="../reference/qview_app.html">qview_app</a></span><span class="op">(</span>max_upload_mb <span class="op">=</span> <span class="fl">1024</span><span class="op">)</span></span></code></pre></div>
 <p>The app accepts a <code>.Q-View</code> upload (and optionally a
@@ -364,6 +545,12 @@ by well type) with high-DPI PNG and vector PDF export;</li>
 project;</li>
 <li>a built-in dark/light toggle and per-card max/restore.</li>
 </ul>
+<p>Changing uploads or parsing settings clears previous results; parse
+again before exporting. The downloaded metadata retains original upload
+names and settings. PNG dimensions must be 3–30 inches, DPI 72–1200, and
+the product of width, height and squared DPI must not exceed 50 million
+pixels. PDF exports remain vector graphics. Invalid settings produce an
+error rather than a silently resized figure.</p>
 </div>
 <div class="section level3">
 <h3 id="error-handling">Error handling<a class="anchor" aria-label="anchor" href="#error-handling"></a>
@@ -384,29 +571,29 @@ exists.</p>
 <div class="section level3">
 <h3 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h3>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"qviewparsR"</span><span class="op">)</span></span></code></pre></div>
 <p>BibTeX:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="va">@Manual</span>{<span class="ot">qviewparsR</span>,</span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>  <span class="dt">title</span>  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},</span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>  <span class="dt">author</span> = {R. Heller and M. Mannes},</span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>  <span class="dt">year</span>   = {2026},</span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>  <span class="dt">note</span>   = {R package version 1.0.0},</span>
-<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>  <span class="dt">doi</span>    = {10.32614/CRAN.package.qviewparsR},</span>
-<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>  <span class="dt">url</span>    = {https://CRAN.R-project.org/package=qviewparsR},</span>
-<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="va">@Manual</span>{<span class="ot">qviewparsR</span>,</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>  <span class="dt">title</span>  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>  <span class="dt">author</span> = {R. Heller and M. Mannes},</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>  <span class="dt">year</span>   = {2026},</span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>  <span class="dt">note</span>   = {R package version 1.0.0},</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>  <span class="dt">doi</span>    = {10.32614/CRAN.package.qviewparsR},</span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>  <span class="dt">url</span>    = {https://CRAN.R-project.org/package=qviewparsR},</span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a>}</span></code></pre></div>
 <p>To cite a specific archived source snapshot instead, use the Zenodo
 software DOI:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co">@software{heller_2026_21395352,</span></span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="co">  author    = {Heller, Raban and Mannes, Marco},</span></span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="co">  title     = {qviewparsR - Read .Q-View Multiplex ELISA Project Files},</span></span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co">  month     = jul,</span></span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="co">  year      = 2026,</span></span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="co">  publisher = {Zenodo},</span></span>
-<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="co">  version   = {1.0.0},</span></span>
-<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co">  doi       = {10.5281/zenodo.21395352},</span></span>
-<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="co">  url       = {https://doi.org/10.5281/zenodo.21395352},</span></span>
-<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="co">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co">@software{heller_2026_21395352,</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="co">  author    = {Heller, Raban and Mannes, Marco},</span></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="co">  title     = {qviewparsR - Read .Q-View Multiplex ELISA Project Files},</span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="co">  month     = jul,</span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="co">  year      = 2026,</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="co">  publisher = {Zenodo},</span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="co">  version   = {1.0.0},</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a><span class="co">  doi       = {10.5281/zenodo.21395352},</span></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a><span class="co">  url       = {https://doi.org/10.5281/zenodo.21395352},</span></span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a><span class="co">}</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

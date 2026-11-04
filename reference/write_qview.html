@@ -15,7 +15,7 @@
     <!-- Standard logo aliases contain the named v5 light and dark hexes. -->
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo" data-cttir-dark-src="../reference/figures/logo-dark.svg">qviewparsR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,7 +47,7 @@
     </div>
 
     <div class="ref-description section level2">
-    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a></p>
+    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="figures/lifecycle-stable.svg" alt="[Stable]"></a></p>
     </div>
 
     <div class="section level2">
@@ -60,7 +60,13 @@
 <span>  call <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">write_qview_csv</span><span class="op">(</span><span class="va">qv</span>, <span class="va">path</span>, template <span class="op">=</span> <span class="cn">NULL</span>, call <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">write_qview_csv</span><span class="op">(</span></span>
+<span>  <span class="va">qv</span>,</span>
+<span>  <span class="va">path</span>,</span>
+<span>  template <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  call <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  overwrite <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">write_qview_rds</span><span class="op">(</span><span class="va">qv</span>, <span class="va">path</span>, overwrite <span class="op">=</span> <span class="cn">FALSE</span>, call <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -72,7 +78,13 @@
 <span>  call <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">qview_to_csv_dir</span><span class="op">(</span><span class="va">qv</span>, <span class="va">dir</span>, template <span class="op">=</span> <span class="cn">NULL</span>, call <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">qview_to_csv_dir</span><span class="op">(</span></span>
+<span>  <span class="va">qv</span>,</span>
+<span>  <span class="va">dir</span>,</span>
+<span>  template <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  call <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  overwrite <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -96,8 +108,11 @@ directory (created if it does not exist).</p></dd>
 
 <dt id="arg-overwrite">overwrite<a class="anchor" aria-label="anchor" href="#arg-overwrite"></a></dt>
 <dd><p>Logical. If <code>FALSE</code> (the default), an existing
-destination triggers an error; set to <code>TRUE</code> to replace it.
-Ignored by <code>write_qview_csv()</code> (it only adds files).</p></dd>
+file or non-empty CSV directory triggers an error. An existing empty
+CSV directory is allowed. With <code>TRUE</code>, CSV replacement accepts only
+the managed table filenames listed below; unrelated entries, links,
+and non-regular files are refused. Tables absent from the new object
+are removed only during this explicit replacement.</p></dd>
 
 
 <dt id="arg-call">call<a class="anchor" aria-label="anchor" href="#arg-call"></a></dt>
@@ -121,7 +136,25 @@ Use <code>path</code> instead.</p></dd>
 <li><p><code>write_qview_csv()</code>  – one CSV per parsed table inside a directory.</p></li>
 <li><p><code>write_qview_rds()</code>  – a single <code>.rds</code> containing the full <code>qview</code>
 object (lossless, the only round-trippable format).</p></li>
-</ul></div>
+</ul><p>Tables are checked and written into a private staging directory beside
+the destination before publication. An existing destination is moved to
+a backup during replacement and restored if publication fails. If that
+restoration fails, the error names the retained backup. This is not a
+crash-atomic transaction: process termination, filesystem failure, or
+concurrent readers/writers can observe an absent destination or leave
+recovery files. Concurrent writers are not synchronized.</p>
+<p>Replacement copies and verifies the existing filesystem permission mode
+before publication, including the CSV directory and each managed CSV file
+present in both bundles. A new CSV directory is created with mode <code>0700</code>.
+Mode support depends on the operating system and filesystem; ownership
+and access-control lists (ACLs) are not copied by these writers.</p>
+<p>CSV bundles contain only non-empty tables named <code>metadata</code>, <code>analytes</code>,
+<code>well_groups</code>, <code>plate_layout</code>, <code>pixel_intensities</code>, <code>summary_statistics</code>,
+<code>concentrations</code>, <code>curve_fit</code>, <code>manifest</code>, <code>segments</code>, and optional
+<code>template</code>, each with a <code>.csv</code> suffix. Use a dedicated directory.
+CSV and XLSX require one-dimensional atomic columns; RDS retains the
+full object, including additional fields and list columns.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -134,11 +167,11 @@ object (lossless, the only round-trippable format).</p></li>
 <span class="r-in"><span>  <span class="fu">write_qview_rds</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"plate.rds"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">write_qview_csv</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"plate_csv"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">out</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "plate.rds"                       "plate_csv/analytes.csv"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "plate_csv/concentrations.csv"    "plate_csv/curve_fit.csv"        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5] "plate_csv/manifest.csv"          "plate_csv/metadata.csv"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [7] "plate_csv/pixel_intensities.csv" "plate_csv/plate_layout.csv"     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [9] "plate_csv/well_groups.csv"      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "plate.rds"                       "plate_csv/analytes.csv"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "plate_csv/concentrations.csv"    "plate_csv/curve_fit.csv"        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "plate_csv/manifest.csv"          "plate_csv/metadata.csv"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "plate_csv/pixel_intensities.csv" "plate_csv/plate_layout.csv"     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "plate_csv/segments.csv"          "plate_csv/well_groups.csv"      </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

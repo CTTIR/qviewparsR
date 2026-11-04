@@ -15,7 +15,7 @@
     <!-- Standard logo aliases contain the named v5 light and dark hexes. -->
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo" data-cttir-dark-src="../reference/figures/logo-dark.svg">qviewparsR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,7 +47,7 @@
     </div>
 
     <div class="ref-description section level2">
-    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a></p>
+    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="figures/lifecycle-stable.svg" alt="[Stable]"></a></p>
     </div>
 
     <div class="section level2">
@@ -87,10 +87,15 @@ assignment. The file uses a multi-section layout: an <code>NxM</code> cell in
 the top-left declares the plate dimensions, followed by sections
 labelled <code>Group Name</code>, <code>Group Type</code>, and <code>Dilution Factor</code>. Each
 section is one row per plate row and one column per plate column.</p>
-<p>All template data is also embedded inside the <code>.Q-View</code> file itself
-(and is recovered by <code><a href="read_qview.html">read_qview()</a></code>); this function exists for
-setting up new plates or cross-validating Q-View imports against
-the original template.</p>
+<p>All three required sections must have each declared row and column
+exactly once. Dimensions must fit the source and use at most 26 single-
+letter rows; this does not extend binary report support beyond 96 wells.
+Nonblank dilution values must be positive finite numbers. Blank sample
+and dilution cells remain missing. Identifiers are decoded as text,
+preserving leading zeroes, quoted punctuation and non-dilution suffixes.
+Text uses the UTF-8-then-Latin-1 fallback described in <code><a href="read_qview_report.html">read_qview_report()</a></code>.
+The template is an independent assignment source; binary report extraction
+does not recover every original template field.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

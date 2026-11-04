@@ -15,7 +15,7 @@
     <!-- Standard logo aliases contain the named v5 light and dark hexes. -->
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo" data-cttir-dark-src="../reference/figures/logo-dark.svg">qviewparsR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,7 +86,9 @@ by well type (standard / negative / sample / control).</p></li>
 pixel intensity per well.</p></li>
 <li><p><code>"replicate_scatter"</code> – replicate 1 vs replicate 2 pixel
 intensity per analyte.</p></li>
-</ul><p>Requires the <code>ggplot2</code> package (Suggested).</p>
+</ul><p>Missing and censored measurements are excluded from numeric plots.
+Their original values and flags remain available in the parsed tables.
+Requires the <code>ggplot2</code> package (Suggested).</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
