@@ -78,7 +78,10 @@ test_that("qview_app() sets the upload limit and runs the app", {
   .app_skips()
   ran <- NULL
   testthat::local_mocked_bindings(
-    runApp = function(appDir, ...) { ran <<- getOption("shiny.maxRequestSize"); invisible() },
+    runApp = function(...) {
+      ran <<- getOption("shiny.maxRequestSize")
+      invisible()
+    },
     .package = "shiny")
   before <- getOption("shiny.maxRequestSize")
   qview_app(max_upload_mb = 64)
@@ -193,10 +196,10 @@ test_that("empty-state messages appear when slots are missing", {
     expect_match(as.character(output$msg_conc), "Upload and parse", all = FALSE)
     expect_match(as.character(output$msg_template), "cross-validate", all = FALSE)
 
-    # Parsed qv with no concentrations: the qualitative-only notice shows.
+    # An absent table does not establish a qualitative regression model.
     state$qv <- qv_noconc
     session$flushReact()
-    expect_match(as.character(output$msg_conc), "No quantitative concentrations",
+    expect_match(as.character(output$msg_conc), "No quantitative concentration rows",
                  all = FALSE)
   })
 })

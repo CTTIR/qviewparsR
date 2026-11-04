@@ -28,6 +28,7 @@
 #' @family qview-app
 #' @export
 qview_app <- function(max_upload_mb = 512, ...) {
+  upload_bytes <- .qv_upload_bytes(max_upload_mb)
   for (pkg in c("shiny", "bslib", "DT", "ggplot2", "withr")) {
     if (!requireNamespace(pkg, quietly = TRUE)) {
       cli::cli_abort(c(
@@ -36,11 +37,51 @@ qview_app <- function(max_upload_mb = 512, ...) {
       ))
     }
   }
-  stopifnot(is.numeric(max_upload_mb), length(max_upload_mb) == 1L,
-            max_upload_mb > 0)
-  old <- options(shiny.maxRequestSize = max_upload_mb * 1024^2)
+  old <- options(shiny.maxRequestSize = upload_bytes)
   on.exit(options(old), add = TRUE)
   shiny::runApp(.qv_app(), ...)
+}
+
+
+.qv_upload_bytes <- function(max_upload_mb) {
+  if (!is.numeric(max_upload_mb) || is.complex(max_upload_mb) ||
+      length(max_upload_mb) != 1L || !is.finite(max_upload_mb) ||
+      max_upload_mb <= 0 ||
+      max_upload_mb > .Machine$double.xmax / 1024^2) {
+    cli::cli_abort("{.arg max_upload_mb} must be one positive finite number with a finite size in bytes.")
+  }
+  max_upload_mb * 1024^2
+}
+
+.qv_plot_export_size <- function(width, height, dpi = NULL) {
+  check <- function(value, label, lower, upper) {
+    if (!is.numeric(value) || is.complex(value) || length(value) != 1L ||
+        !is.finite(value) || value < lower || value > upper) {
+      cli::cli_abort("{label} must be one finite number between {lower} and {upper}.")
+    }
+    value
+  }
+  width <- check(width, "Plot width (inches)", 3, 30)
+  height <- check(height, "Plot height (inches)", 3, 30)
+  if (!is.null(dpi)) {
+    dpi <- check(dpi, "Plot DPI", 72, 1200)
+    if (width * height * dpi^2 > 50000000) {
+      cli::cli_abort(c(
+        "PNG exports are limited to 50 million pixels.",
+        i = "Reduce the width, height, or DPI; no values were changed automatically."
+      ))
+    }
+  }
+  list(width = width, height = height, dpi = dpi)
+}
+
+.qv_upload_basename <- function(upload) {
+  if (is.null(upload)) return(NA_character_)
+  name <- upload$name
+  if (!is.character(name) || length(name) != 1L || is.na(name) || !nzchar(name)) {
+    name <- upload$datapath
+  }
+  basename(gsub("\\", "/", name, fixed = TRUE))
 }
 
 
@@ -149,6 +190,8 @@ hr { border-top:1px solid var(--qv-line); }
 }
 table.dataTable thead th { border-bottom:1px solid var(--qv-fg) !important; }
 table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
+
+#plt_overview, #qv_plot { flex: 0 0 auto; }
 
 .qv-about { max-width: 760px; padding: 1rem 0.25rem; }
 .qv-about h2 { letter-spacing:.02em; margin-bottom:.5rem; }
@@ -269,7 +312,8 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
           "Publication-ready 2x2: A. Plate layout - ",
           "B. Pixel-intensity distribution - ",
           "C. Replicate concordance - ",
-          "D. Mean PI (+/- SD) by well type. ",
+          "D. Mean PI (+/- SD) by well type. Missing and censored ",
+          "values are excluded from numeric plots. ",
           "Width / Height / DPI controls (set in the Visualise tab) apply ",
           "to the PNG download."
         )
@@ -317,6 +361,9 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
           shiny::column(2, shiny::numericInput(
             "plot_h_in", "Height (in)", value = 7, min = 3, max = 30, step = 0.5))
         ),
+        shiny::tags$p(class = "text-muted",
+          "PNG exports are limited to 50 million pixels. Reduce width, height, ",
+          "or DPI for larger figures; PDF exports remain vector graphics."),
         shiny::plotOutput("qv_plot", height = "640px"),
         shiny::downloadButton("dl_plot", "Download plot (PNG, high-DPI)")
       )
@@ -342,13 +389,16 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
         "chemiluminescent multiplex ELISA plate imaging and quantification."
       )),
       shiny::p(
-        "qviewparsR reads .Q-View files end-to-end without a Java runtime ",
-        "or H2 database driver. The package extracts project metadata, the ",
+        "qviewparsR extracts the embedded report from .Q-View files without ",
+        "a Java runtime or H2 database driver. Ambiguous or malformed ",
+        "reports are refused. The package extracts project metadata, the ",
         "analyte panel with units and detection limits, sample well-group ",
         "assignments, per-well replicate pixel intensities, summary ",
         "statistics, optional back-calculated concentrations, the curve ",
         "fit, and a plate layout, all as tidy tibbles. Plot, summarise, ",
-        "or pipe-export to xlsx, csv, or rds."
+        "or pipe-export to xlsx, csv, or rds. If binary extraction is ",
+        "ambiguous, export a CSV or XLSX report in Q-View and read it with ",
+        "the package's read_qview_report() function."
       ),
       shiny::h3("Authors"),
       shiny::tags$ul(
@@ -410,8 +460,38 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
                                  log = character(0))
 
   log_msg <- function(...) {
-    state$log <- c(state$log, paste0(format(Sys.time(), "%H:%M:%S"), "  ",
-                                     paste0(..., collapse = "")))
+    entry <- paste0(format(Sys.time(), "%H:%M:%S"), "  ",
+                    paste0(..., collapse = ""))
+    state$log <- utils::tail(c(shiny::isolate(state$log), entry), 100L)
+  }
+
+  # Input changes invalidate the previous successful snapshot before a Parse
+  # click in the same flush. Plot display/export controls do not invalidate it.
+  shiny::observeEvent(list(input$f_qview, input$f_template, input$opt_strip), {
+    had_result <- !is.null(state$qv)
+    state$qv <- NULL
+    state$template <- NULL
+    state$log <- character(0)
+    if (had_result) log_msg("Inputs changed. Click 'Parse' to create new results.")
+  }, ignoreInit = TRUE, priority = 100)
+
+  export_size <- function(default_width, default_height, raster = TRUE) {
+    tryCatch(
+      .qv_plot_export_size(
+        if (is.null(input$plot_w_in)) default_width else input$plot_w_in,
+        if (is.null(input$plot_h_in)) default_height else input$plot_h_in,
+        if (raster) {
+          if (is.null(input$plot_dpi)) 600 else input$plot_dpi
+        } else {
+          NULL
+        }
+      ),
+      error = function(e) {
+        log_msg("Plot export refused: ", conditionMessage(e))
+        shiny::showNotification(conditionMessage(e), type = "error", duration = 10)
+        shiny::req(FALSE)
+      }
+    )
   }
 
   shiny::observeEvent(input$btn_parse, {
@@ -433,12 +513,18 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
       }
     )
     if (is.null(qv)) return()
-    state$qv <- qv
+    qv$metadata$upload_file <- .qv_upload_basename(input$f_qview)
+    qv$metadata$upload_template <- .qv_upload_basename(input$f_template)
+    qv$metadata$strip_prefix <- isTRUE(input$opt_strip)
+    qv$metadata$template_status <- "not supplied"
     log_msg(sprintf(
       "Parsed Q-View binary: %d well groups x %d analytes (%d replicate rows).",
       nrow(qv$well_groups), nrow(qv$analytes), nrow(qv$pixel_intensities)))
+    log_msg("Source: ", qv$metadata$upload_file,
+            "; strip prefixes: ", qv$metadata$strip_prefix, ".")
 
     if (!is.null(input$f_template)) {
+      qv$metadata$template_status <- "failed"
       tmpl <- tryCatch(
         read_qview_template(input$f_template$datapath, verbose = FALSE),
         error = function(e) {
@@ -448,9 +534,11 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
       )
       if (!is.null(tmpl)) {
         state$template <- tmpl
+        qv$metadata$template_status <- "parsed"
         log_msg(sprintf("Parsed template: %d wells.", nrow(tmpl)))
       }
     }
+    state$qv <- qv
   })
 
   output$status <- shiny::renderText({
@@ -496,7 +584,7 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
   output$plt_overview <- shiny::renderPlot({
     p <- rx_overview()
     if (is.null(p)) return(.qv_blank_plot(
-      "Upload and parse a .Q-View file to see the publication overview."
+      "Overview unavailable. See Status for the error and recovery details."
     ))
     p
   })
@@ -504,20 +592,17 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
   output$dl_overview_png <- shiny::downloadHandler(
     filename = function() filename_stamp("_overview.png"),
     content  = function(file) {
+      size <- export_size(12, 9)
       p <- rx_overview(); shiny::req(p)
-      ggplot2::ggsave(
-        file, p,
-        width  = if (is.null(input$plot_w_in)) 12 else input$plot_w_in,
-        height = if (is.null(input$plot_h_in)) 9  else input$plot_h_in,
-        dpi    = if (is.null(input$plot_dpi))  600 else input$plot_dpi,
-        units  = "in"
-      )
+      ggplot2::ggsave(file, p, width = size$width, height = size$height,
+                      dpi = size$dpi, units = "in")
     }
   )
 
   output$dl_overview_pdf <- shiny::downloadHandler(
     filename = function() filename_stamp("_overview.pdf"),
     content  = function(file) {
+      size <- export_size(12, 9, raster = FALSE)
       p <- rx_overview(); shiny::req(p)
       # Use the base pdf device (vector, no external dependencies) rather than
       # cairo_pdf: capabilities("cairo") can report TRUE on macOS R builds where
@@ -525,9 +610,8 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
       # broke this download and R CMD check there. Base pdf works everywhere.
       ggplot2::ggsave(
         file, p,
-        width  = if (is.null(input$plot_w_in)) 12 else input$plot_w_in,
-        height = if (is.null(input$plot_h_in)) 9  else input$plot_h_in,
-        units  = "in", device = grDevices::pdf
+        width = size$width, height = size$height,
+        units = "in", device = grDevices::pdf
       )
     }
   )
@@ -541,10 +625,9 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
         nrow(state$qv$concentrations) == 0L) {
       shiny::div(
         class = "alert alert-secondary",
-        shiny::strong("No quantitative concentrations available. "),
-        "The embedded report's regression model is ",
-        shiny::tags$code("Qualitative"),
-        ", so back-calculated concentrations are not present."
+        shiny::strong("No quantitative concentration rows were recovered from this report. "),
+        "If concentrations are expected, check the report generated in Q-View ",
+        "and export its quantitative CSV or XLSX report for comparison."
       )
     }
   })
@@ -580,15 +663,11 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
   output$dl_plot <- shiny::downloadHandler(
     filename = function() filename_stamp(paste0("_", input$plot_type, ".png")),
     content = function(file) {
+      size <- export_size(10, 7)
       p <- current_plot()
       shiny::req(p)
-      ggplot2::ggsave(
-        file, p,
-        width  = if (is.null(input$plot_w_in)) 10 else input$plot_w_in,
-        height = if (is.null(input$plot_h_in)) 7  else input$plot_h_in,
-        dpi    = if (is.null(input$plot_dpi))  600 else input$plot_dpi,
-        units  = "in"
-      )
+      ggplot2::ggsave(file, p, width = size$width, height = size$height,
+                      dpi = size$dpi, units = "in")
     }
   )
 

@@ -1,7 +1,10 @@
-# shinytest2 harness: returns the qviewparsR Shiny app object (not run).
-# Driven by tests/testthat/test-shiny.R via shinytest2::AppDriver.
-library(qviewparsR)
-# .Q-View uploads routinely exceed Shiny's 5 MB default; lift the cap as
-# qview_app() does at runtime.
+# Explicit namespace selection supports source and installed test contexts.
+package_path <- Sys.getenv("QVIEWPARSR_TEST_PACKAGE_PATH", unset = "")
+if (nzchar(package_path) && file.exists(file.path(package_path, "R", "app.R"))) {
+  pkgload::load_all(package_path, export_all = FALSE, attach_testthat = FALSE)
+} else {
+  base::loadNamespace("qviewparsR",
+                      lib.loc = if (nzchar(package_path)) dirname(package_path) else NULL)
+}
 options(shiny.maxRequestSize = 1024 * 1024^2)
-qviewparsR:::.qv_app()
+get(".qv_app", envir = asNamespace("qviewparsR"))()

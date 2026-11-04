@@ -19,7 +19,7 @@ running app and restores the previous value on exit. Default
 Invoked for its side effect of running the app.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 }
 \details{
 Interactive front-end for \code{\link[=read_qview]{read_qview()}}. Uploads a \code{.Q-View} file
