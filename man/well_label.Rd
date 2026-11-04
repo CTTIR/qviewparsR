@@ -11,17 +11,19 @@ well_label(row, col, zero_based = FALSE)
 already a single letter (\code{"A"}...).}
 
 \item{col}{Integer column index (1-based or 0-based; values >= 1 are
-treated as 1-based).}
+treated as 1-based). Nonintegral or out-of-range indices are refused.}
 
 \item{zero_based}{Logical. If \code{TRUE}, treat \code{row} and \code{col} as
 0-based; if \code{FALSE} (default), treat them as 1-based.}
 }
 \value{
 Character vector of well labels (e.g. \code{"A1"}, \code{"H12"}),
-recycled to the longer of \code{row} / \code{col}.
+recycled to the longer of \code{row} / \code{col} only when lengths divide exactly.
+Rows are single letters A through Z; this helper does not extend the
+96-well scope of report extraction.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 }
 \details{
 Converts 0-based or 1-based row and column indices to the standard

@@ -40,7 +40,7 @@ test_that("read_qview_template(verbose = TRUE) prints a parse summary", {
 test_that("read_qview_template errors when section headers are missing", {
   p <- withr::local_tempfile(fileext = ".csv")
   # Valid NxM cell, but no row with a blank first cell and a '1' second cell.
-  writeLines(c("2x2,foo,bar", "data,a,b", "more,c,d"), p)
+  writeLines(c("2x2,foo,bar,", "data,a,b,", "more,c,d,"), p)
   expect_error(read_qview_template(p, verbose = FALSE),
                "no recognisable section headers")
 })

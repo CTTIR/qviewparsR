@@ -6,10 +6,15 @@
 #' labelled `Group Name`, `Group Type`, and `Dilution Factor`. Each
 #' section is one row per plate row and one column per plate column.
 #'
-#' All template data is also embedded inside the `.Q-View` file itself
-#' (and is recovered by [read_qview()]); this function exists for
-#' setting up new plates or cross-validating Q-View imports against
-#' the original template.
+#' All three required sections must have each declared row and column
+#' exactly once. Dimensions must fit the source and use at most 26 single-
+#' letter rows; this does not extend binary report support beyond 96 wells.
+#' Nonblank dilution values must be positive finite numbers. Blank sample
+#' and dilution cells remain missing. Identifiers are decoded as text,
+#' preserving leading zeroes, quoted punctuation and non-dilution suffixes.
+#' Text uses the UTF-8-then-Latin-1 fallback described in [read_qview_report()].
+#' The template is an independent assignment source; binary report extraction
+#' does not recover every original template field.
 #'
 #' @description
 #' `r lifecycle::badge("stable")`
@@ -50,14 +55,8 @@ read_qview_template <- function(path,
     )
   }
   delim <- .qv_sniff_delim(path)
-  raw <- readr::read_delim(
-    path, delim = delim,
-    col_names = FALSE,
-    col_types = readr::cols(.default = readr::col_character()),
-    show_col_types = FALSE
-  )
-
-  dim_cell <- as.character(raw[[1L]][1L])
+  rows <- .qv_csv_records(.qv_read_text_lines(path), delim = delim)
+  dim_cell <- if (length(rows) && length(rows[[1L]])) rows[[1L]][[1L]] else ""
   m <- regmatches(dim_cell,
                   regexec("^([0-9]+)x([0-9]+)$", trimws(dim_cell)))[[1L]]
   if (length(m) != 3L) {
@@ -68,71 +67,81 @@ read_qview_template <- function(path,
       call = call
     )
   }
-  ncols <- as.integer(m[2L]); nrows <- as.integer(m[3L])
-
-  col1 <- as.character(raw[[1L]])
-  col2 <- if (ncol(raw) >= 2L) as.character(raw[[2L]]) else character()
-  hdr_idx <- which(
-    (is.na(col1) | trimws(col1) == "") &
-    !is.na(col2) & trimws(col2) == "1"
-  )
-  if (length(hdr_idx) == 0L) {
-    cli::cli_abort(
-      c("{.arg path} has no recognisable section headers.",
-        "x" = "{.path {path}} contains no rows of the expected layout.",
-        "i" = "Each section must start with a row whose first cell is blank and whose second cell is {.val 1}."),
-      call = call
-    )
+  dims <- suppressWarnings(as.numeric(m[2:3]))
+  if (any(!is.finite(dims)) || any(dims < 1) || dims[[2L]] > 26 ||
+      dims[[2L]] > length(rows) || dims[[1L]] > max(lengths(rows)) - 2L) {
+    cli::cli_abort("Template dimensions must be positive, fit the source rows/columns, and use at most 26 lettered rows.", call = call)
   }
-
-  parse_section <- function(start) {
-    label <- as.character(raw[[ncol(raw)]][start])
-    body <- raw[(start + 1L):(start + nrows), , drop = FALSE]
-    row_letter <- as.character(body[[1L]])
-    vals <- body[, 2L:(1L + ncols), drop = FALSE]
-    list(
-      label = label,
-      df = tibble::tibble(
-        well = paste0(rep(row_letter, ncols),
-                      rep(seq_len(ncols), each = nrows)),
-        value = as.character(unlist(vals))
-      )
-    )
+  ncols <- as.integer(dims[[1L]])
+  nrows <- as.integer(dims[[2L]])
+  hdr_idx <- which(vapply(rows, function(f) {
+    length(f) >= 2L && !nzchar(trimws(f[[1L]])) && trimws(f[[2L]]) == "1"
+  }, logical(1L)))
+  if (!length(hdr_idx)) {
+    cli::cli_abort(c(
+      "{.arg path} has no recognisable section headers.",
+      "i" = "Each section needs a blank first cell followed by numbered columns."
+    ), call = call)
   }
-  sections <- lapply(hdr_idx, parse_section)
   label_to_field <- function(lbl) {
     key <- tolower(trimws(lbl))
     if (grepl("^group name", key)) return("sample_id")
     if (grepl("^group type", key)) return("group_type")
-    if (grepl("^dilution",   key)) return("dilution")
+    if (grepl("^dilution", key)) return("dilution")
     NA_character_
   }
-
-  out <- tibble::tibble(
-    well = paste0(rep(LETTERS[seq_len(nrows)], ncols),
-                  rep(seq_len(ncols), each = nrows))
-  )
-  for (s in sections) {
-    field <- label_to_field(s$label)
-    if (is.na(field)) next
-    sub <- s$df
-    colnames(sub) <- c("well", field)
-    out <- dplyr::left_join(out, sub, by = "well")
-  }
-  if ("dilution" %in% colnames(out)) {
-    suppressWarnings(out$dilution <- as.numeric(out$dilution))
-  }
-  for (col in c("sample_id", "group_type")) {
-    if (col %in% colnames(out)) {
-      v <- out[[col]]
-      v[is.na(v) | trimws(v) == ""] <- NA_character_
-      out[[col]] <- v
+  out <- .qv_plate_grid(nrows, ncols)
+  out <- out[, c("well", "plate_row", "plate_col")]
+  seen <- character()
+  for (start in hdr_idx) {
+    header <- rows[[start]]
+    if (length(header) < ncols + 2L) {
+      cli::cli_abort("Incomplete template section header at row {start}.")
     }
+    field <- label_to_field(header[[ncols + 2L]])
+    if (is.na(field)) next
+    if (field %in% seen) cli::cli_abort("Duplicate template section: {.val {field}}.")
+    seen <- c(seen, field)
+    columns <- trimws(header[seq_len(ncols) + 1L])
+    if (!identical(columns, as.character(seq_len(ncols)))) {
+      cli::cli_abort("Template section columns must be numbered consecutively.")
+    }
+    end <- start + nrows
+    if (end > length(rows) || any(hdr_idx > start & hdr_idx <= end)) {
+      cli::cli_abort("Incomplete template section {.val {field}}.")
+    }
+    body <- rows[seq.int(start + 1L, end)]
+    if (any(lengths(body) < ncols + 1L)) {
+      cli::cli_abort("Incomplete columns in template section {.val {field}}.")
+    }
+    row_letters <- vapply(body, function(f) trimws(f[[1L]]), character(1L))
+    if (anyDuplicated(row_letters) || !setequal(row_letters, LETTERS[seq_len(nrows)])) {
+      cli::cli_abort("Template section {.val {field}} must contain every declared row letter exactly once.")
+    }
+    body <- body[match(LETTERS[seq_len(nrows)], row_letters)]
+    extra <- unlist(lapply(body, function(f) f[-seq_len(ncols + 1L)]))
+    if (any(nzchar(trimws(extra)))) {
+      cli::cli_abort("Unexpected cells beyond the declared template columns.")
+    }
+    values <- as.vector(t(vapply(body, function(f) f[seq_len(ncols) + 1L], character(ncols))))
+    if (field == "dilution") {
+      values <- vapply(values, function(x) {
+        if (!nzchar(trimws(x))) return(NA_real_)
+        value <- .qv_parse_value_cell(x)
+        if (!is.na(value$flag) || value$value <= 0) {
+          cli::cli_abort("Template dilution must be blank or a positive finite number.")
+        }
+        value$value
+      }, numeric(1L), USE.NAMES = FALSE)
+    } else {
+      values[!nzchar(trimws(values))] <- NA_character_
+    }
+    out[[field]] <- values
   }
-  out$plate_row <- substr(out$well, 1L, 1L)
-  out$plate_col <- as.integer(substring(out$well, 2L))
-  out <- out[, c("well", "plate_row", "plate_col", "sample_id",
-                 "group_type", "dilution"), drop = FALSE]
+  missing <- setdiff(c("sample_id", "group_type", "dilution"), seen)
+  if (length(missing)) {
+    cli::cli_abort("Missing required template section(s): {.val {missing}}.")
+  }
   if (isTRUE(verbose)) {
     n_samples <- length(unique(stats::na.omit(out$sample_id)))
     cli::cli_inform(c(
@@ -150,7 +159,8 @@ read_qview_template <- function(path,
 .qv_sniff_delim <- function(path) {
   sniff <- tryCatch(readLines(path, n = 10L, warn = FALSE),
                     error = function(e) character())
-  sniff <- paste(sniff, collapse = "\n")
+  sniff <- sniff[nzchar(trimws(sniff))]
+  sniff <- if (length(sniff)) sniff[[1L]] else ""
   if (!nzchar(sniff)) return(",")
   cand <- c(",", ";", "\t")
   counts <- vapply(cand, function(d) {

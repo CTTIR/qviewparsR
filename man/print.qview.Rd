@@ -18,7 +18,7 @@
 Compact summary of a parsed \code{qview} object: project / plate
 identifiers, analyte panel, well-group counts by type, and whether
 the embedded report carries quantitative concentrations or only
-qualitative pixel intensities.
+reported pixel intensities.
 }
 \examples{
 qv <- read_qview(system.file("extdata", "example.Q-View",

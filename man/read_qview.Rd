@@ -47,18 +47,25 @@ when reported.}
 averages, std-dev, and CV statistics: \code{well_group}, \code{sample_id},
 \code{statistic}, \code{analyte}, \code{value}, \code{unit}.}
 \item{\code{concentrations}}{Long-format concentration tibble or \code{NULL}
-if the regression model is \code{"Qualitative"}.}
+when no supported concentration rows were extracted.}
 \item{\code{curve_fit}}{Tibble with \code{analyte}, \code{regression_model}, or
 \code{NULL} if not reported.}
-\item{\code{report_csv}}{Character vector of the raw CSV report lines,
-or \code{NULL} if no report was generated.}
+\item{\code{report_csv}}{Extracted candidate report lines in source order,
+including repeated copies, or \code{NULL} if none were found. This is not
+a complete or transaction-verified CLOB.}
 \item{\code{plate_layout}}{Tibble with one row per well: \code{well},
 \code{plate_row}, \code{plate_col}, \code{well_group}, \code{sample_id},
 \code{well_type}, \code{dilution}.}
 }
+
+Measurement tables preserve decoded \code{raw_value}, \code{flag}, \code{error_codes}
+and \code{statistic_label}. Missing and incalculable cells remain explicit rows;
+censored numeric cells retain their bound and flag, not an invented point
+estimate. Nonblank malformed or nonfinite numeric values are refused.
+See \code{\link[=read_qview_report]{read_qview_report()}} for the shared value and identity rules.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 }
 \details{
 Parses a \code{.Q-View} binary container (a chemiluminescent multiplex
@@ -68,12 +75,16 @@ panel with units, well-group sample assignments, per-well replicate
 pixel intensities, summary statistics, and (when present) the
 embedded CSV report.
 
-The file format is reverse-engineered from public binary inspection:
-it begins with a plain-text manifest, followed by three concatenated
-H2 database segments. The fully-formatted report Q-View renders for
-the user is stored as a CLOB inside the main H2 segment. This
-parser scans the binary for that CLOB, reassembles it across H2 page
-boundaries (2048-byte pages), and parses it as CSV.
+This reverse-engineered reader scans printable report text inside the
+container. It does not open the H2 database or establish transaction
+recency. Identical repeated records are collapsed; conflicting candidate
+records and incomplete analyte rows are refused rather than selecting
+values by page-copy frequency. An authoritative flat CSV/XLSX report can
+be read with \code{\link[=read_qview_report]{read_qview_report()}} when binary extraction is ambiguous.
+The binary scan is limited to printable ASCII spans, not a general CLOB
+decoder, and cannot recover a complete report across arbitrary page or
+encoding boundaries. Report wells are limited to A1 through H12.
+Sample and Assay/Lot continuation never crosses an opaque binary gap.
 
 Parsing is done in pure R: no Java runtime, no H2 database driver,
 no system dependencies beyond a working R installation.

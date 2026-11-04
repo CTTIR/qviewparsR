@@ -24,16 +24,16 @@ error reporting; experts only.}
 }
 \value{
 A list with class \code{"qview"}, structured as the \code{\link[=read_qview]{read_qview()}}
-return value, with these deviations. Container-only slots (\code{manifest},
-\code{segments}) are zero-row tibbles; \code{metadata$container_version} is \code{NA}.
-The \code{concentrations} tibble carries one extra column, \code{flag}
-(\code{NA} / \code{"<"} / \code{">"} / \code{"incalculable"}), relative to \code{\link[=read_qview]{read_qview()}}.
-\code{report_csv} echoes the full export in file order (metadata preamble,
-blank spacer rows, the analyte header, then the data rows), whereas
-\code{\link[=read_qview]{read_qview()}}'s \code{report_csv} holds only the unique report data lines.
+return value. Container-only slots (\code{manifest}, \code{segments}) are empty;
+\code{metadata$container_version} is \code{NA}. Measurement tables add \code{raw_value},
+\code{flag}, \code{error_codes} and \code{statistic_label}, preserving decoded cell text,
+censor/missing state and the original statistic label. Numeric censored
+values are bounds, not measured point estimates. Plain reduced estimates
+use \code{statistic == "reduced"}. \code{report_csv} retains decoded CSV source
+lines in order; XLSX rows are serialized with valid CSV quoting.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 }
 \details{
 Parses one of the flat report files Q-View exports next to the native
@@ -43,21 +43,24 @@ and returns the same \code{\link[=read_qview]{qview}} object \code{\link[=read_q
 from the binary container. Use it when only the exports were kept and the
 original \code{.Q-View} project file is unavailable.
 
-The export shares its report layout with the CLOB embedded in the binary
-container, so the two readers agree on concentrations and pixel
-intensities. Two behaviours differ from \code{\link[=read_qview]{read_qview()}}, both to preserve
-information the study workflows rely on:
-\itemize{
-\item The plain \code{"Reduced Concentration"} point estimate (one row per
-sample, the value the exports headline) is captured with
-\code{statistic == "reduced"}. \code{\link[=read_qview]{read_qview()}} currently keeps only the
-per-replicate / summary concentration rows.
-\item Out-of-range cells are \strong{preserved, not dropped}: a \code{"< 52.50"}
-cell yields \code{concentration = 52.50} with \code{flag = "<"}, a \code{"> 7700"}
-cell \code{flag = ">"}, and an \code{"Incalculable ..."} cell
-\code{concentration = NA} with \code{flag = "incalculable"}. In-range cells carry
-\code{flag = NA}.
-}
+Binary and flat report readers use the same typed measurement parsing.
+Censored cells retain their bound with \code{flag = "<"} or \code{">"};
+\code{Incalculable} cells retain \code{NA} with \code{flag = "incalculable"}.
+Blank cells and explicit \code{NA} / \code{N/A} retain \code{NA} with \code{flag = "missing"}.
+Ordinary measurements have a missing flag. Malformed nonblank values,
+nonfinite numbers and nonzero values that underflow to zero are refused.
+
+CSV input is decoded as UTF-8 when valid (including an optional BOM),
+otherwise as Latin-1. Encoding cannot be inferred perfectly; Windows-1252
+and arbitrary encodings are not inferred. The selected interpretation is
+recorded in \code{metadata$source_encoding}. XLSX strings are already decoded
+by \code{openxlsx2} and are not reinterpreted as Latin-1. Quoted commas, escaped
+quotes and quoted line breaks are preserved; malformed quoting is refused.
+
+Only report wells A1 through H12 are supported. Conflicting records,
+duplicate analyte identities and conflicting well assignments are refused.
+A sample suffix is removed only when it is a recognized positive finite
+dilution of the form \code{(1:n)}; other parentheses remain part of the ID.
 }
 \examples{
 path <- system.file("extdata", "example-report.csv",

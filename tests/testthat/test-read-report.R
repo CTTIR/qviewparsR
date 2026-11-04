@@ -72,8 +72,9 @@ test_that("read_qview_report() reads the xlsx path when openxlsx2 is available",
   skip_if(csv == "", "fixture not installed")
   qv_csv <- read_qview_report(csv, verbose = FALSE)
 
-  m <- do.call(rbind, lapply(readLines(csv), function(l)
-    qviewparsR:::.qv_split_csv_row(l)))
+  m <- do.call(rbind, lapply(readLines(csv), function(l) {
+    qviewparsR:::.qv_split_csv_row(l)
+  }))
   xlsx <- withr::local_tempfile(fileext = ".xlsx")
   openxlsx2::write_xlsx(as.data.frame(m), xlsx, col_names = FALSE)
   qv_xlsx <- read_qview_report(xlsx, verbose = FALSE)

@@ -9,21 +9,24 @@
 #' from the binary container. Use it when only the exports were kept and the
 #' original `.Q-View` project file is unavailable.
 #'
-#' The export shares its report layout with the CLOB embedded in the binary
-#' container, so the two readers agree on concentrations and pixel
-#' intensities. Two behaviours differ from [read_qview()], both to preserve
-#' information the study workflows rely on:
-#' \itemize{
-#'   \item The plain `"Reduced Concentration"` point estimate (one row per
-#'     sample, the value the exports headline) is captured with
-#'     `statistic == "reduced"`. [read_qview()] currently keeps only the
-#'     per-replicate / summary concentration rows.
-#'   \item Out-of-range cells are **preserved, not dropped**: a `"< 52.50"`
-#'     cell yields `concentration = 52.50` with `flag = "<"`, a `"> 7700"`
-#'     cell `flag = ">"`, and an `"Incalculable ..."` cell
-#'     `concentration = NA` with `flag = "incalculable"`. In-range cells carry
-#'     `flag = NA`.
-#' }
+#' Binary and flat report readers use the same typed measurement parsing.
+#' Censored cells retain their bound with `flag = "<"` or `">"`;
+#' `Incalculable` cells retain `NA` with `flag = "incalculable"`.
+#' Blank cells and explicit `NA` / `N/A` retain `NA` with `flag = "missing"`.
+#' Ordinary measurements have a missing flag. Malformed nonblank values,
+#' nonfinite numbers and nonzero values that underflow to zero are refused.
+#'
+#' CSV input is decoded as UTF-8 when valid (including an optional BOM),
+#' otherwise as Latin-1. Encoding cannot be inferred perfectly; Windows-1252
+#' and arbitrary encodings are not inferred. The selected interpretation is
+#' recorded in `metadata$source_encoding`. XLSX strings are already decoded
+#' by `openxlsx2` and are not reinterpreted as Latin-1. Quoted commas, escaped
+#' quotes and quoted line breaks are preserved; malformed quoting is refused.
+#'
+#' Only report wells A1 through H12 are supported. Conflicting records,
+#' duplicate analyte identities and conflicting well assignments are refused.
+#' A sample suffix is removed only when it is a recognized positive finite
+#' dilution of the form `(1:n)`; other parentheses remain part of the ID.
 #'
 #' @param path Character. Path to a Q-View report export (`.csv` or `.xlsx`).
 #' @param strip_prefix Logical. If `TRUE`, reverse Q-View's internal naming
@@ -33,13 +36,13 @@
 #'   error reporting; experts only.
 #'
 #' @return A list with class `"qview"`, structured as the [read_qview()]
-#'   return value, with these deviations. Container-only slots (`manifest`,
-#'   `segments`) are zero-row tibbles; `metadata$container_version` is `NA`.
-#'   The `concentrations` tibble carries one extra column, `flag`
-#'   (`NA` / `"<"` / `">"` / `"incalculable"`), relative to [read_qview()].
-#'   `report_csv` echoes the full export in file order (metadata preamble,
-#'   blank spacer rows, the analyte header, then the data rows), whereas
-#'   [read_qview()]'s `report_csv` holds only the unique report data lines.
+#'   return value. Container-only slots (`manifest`, `segments`) are empty;
+#'   `metadata$container_version` is `NA`. Measurement tables add `raw_value`,
+#'   `flag`, `error_codes` and `statistic_label`, preserving decoded cell text,
+#'   censor/missing state and the original statistic label. Numeric censored
+#'   values are bounds, not measured point estimates. Plain reduced estimates
+#'   use `statistic == "reduced"`. `report_csv` retains decoded CSV source
+#'   lines in order; XLSX rows are serialized with valid CSV quoting.
 #'
 #' @examples
 #' path <- system.file("extdata", "example-report.csv",
@@ -74,6 +77,7 @@ read_qview_report <- function(path,
   }
 
   metadata <- .qv_meta_from_rows(rows, path)
+  metadata$source_encoding <- attr(rows, "source_encoding")
   analytes <- .qv_analytes_from_rows(rows, hdr_idx)
   parsed   <- .qv_parse_export_rows(rows, hdr_idx, analytes)
 
@@ -90,7 +94,7 @@ read_qview_report <- function(path,
   well_groups  <- .qv_build_well_groups(wg_src, wg_src)
   # auto_report exports carry no pixel-intensity replicates; fall back to the
   # concentration rows so the plate layout still maps every physical well.
-  well_src <- .qv_well_source(pixel_intensities, concentrations)
+  well_src <- parsed$well_source
   plate_layout <- .qv_build_plate_layout(well_src, well_groups)
 
   if (isTRUE(strip_prefix)) {
@@ -117,7 +121,7 @@ read_qview_report <- function(path,
       summary_statistics = summary_statistics,
       concentrations     = concentrations,
       curve_fit          = curve_fit,
-      report_csv         = .qv_rows_to_csv(rows),
+      report_csv         = attr(rows, "source_lines") %||% .qv_rows_to_csv(rows),
       plate_layout       = plate_layout
     ),
     class = "qview"
@@ -148,29 +152,35 @@ read_qview_report <- function(path,
       skip_empty_rows = FALSE, skip_empty_cols = FALSE)
     m <- as.matrix(m)
     mode(m) <- "character"
-    # Q-View writes exports in the imager's Latin-1 locale (e.g. the "ue" in
-    # template names); normalise to UTF-8 before anything touches the strings.
-    m[] <- iconv(m, from = "latin1", to = "UTF-8")
+    # XLSX strings have already been decoded by openxlsx2; never reinterpret
+    # their UTF-8 bytes as a legacy single-byte locale.
     m[is.na(m)] <- ""
-    lapply(seq_len(nrow(m)), function(r) unname(trimws(m[r, ])))
+    rows <- lapply(seq_len(nrow(m)), function(r) unname(m[r, ]))
+    attr(rows, "source_encoding") <- "XLSX decoded Unicode"
+    rows
   } else {
-    lines <- readLines(path, encoding = "latin1", warn = FALSE)
-    lines <- iconv(lines, from = "latin1", to = "UTF-8")
-    lapply(lines, .qv_split_csv_row)
+    lines <- .qv_read_text_lines(path)
+    rows <- .qv_csv_records(lines)
+    attr(rows, "source_lines") <- as.character(lines)
+    attr(rows, "source_encoding") <- attr(lines, "source_encoding")
+    rows
   }
 }
 
-
 .qv_find_report_header <- function(rows) {
+  found <- NA_integer_
   for (i in seq_along(rows)) {
     f <- rows[[i]]
     if (length(f) >= 4L &&
-        identical(f[[1L]], "Well Group") &&
-        identical(f[[2L]], "Statistic")) {
-      return(i)
+        identical(trimws(f[seq_len(4L)]),
+                  c("Well Group", "Statistic", "Well", "Error Codes"))) {
+      if (!is.na(found) && !identical(f, rows[[found]])) {
+        cli::cli_abort("Ambiguous conflicting report analyte headers.")
+      }
+      if (is.na(found)) found <- i
     }
   }
-  NA_integer_
+  found
 }
 
 
@@ -188,6 +198,9 @@ read_qview_report <- function(path,
   pull <- function(prefix) {
     hit <- first[startsWith(first, prefix)]
     if (length(hit) == 0L) return(NA_character_)
+    if (length(unique(hit)) > 1L) {
+      cli::cli_abort("Ambiguous conflicting report metadata: {.val {prefix}}.")
+    }
     trimws(sub(paste0("^", prefix), "", hit[1L]))
   }
   metadata$project        <- pull("Project: ")
@@ -210,7 +223,8 @@ read_qview_report <- function(path,
                           assay_control_high = numeric())
   hdr <- rows[[hdr_idx]]
   if (length(hdr) <= 4L) return(empty)
-  panel <- hdr[-seq_len(4L)]
+  panel <- trimws(hdr[-seq_len(4L)])
+  while (length(panel) && !nzchar(utils::tail(panel, 1L))) panel <- utils::head(panel, -1L)
   m <- regmatches(panel, regexec("^(.+?)\\s*\\(([^)]+)\\)\\s*$", panel))
   analyte <- vapply(m, function(x) if (length(x) == 3L) x[2L] else NA_character_, "")
   unit    <- vapply(m, function(x) if (length(x) == 3L) x[3L] else NA_character_, "")
@@ -220,28 +234,38 @@ read_qview_report <- function(path,
     lod = NA_real_, lloq = NA_real_, uloq = NA_real_,
     assay_control_low = NA_real_, assay_control_high = NA_real_)
 
-  # The Assay/Lot limit blocks sit between the header and the first data row;
-  # only a block's first row carries the section label (Assay / Lot), so carry
-  # it forward. Pull the numeric limits from the Lot block, control ranges from
-  # the Assay block -- mirroring .qv_extract_analyte_panel().
+  .qv_check_panel(out)
+
+  # Scan every report section, including repeated headers after measurements.
+  # Only a block's first row carries its Assay/Lot label. A new header resets
+  # that context; it cannot establish a limit block's identity by itself.
   section <- ""
   n <- nrow(out)
-  numify <- function(f) suppressWarnings(as.numeric(.qv_value_number(f[-seq_len(4L)][seq_len(n)])))
+  numify <- function(f) .qv_value_number(.qv_report_values(f, n, "analyte limits"))
   vals <- list()
   for (i in seq_len(length(rows) - hdr_idx) + hdr_idx) {
     f <- rows[[i]]
-    if (length(f) < 4L) { if (length(f) == 0L || !nzchar(paste(f, collapse = ""))) break else next }
-    if (nzchar(f[[1L]])) section <- f[[1L]]
-    stat <- if (length(f) >= 2L) f[[2L]] else ""
+    if (length(f) < 4L) next
+    if (identical(trimws(f[seq_len(4L)]),
+                  c("Well Group", "Statistic", "Well", "Error Codes"))) {
+      section <- ""
+      next
+    }
+    if (nzchar(trimws(f[[1L]]))) section <- trimws(f[[1L]])
+    stat <- trimws(f[[2L]])
     key <- paste(section, stat, sep = "|")
-    if (!is.null(vals[[key]])) next
     if (stat %in% c("Limit of Detection", "Lower Limit of Quantification",
                     "Upper Limit of Quantification", "Assay Control Range Low",
                     "Assay Control Range High")) {
-      vals[[key]] <- numify(f)
+      if (!section %in% c("Assay", "Lot")) {
+        cli::cli_abort("Missing Assay/Lot section for analyte limits at report row {i}.")
+      }
+      value <- numify(f)
+      if (!is.null(vals[[key]]) && !identical(vals[[key]], value)) {
+        cli::cli_abort("Ambiguous conflicting report analyte limits: {.val {key}}.")
+      }
+      vals[[key]] <- value
     }
-    # stop scanning once we reach the calibrator/sample block
-    if (grepl("Concentration|Pixel Intensity", stat)) break
   }
   set <- function(col, key) if (!is.null(vals[[key]])) out[[col]] <<- vals[[key]]
   set("lod",  "Lot|Limit of Detection")
@@ -254,21 +278,32 @@ read_qview_report <- function(path,
 
 
 # Parse a single Q-View value cell, preserving out-of-range information.
-#   "1815.82"          -> list(value = 1815.82, flag = NA)
-#   "< 52.50"          -> list(value = 52.50,   flag = "<")
-#   "> 7700.00"        -> list(value = 7700,    flag = ">")
-#   "Incalculable ..." -> list(value = NA,      flag = "incalculable")
+# Ordinary decimals have no flag; inequality prefixes retain their bound
+# with a censor flag. Incalculable text retains missingness and its flag.
 .qv_parse_value_cell <- function(x) {
-  x <- trimws(x)
-  if (!nzchar(x) || is.na(x)) return(list(value = NA_real_, flag = NA_character_))
-  if (grepl("^Incalculable", x, ignore.case = TRUE)) {
+  if (length(x) != 1L || is.na(x)) {
+    return(list(value = NA_real_, flag = "missing"))
+  }
+  token <- trimws(x)
+  if (!nzchar(token) || token %in% c("NA", "N/A")) {
+    return(list(value = NA_real_, flag = "missing"))
+  }
+  if (grepl("^Incalculable(?:[[:space:]]|$)", token, ignore.case = TRUE, perl = TRUE)) {
     return(list(value = NA_real_, flag = "incalculable"))
   }
   flag <- NA_character_
-  if (startsWith(x, "<")) { flag <- "<"; x <- sub("^<\\s*", "", x) }
-  else if (startsWith(x, ">")) { flag <- ">"; x <- sub("^>\\s*", "", x) }
-  v <- suppressWarnings(as.numeric(x))
-  list(value = v, flag = if (is.na(v)) NA_character_ else flag)
+  if (startsWith(token, "<") || startsWith(token, ">")) {
+    flag <- substr(token, 1L, 1L)
+    token <- trimws(substring(token, 2L))
+  }
+  grammar <- "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$"
+  value <- suppressWarnings(as.numeric(token))
+  mantissa <- sub("[eE].*$", "", token)
+  if (!grepl(grammar, token, perl = TRUE) || !is.finite(value) ||
+      (value == 0 && grepl("[1-9]", mantissa))) {
+    cli::cli_abort("Invalid or unrepresentable numeric report cell: {.val {x}}.")
+  }
+  list(value = value, flag = flag)
 }
 
 # Numeric-only helper for the limit blocks (strips <,>, drops Incalculable).
@@ -280,106 +315,126 @@ read_qview_report <- function(path,
 .qv_parse_export_rows <- function(rows, hdr_idx, analytes) {
   empty <- list(replicates = .qv_empty_replicates(),
                 summaries = .qv_empty_summaries(),
-                concentrations = NULL, curve_fit = NULL)
+                concentrations = NULL, curve_fit = NULL,
+                well_source = .qv_well_source(NULL, NULL))
   if (nrow(analytes) == 0L) return(empty)
+  .qv_check_panel(analytes)
   n <- nrow(analytes)
   current_group <- NA_character_
   acc <- list()
   csv_lines <- character()
+  source_runs <- attr(rows, "source_runs")
   for (i in seq_len(length(rows) - hdr_idx) + hdr_idx) {
+    if (!is.null(source_runs) &&
+        (i == 1L || source_runs[[i]] != source_runs[[i - 1L]])) {
+      current_group <- NA_character_
+    }
     f <- rows[[i]]
     if (length(f) < 4L) next
-    csv_lines <- c(csv_lines, paste(f, collapse = ","))
-    if (nzchar(f[[1L]])) current_group <- f[[1L]]
-    well_group <- if (nzchar(f[[1L]])) f[[1L]] else current_group
-    statistic_raw <- f[[2L]]
-    well_field    <- f[[3L]]
-    values        <- f[-seq_len(4L)]
-    if (length(values) == 0L) next
+    if (identical(trimws(f[seq_len(4L)]),
+                  c("Well Group", "Statistic", "Well", "Error Codes"))) {
+      current_group <- NA_character_
+      next
+    }
+    csv_lines <- c(csv_lines, .qv_rows_to_csv(list(f)))
+    if (nzchar(trimws(f[[1L]]))) current_group <- f[[1L]]
+    well_group <- current_group
+    statistic_raw <- trimws(f[[2L]])
+    well_field <- trimws(f[[3L]])
     info <- .qv_classify_statistic(statistic_raw)
     if (is.na(info$family)) next
-    # Plain point estimate: only "Reduced Concentration" (the value the exports
-    # headline) is captured, as statistic == "reduced". Other unqualified rows
-    # (Theoretical / Backfit / Expected Concentration, bare Pixel Intensity) are
-    # dropped -- matching read_qview(), which skips NA-kind rows -- so the two
-    # readers stay consistent and no duplicate (well, analyte) keys appear.
     if (is.na(info$kind)) {
-      if (grepl("^Reduced Concentration", statistic_raw)) info$kind <- "reduced" else next
+      if (identical(statistic_raw, "Reduced Concentration")) {
+        info$kind <- "reduced"
+      } else {
+        next
+      }
     }
-    if (length(values) >= n) values <- values[seq_len(n)] else length(values) <- n
-    cells <- lapply(values, .qv_parse_value_cell)
+    if (is.na(well_group) || !nzchar(trimws(well_group))) {
+      cli::cli_abort("Missing sample group at report row {i}.")
+    }
+    wells <- .qv_check_report_wells(well_field, paste("report row", i))
+    if (info$kind == "replicate" && length(wells) != 1L) {
+      cli::cli_abort("A replicate needs one physical well at report row {i}.")
+    }
+    values <- .qv_report_values(f, n, paste("report row", i))
+    cells <- lapply(seq_along(values), function(j) {
+      tryCatch(.qv_parse_value_cell(values[[j]]), error = function(e) {
+        cli::cli_abort("Invalid value at report row {i}, analyte {.val {analytes$analyte[[j]]}}.",
+                       parent = e)
+      })
+    })
     acc[[length(acc) + 1L]] <- tibble::tibble(
       well_group = well_group,
-      # keep a single physical well (samples + replicates); summary rows list
-      # several wells ("A1, A2") -> no single well.
-      well       = if (nzchar(well_field) && !grepl(",", well_field, fixed = TRUE))
-                     well_field else NA_character_,
-      replicate  = info$replicate,
-      kind       = info$kind,
-      family     = info$family,
-      analyte    = analytes$analyte,
-      value      = vapply(cells, `[[`, numeric(1L), "value"),
-      flag       = vapply(cells, `[[`, character(1L), "flag"),
-      unit       = analytes$unit
+      well = if (length(wells) == 1L) wells else NA_character_,
+      replicate = info$replicate, kind = info$kind, family = info$family,
+      analyte = analytes$analyte,
+      value = vapply(cells, `[[`, numeric(1L), "value"),
+      flag = vapply(cells, `[[`, character(1L), "flag"),
+      raw_value = values, error_codes = f[[4L]],
+      statistic_label = statistic_raw, unit = analytes$unit,
+      reported_wells = well_field, .line = i
     )
   }
   if (length(acc) == 0L) return(empty)
   out <- dplyr::bind_rows(acc)
-  out <- out[!is.na(out$analyte) & out$analyte != "Ref Spot", , drop = FALSE]
-  out <- out[!is.na(out$well_group) & nzchar(out$well_group), , drop = FALSE]
-  # keep out-of-range rows (flagged) even though value is NA; drop only rows
-  # that are both value-NA and flag-NA (genuinely empty cells).
-  out <- out[!(is.na(out$value) & is.na(out$flag)), , drop = FALSE]
-
-  dilution <- rep(NA_real_, nrow(out))
-  m <- regmatches(out$well_group, regexec("\\(1:([0-9.]+)\\)\\s*$", out$well_group))
-  for (k in seq_along(m)) if (length(m[[k]]) == 2L) {
-    dilution[k] <- suppressWarnings(as.numeric(m[[k]][2L]))
-  }
-  out$dilution  <- dilution
-  out$sample_id <- trimws(sub("\\s*\\([^)]*\\)\\s*$", "", out$well_group))
-
-  pi_rows   <- out[out$family == "pixel_intensity", , drop = FALSE]
+  out <- out[out$analyte != "Ref Spot", , drop = FALSE]
+  out <- .qv_unique_measurements(out)
+  identity <- .qv_sample_identity(out$well_group)
+  out$dilution <- identity$dilution
+  out$sample_id <- identity$sample_id
+  pi_rows <- out[out$family == "pixel_intensity", , drop = FALSE]
   conc_rows <- out[out$family == "concentration", , drop = FALSE]
   replicates <- pi_rows[pi_rows$kind == "replicate", , drop = FALSE]
-  summaries  <- pi_rows[pi_rows$kind != "replicate", , drop = FALSE]
-
+  summaries <- pi_rows[pi_rows$kind != "replicate", , drop = FALSE]
   list(
     replicates = tibble::tibble(
       well_group = replicates$well_group, sample_id = replicates$sample_id,
       well = replicates$well, replicate = replicates$replicate,
       analyte = replicates$analyte, unit = replicates$unit,
-      pixel_intensity = replicates$value, dilution = replicates$dilution),
+      pixel_intensity = replicates$value, dilution = replicates$dilution,
+      raw_value = replicates$raw_value, flag = replicates$flag,
+      error_codes = replicates$error_codes,
+      statistic_label = replicates$statistic_label),
     summaries = tibble::tibble(
       well_group = summaries$well_group, sample_id = summaries$sample_id,
       statistic = summaries$kind, analyte = summaries$analyte,
-      value = summaries$value, unit = summaries$unit),
+      value = summaries$value, unit = summaries$unit,
+      raw_value = summaries$raw_value, flag = summaries$flag,
+      error_codes = summaries$error_codes,
+      statistic_label = summaries$statistic_label),
     concentrations = if (nrow(conc_rows) > 0L) tibble::tibble(
       well_group = conc_rows$well_group, sample_id = conc_rows$sample_id,
       well = conc_rows$well, replicate = conc_rows$replicate,
       statistic = conc_rows$kind, analyte = conc_rows$analyte,
       unit = conc_rows$unit, concentration = conc_rows$value,
-      dilution = conc_rows$dilution, flag = conc_rows$flag) else NULL,
-    curve_fit = .qv_extract_curve_fit(csv_lines, analytes)
+      dilution = conc_rows$dilution, flag = conc_rows$flag,
+      raw_value = conc_rows$raw_value, error_codes = conc_rows$error_codes,
+      statistic_label = conc_rows$statistic_label) else NULL,
+    curve_fit = .qv_extract_curve_fit(csv_lines, analytes),
+    well_source = .qv_record_well_source(out)
   )
 }
-
 
 # Well-bearing rows to seed the plate layout: pixel replicates if present,
 # otherwise the concentration rows (auto_report has no pixel data).
 .qv_well_source <- function(replicates, concentrations) {
   cols <- c("well", "well_group", "sample_id", "dilution")
-  if (!is.null(replicates) && nrow(replicates) > 0L) return(replicates[, cols])
-  if (!is.null(concentrations) && nrow(concentrations) > 0L) {
-    src <- concentrations[!is.na(concentrations$well) & nzchar(concentrations$well), , drop = FALSE]
-    if (nrow(src) > 0L) return(src[, cols])
-  }
-  .qv_empty_replicates()[, cols]
+  pieces <- lapply(list(replicates, concentrations), function(x) {
+    if (is.null(x) || !nrow(x)) return(NULL)
+    x[!is.na(x$well) & nzchar(x$well), cols, drop = FALSE]
+  })
+  out <- dplyr::bind_rows(pieces)
+  if (!nrow(out)) return(.qv_empty_replicates()[, cols])
+  out
 }
-
 
 .qv_rows_to_csv <- function(rows) {
   if (length(rows) == 0L) return(NULL)
-  vapply(rows, function(f) paste(f, collapse = ","), character(1L))
+  vapply(rows, function(f) {
+    f[is.na(f)] <- ""
+    quote <- grepl('[,"\\r\\n]', f, perl = TRUE) | grepl("^[[:space:]]|[[:space:]]$", f)
+    f[quote] <- paste0('"', gsub('"', '""', f[quote], fixed = TRUE), '"')
+    paste(f, collapse = ",")
+  }, character(1L))
 }
-# Version 1.0.0

@@ -9,12 +9,16 @@
 #' pixel intensities, summary statistics, and (when present) the
 #' embedded CSV report.
 #'
-#' The file format is reverse-engineered from public binary inspection:
-#' it begins with a plain-text manifest, followed by three concatenated
-#' H2 database segments. The fully-formatted report Q-View renders for
-#' the user is stored as a CLOB inside the main H2 segment. This
-#' parser scans the binary for that CLOB, reassembles it across H2 page
-#' boundaries (2048-byte pages), and parses it as CSV.
+#' This reverse-engineered reader scans printable report text inside the
+#' container. It does not open the H2 database or establish transaction
+#' recency. Identical repeated records are collapsed; conflicting candidate
+#' records and incomplete analyte rows are refused rather than selecting
+#' values by page-copy frequency. An authoritative flat CSV/XLSX report can
+#' be read with [read_qview_report()] when binary extraction is ambiguous.
+#' The binary scan is limited to printable ASCII spans, not a general CLOB
+#' decoder, and cannot recover a complete report across arbitrary page or
+#' encoding boundaries. Report wells are limited to A1 through H12.
+#' Sample and Assay/Lot continuation never crosses an opaque binary gap.
 #'
 #' Parsing is done in pure R: no Java runtime, no H2 database driver,
 #' no system dependencies beyond a working R installation.
@@ -50,15 +54,22 @@
 #'     averages, std-dev, and CV statistics: `well_group`, `sample_id`,
 #'     `statistic`, `analyte`, `value`, `unit`.}
 #'   \item{`concentrations`}{Long-format concentration tibble or `NULL`
-#'     if the regression model is `"Qualitative"`.}
+#'     when no supported concentration rows were extracted.}
 #'   \item{`curve_fit`}{Tibble with `analyte`, `regression_model`, or
 #'     `NULL` if not reported.}
-#'   \item{`report_csv`}{Character vector of the raw CSV report lines,
-#'     or `NULL` if no report was generated.}
+#'   \item{`report_csv`}{Extracted candidate report lines in source order,
+#'     including repeated copies, or `NULL` if none were found. This is not
+#'     a complete or transaction-verified CLOB.}
 #'   \item{`plate_layout`}{Tibble with one row per well: `well`,
 #'     `plate_row`, `plate_col`, `well_group`, `sample_id`,
 #'     `well_type`, `dilution`.}
 #' }
+#'
+#' Measurement tables preserve decoded `raw_value`, `flag`, `error_codes`
+#' and `statistic_label`. Missing and incalculable cells remain explicit rows;
+#' censored numeric cells retain their bound and flag, not an invented point
+#' estimate. Nonblank malformed or nonfinite numeric values are refused.
+#' See [read_qview_report()] for the shared value and identity rules.
 #'
 #' @examples
 #' # A small synthetic .Q-View ships with the package:
@@ -101,9 +112,11 @@ read_qview <- function(path,
   curve_fit <- rows$curve_fit
   concentrations <- rows$concentrations
 
-  well_groups <- .qv_build_well_groups(
-    pixel_intensities, summary_statistics)
-  plate_layout <- .qv_build_plate_layout(pixel_intensities, well_groups)
+  group_source <- tibble::tibble(well_group = c(
+    pixel_intensities$well_group, summary_statistics$well_group,
+    if (is.null(concentrations)) character() else concentrations$well_group))
+  well_groups <- .qv_build_well_groups(group_source, group_source)
+  plate_layout <- .qv_build_plate_layout(rows$well_source, well_groups)
 
   if (isTRUE(strip_prefix)) {
     pixel_intensities$sample_id  <- strip_qview_prefix(pixel_intensities$sample_id)
@@ -126,7 +139,7 @@ read_qview <- function(path,
       summary_statistics = summary_statistics,
       concentrations     = concentrations,
       curve_fit          = curve_fit,
-      report_csv         = if (is.null(report_lines)) NULL else unique(report_lines),
+      report_csv         = if (is.null(report_lines)) NULL else as.character(report_lines),
       plate_layout       = plate_layout
     ),
     class = "qview"
@@ -248,26 +261,25 @@ read_qview <- function(path,
                   regexec("^([0-9]+)", rawToChar(hdr)))[[1L]]
   if (length(m) == 2L) metadata$container_version <- m[2L]
 
-  md_pos <- grepRaw(charToRaw("Project: "), raw, fixed = TRUE)
-  if (length(md_pos) > 0L) {
-    md_chunk <- raw[md_pos[1L]:min(md_pos[1L] + 2000L, length(raw))]
-    md_chunk <- md_chunk[md_chunk >= as.raw(9) & md_chunk <= as.raw(126)]
-    md_text <- rawToChar(md_chunk)
-    md_lines <- strsplit(md_text, "[\r\n]+")[[1L]]
-    pull <- function(prefix) {
-      hit <- md_lines[startsWith(md_lines, prefix)]
-      if (length(hit) == 0L) return(NA_character_)
-      trimws(sub(paste0("^", prefix), "", hit[1L]))
+  prefixes <- c(project = "Project: ", plate = "Plate: ", image = "Image: ",
+                imager = "Imager: ", product = "Product: ", user = "User: ",
+                report_created = "Report Created: ", qview_version = "Q-View Version: ",
+                template = "Well Assignment Template: ")
+  line_starts <- c(1L, which(raw %in% as.raw(c(10L, 13L))) + 1L)
+  for (field in names(prefixes)) {
+    prefix <- prefixes[[field]]
+    positions <- grepRaw(charToRaw(prefix), raw, all = TRUE, fixed = TRUE)
+    # A key mentioned inside another value is not a second metadata record.
+    positions <- positions[positions %in% line_starts]
+    if (!length(positions)) next
+    values <- vapply(positions, function(pos) {
+      line <- .qv_binary_line(raw, pos, paste("metadata", field))
+      substring(line, nchar(prefix) + 1L)
+    }, character(1L))
+    if (length(unique(values)) > 1L) {
+      cli::cli_abort("Ambiguous conflicting binary metadata: {.val {field}}.")
     }
-    metadata$project        <- pull("Project: ")
-    metadata$plate          <- pull("Plate: ")
-    metadata$image          <- pull("Image: ")
-    metadata$imager         <- pull("Imager: ")
-    metadata$product        <- pull("Product: ")
-    metadata$user           <- pull("User: ")
-    metadata$report_created <- pull("Report Created: ")
-    metadata$qview_version  <- pull("Q-View Version: ")
-    metadata$template       <- pull("Well Assignment Template: ")
+    metadata[[field]] <- values[[1L]]
   }
   metadata
 }
@@ -275,7 +287,9 @@ read_qview <- function(path,
 
 .qv_extract_analyte_panel <- function(raw) {
   marker <- grepRaw(charToRaw("Well Group,Statistic,Well,Error Codes"),
-                    raw, fixed = TRUE)
+                    raw, all = TRUE, fixed = TRUE)
+  line_starts <- c(1L, which(raw %in% as.raw(c(10L, 13L))) + 1L)
+  marker <- marker[marker %in% line_starts]
   empty <- tibble::tibble(spot_number = integer(),
                           analyte = character(), unit = character(),
                           lod = numeric(), lloq = numeric(),
@@ -283,14 +297,16 @@ read_qview <- function(path,
                           assay_control_low = numeric(),
                           assay_control_high = numeric())
   if (length(marker) == 0L) return(empty)
-  end <- min(marker[1L] + 2000L, length(raw))
-  chunk <- raw[marker[1L]:end]
-  chunk <- chunk[chunk >= as.raw(9) & chunk <= as.raw(126)]
-  text <- rawToChar(chunk)
-  hdr_line <- strsplit(text, "[\r\n]+")[[1L]][1L]
-  fields <- .qv_split_csv_row(hdr_line)
+  headers <- lapply(marker, function(pos) {
+    .qv_split_csv_row(.qv_binary_line(raw, pos, "analyte header"))
+  })
+  if (length(unique(headers)) > 1L) {
+    cli::cli_abort("Ambiguous conflicting binary analyte headers.")
+  }
+  fields <- headers[[1L]]
   if (length(fields) <= 4L) return(empty)
-  panel <- fields[-seq_len(4L)]
+  panel <- trimws(fields[-seq_len(4L)])
+  while (length(panel) && !nzchar(utils::tail(panel, 1L))) panel <- utils::head(panel, -1L)
   m <- regmatches(panel, regexec("^(.+?)\\s*\\(([^)]+)\\)\\s*$", panel))
   analyte <- vapply(m, function(x) if (length(x) == 3L) x[2L] else NA_character_, "")
   unit    <- vapply(m, function(x) if (length(x) == 3L) x[3L] else NA_character_, "")
@@ -306,220 +322,107 @@ read_qview <- function(path,
     assay_control_low  = NA_real_,
     assay_control_high = NA_real_
   )
-  # Pull the "Limit of Detection", "Lower / Upper Limit of Quantification",
-  # and assay control range rows from the same first contiguous chunk.
-  # These come in two stacked blocks: an "Assay" block (often
-  # "Incalculable") and a "Lot" block (the numeric limits we want). Only
-  # the block's first row carries the label; continuation rows have an
-  # empty first field, so track the carried-forward section and match on
-  # it -- otherwise the leading-comma rows are missed and the Assay block
-  # is indistinguishable from the Lot block.
-  lines <- strsplit(text, "[\r\n]+")[[1L]]
+  .qv_check_panel(out)
+  # Read only intact, observed report lines. No non-ASCII/control byte is
+  # discarded to join fragments into a different numeric or identity token.
+  lines <- .qv_extract_report_lines(raw)
   section <- ""
-  sect_of <- vapply(lines, function(ln) {
-    f1 <- trimws(sub(",.*$", "", ln))
-    if (nzchar(f1)) section <<- f1
-    section
-  }, character(1L), USE.NAMES = FALSE)
-  pull_row <- function(stat, want = "Lot") {
-    idx <- which(sect_of == want &
-                 grepl(paste0(",", stat, ","), lines, fixed = TRUE))
-    if (length(idx) == 0L) return(NULL)
-    parts <- .qv_split_csv_row(lines[idx[1L]])
-    vals <- parts[-seq_len(4L)]
-    suppressWarnings(as.numeric(vals[seq_len(nrow(out))]))
+  values <- list()
+  source_runs <- attr(lines, "source_runs")
+  for (i in seq_along(lines)) {
+    if (i == 1L || source_runs[[i]] != source_runs[[i - 1L]]) section <- ""
+    f <- .qv_split_csv_row(lines[[i]])
+    if (length(f) < 4L) next
+    if (nzchar(trimws(f[[1L]]))) section <- f[[1L]]
+    stat <- trimws(f[[2L]])
+    if (!stat %in% c("Limit of Detection", "Lower Limit of Quantification",
+                     "Upper Limit of Quantification", "Assay Control Range Low",
+                     "Assay Control Range High")) next
+    if (!section %in% c("Assay", "Lot")) {
+      cli::cli_abort("Missing Assay/Lot section for binary analyte limits at candidate record {i}.")
+    }
+    key <- paste(section, stat, sep = "|")
+    value <- .qv_value_number(.qv_report_values(f, nrow(out), "analyte limits"))
+    if (!is.null(values[[key]]) && !identical(values[[key]], value)) {
+      cli::cli_abort("Ambiguous conflicting binary analyte limits: {.val {key}}.")
+    }
+    values[[key]] <- value
   }
-  lod  <- pull_row("Limit of Detection",            want = "Lot")
-  lloq <- pull_row("Lower Limit of Quantification", want = "Lot")
-  uloq <- pull_row("Upper Limit of Quantification", want = "Lot")
-  acl  <- pull_row("Assay Control Range Low",  want = "Assay")
-  ach  <- pull_row("Assay Control Range High", want = "Assay")
-  if (!is.null(lod))  out$lod  <- lod
-  if (!is.null(lloq)) out$lloq <- lloq
-  if (!is.null(uloq)) out$uloq <- uloq
-  if (!is.null(acl))  out$assay_control_low  <- acl
-  if (!is.null(ach)) out$assay_control_high <- ach
+  mapping <- c(lod = "Lot|Limit of Detection",
+               lloq = "Lot|Lower Limit of Quantification",
+               uloq = "Lot|Upper Limit of Quantification",
+               assay_control_low = "Assay|Assay Control Range Low",
+               assay_control_high = "Assay|Assay Control Range High")
+  for (field in names(mapping)) {
+    value <- values[[mapping[[field]]]]
+    if (!is.null(value)) out[[field]] <- value
+  }
   out
 }
 
 
 .qv_extract_report_lines <- function(raw) {
-  is_text <- raw >= as.raw(9) & raw <= as.raw(126)
-  r <- rle(is_text)
-  ends   <- cumsum(r$lengths)
-  starts <- ends - r$lengths + 1L
-  mask <- r$values & r$lengths >= 30L
-  patterns <- "(?:Pixel Intensity|Reduced Concentration|Theoretical Concentration|Backfit|Concentration|Regression Model|Limit of Detection|Limit of Quantification|Assay Control Range)"
-  any_pattern <- paste0("(",
-    "^[^,\\r\\n]+,", patterns, " (?:Average|\\(|$|,)", "|",
-    "^,",            patterns,                          ")")
+  is_text <- raw %in% as.raw(c(9L, 10L, 13L)) |
+    (raw >= as.raw(32L) & raw <= as.raw(126L))
+  runs <- rle(is_text)
+  ends <- cumsum(runs$lengths)
+  starts <- ends - runs$lengths + 1L
+  patterns <- paste0("(?:Pixel Intensity|Reduced Concentration|",
+    "Theoretical Concentration|Backfit Concentration|Expected Concentration|",
+    "Concentration|Regression Model|Limit of Detection|",
+    "Lower Limit of Quantification|Upper Limit of Quantification|Assay Control Range)")
   captured <- character()
-  for (i in which(mask)) {
-    s <- starts[i]; len <- r$lengths[i]
-    txt <- rawToChar(raw[s:(s + len - 1L)])
-    parts <- unlist(strsplit(txt, "[\r\n]+"))
-    if (length(parts) == 0L) next
-    keep <- grepl(any_pattern, parts, perl = TRUE)
-    if (any(keep)) captured <- c(captured, parts[keep])
-  }
-  if (length(captured) == 0L) return(NULL)
-  # Keep duplicate copies: the H2 container flushes the current row to more
-  # than one page, and that copy frequency is what lets the row parser tell
-  # the committed reading from stale/truncated versions. De-duplication for
-  # display happens later, in read_qview().
-  trimws(captured)
-}
-
-
-.qv_parse_report_rows <- function(lines, analytes) {
-  empty <- list(
-    replicates     = .qv_empty_replicates(),
-    summaries      = .qv_empty_summaries(),
-    curve_fit      = NULL,
-    concentrations = NULL
-  )
-  if (is.null(lines) || length(lines) == 0L || nrow(analytes) == 0L) {
-    return(empty)
-  }
-
-  current_group <- NA_character_
-  parsed <- vector("list", length(lines))
-
-  for (i in seq_along(lines)) {
-    parts <- .qv_split_csv_row(lines[[i]])
-    if (length(parts) < 4L) next
-    if (nzchar(parts[[1L]])) current_group <- parts[[1L]]
-    well_group    <- if (nzchar(parts[[1L]])) parts[[1L]] else current_group
-    statistic_raw <- parts[[2L]]
-    well_field    <- parts[[3L]]
-    values        <- parts[-seq_len(4L)]
-    if (length(values) == 0L) next
-    info <- .qv_classify_statistic(statistic_raw)
-    if (is.na(info$kind)) next
-    n <- nrow(analytes)
-    if (length(values) >= n) values <- values[seq_len(n)] else length(values) <- n
-    nums <- suppressWarnings(as.numeric(values))
-    parsed[[i]] <- tibble::tibble(
-      well_group  = well_group,
-      well        = if (info$kind == "replicate") well_field else NA_character_,
-      replicate   = info$replicate,
-      kind        = info$kind,
-      family      = info$family,
-      analyte     = analytes$analyte,
-      value       = nums,
-      unit        = analytes$unit,
-      .line       = i                      # source-line id; dropped before return
-    )
-  }
-
-  out <- dplyr::bind_rows(parsed)
-  if (nrow(out) == 0L) return(empty)
-  out <- out[!is.na(out$analyte) & out$analyte != "Ref Spot",
-             , drop = FALSE]
-  out <- out[!is.na(out$well_group) & nzchar(out$well_group),
-             , drop = FALSE]
-  out <- out[!is.na(out$value), , drop = FALSE]
-  # --- Collapse stale duplicate replicate readings ----------------------
-  # The H2 container keeps superseded MVCC page versions of a well's row.
-  # A version cut at a 2048-byte page boundary parses as a short row
-  # (fewer analytes, a number sometimes truncated mid-digit) and can carry
-  # a stale group label, so the same physical well appears several times
-  # with different values. The current, committed row is flushed to more
-  # than one page, so for each physical (well, replicate, family, analyte)
-  # keep the value that occurs most often across the duplicate copies,
-  # breaking ties toward the most complete source row (the intact, non-
-  # truncated version). This must run on the raw rows -- before any
-  # de-duplication that would discard the copy-frequency signal. Summary
-  # rows (well == NA) are keyed by group and de-duplicated as before.
-  is_rep <- out$kind == "replicate" & !is.na(out$well) & nzchar(out$well)
-  rep_part <- out[is_rep, , drop = FALSE]
-  other_part <- out[!is_rep, , drop = FALSE]
-  if (nrow(rep_part) > 0L) {
-    # completeness of the *source line* (a truncated copy carries fewer
-    # analyte values than the intact one), independent of its group label.
-    rep_part$.cov <- stats::ave(rep(1L, nrow(rep_part)), rep_part$.line,
-                                FUN = length)
-    cell <- paste(rep_part$well, rep_part$replicate, rep_part$family,
-                  rep_part$analyte, sep = "\r")
-    rep_part$.freq <- stats::ave(rep(1L, nrow(rep_part)),
-                                 paste(cell, rep_part$value, sep = "\v"),
-                                 FUN = length)
-    ord <- order(rep_part$well, rep_part$replicate, rep_part$family,
-                 rep_part$analyte, -rep_part$.freq, -rep_part$.cov)
-    rep_part <- rep_part[ord, , drop = FALSE]
-    rep_part <- dplyr::distinct(rep_part, .data$well, .data$replicate,
-                               .data$family, .data$analyte, .keep_all = TRUE)
-    rep_part$.cov <- NULL
-    rep_part$.freq <- NULL
-  }
-  other_part <- dplyr::distinct(other_part, .data$well_group, .data$well,
-                                .data$replicate, .data$kind, .data$family,
-                                .data$analyte, .keep_all = TRUE)
-  out <- dplyr::bind_rows(rep_part, other_part)
-  out$.line <- NULL
-
-  # Parse "(1:NNN)" dilution suffix off the well_group label.
-  dilution <- rep(NA_real_, nrow(out))
-  m <- regmatches(out$well_group,
-                  regexec("\\(1:([0-9.]+)\\)\\s*$", out$well_group))
-  for (k in seq_along(m)) {
-    if (length(m[[k]]) == 2L) {
-      dilution[k] <- suppressWarnings(as.numeric(m[[k]][2L]))
+  source_spans <- list()
+  source_runs <- integer()
+  for (i in which(runs$values & runs$lengths >= 20L)) {
+    start <- starts[[i]]
+    end <- ends[[i]]
+    text <- rawToChar(raw[seq.int(start, end)])
+    breaks <- gregexpr("[\r\n]", text)[[1L]]
+    breaks <- breaks[breaks > 0L]
+    begins <- c(1L, breaks + 1L)
+    finishes <- c(breaks - 1L, nchar(text))
+    for (j in which(begins <= finishes)) {
+      line <- substr(text, begins[[j]], finishes[[j]])
+      if (!grepl(paste0(",", patterns, "(?:[ ,]|$)"), line, perl = TRUE)) next
+      # A report-like fragment touching an opaque byte boundary is not a
+      # complete source record. Refuse it instead of changing its identity.
+      left_ok <- begins[[j]] > 1L || start == 1L
+      right_ok <- finishes[[j]] < nchar(text) || end == length(raw)
+      if (!left_ok || !right_ok) {
+        .qv_binary_text_error(start + begins[[j]] - 1L,
+                              start + finishes[[j]] - 1L, "candidate record")
+      }
+      captured <- c(captured, line)
+      source_spans[[length(source_spans) + 1L]] <- c(
+        start = start + begins[[j]] - 1L, end = start + finishes[[j]] - 1L)
+      source_runs <- c(source_runs, i)
     }
   }
-  out$dilution  <- dilution
-  out$sample_id <- trimws(sub("\\s*\\([^)]*\\)\\s*$", "", out$well_group))
-
-  pi_rows <- out[out$family == "pixel_intensity", , drop = FALSE]
-  conc_rows <- out[out$family == "concentration", , drop = FALSE]
-
-  replicates <- pi_rows[pi_rows$kind == "replicate", , drop = FALSE]
-  summaries  <- pi_rows[pi_rows$kind != "replicate", , drop = FALSE]
-
-  list(
-    replicates = tibble::tibble(
-      well_group      = replicates$well_group,
-      sample_id       = replicates$sample_id,
-      well            = replicates$well,
-      replicate       = replicates$replicate,
-      analyte         = replicates$analyte,
-      unit            = replicates$unit,
-      pixel_intensity = replicates$value,
-      dilution        = replicates$dilution
-    ),
-    summaries = tibble::tibble(
-      well_group = summaries$well_group,
-      sample_id  = summaries$sample_id,
-      statistic  = summaries$kind,
-      analyte    = summaries$analyte,
-      value      = summaries$value,
-      unit       = summaries$unit
-    ),
-    concentrations = if (nrow(conc_rows) > 0L) {
-      tibble::tibble(
-        well_group    = conc_rows$well_group,
-        sample_id     = conc_rows$sample_id,
-        well          = conc_rows$well,
-        replicate     = conc_rows$replicate,
-        statistic     = conc_rows$kind,
-        analyte       = conc_rows$analyte,
-        unit          = conc_rows$unit,
-        concentration = conc_rows$value,
-        dilution      = conc_rows$dilution
-      )
-    } else {
-      NULL
-    },
-    curve_fit = .qv_extract_curve_fit(lines, analytes)
-  )
+  if (!length(captured)) return(NULL)
+  # Copy counts and physical order are provenance, not transaction recency.
+  attr(captured, "source_spans") <- source_spans
+  attr(captured, "source_runs") <- source_runs
+  captured
 }
 
+.qv_parse_report_rows <- function(lines, analytes) {
+  rows <- if (is.null(lines)) list() else lapply(lines, .qv_split_csv_row)
+  attr(rows, "source_runs") <- attr(lines, "source_runs")
+  .qv_parse_export_rows(rows, 0L, analytes)
+}
 
 .qv_extract_curve_fit <- function(lines, analytes) {
   if (is.null(lines) || nrow(analytes) == 0L) return(NULL)
   rgx <- "^[^,]*,Regression Model,"
   hit <- lines[grepl(rgx, lines)]
   if (length(hit) == 0L) return(NULL)
+  models <- lapply(hit, function(line) {
+    .qv_report_values(.qv_split_csv_row(line), nrow(analytes), "regression model")
+  })
+  if (length(unique(models)) > 1L) {
+    cli::cli_abort("Ambiguous conflicting regression-model records.")
+  }
   parts <- .qv_split_csv_row(hit[1L])
   vals <- parts[-seq_len(4L)]
   if (length(vals) < nrow(analytes)) length(vals) <- nrow(analytes)
@@ -544,7 +447,7 @@ read_qview <- function(path,
                           well_type   = factor(character(),
                             levels = c("standard", "negative", "sample", "control"))))
   }
-  base <- trimws(sub("\\s*\\([^)]*\\)\\s*$", "", groups))
+  base <- .qv_sample_identity(groups)$sample_id
   classify <- function(g) {
     if (grepl("^ICal\\b|^Cal\\b", g)) return("standard")
     if (g == "GLow"  || g == "Low")    return("negative")
@@ -577,6 +480,10 @@ read_qview <- function(path,
   }
   per_well <- dplyr::distinct(
     replicates[, c("well", "well_group", "sample_id", "dilution")])
+  if (anyDuplicated(per_well$well)) {
+    cli::cli_abort("Conflicting sample assignments for a physical report well.")
+  }
+  invisible(lapply(per_well$well, .qv_check_report_wells, context = "plate layout"))
   per_well <- dplyr::left_join(
     per_well,
     well_groups[, c("well_group", "well_type")],
@@ -606,6 +513,9 @@ read_qview <- function(path,
     m <- regmatches(label, regexec("\\(Replicate ([0-9]+)\\)", label))[[1L]]
     out$kind <- "replicate"
     out$replicate <- suppressWarnings(as.integer(m[2L]))
+    if (is.na(out$replicate) || out$replicate < 1L) {
+      cli::cli_abort("Replicate indices must be positive representable integers.")
+    }
   }
   out
 }
@@ -614,24 +524,10 @@ read_qview <- function(path,
 # CSV row splitter that respects double-quoted fields. Q-View only quotes
 # fields containing commas (e.g. "A1, A2"); a tiny state machine is enough.
 .qv_split_csv_row <- function(line) {
-  chars <- strsplit(line, "", fixed = TRUE)[[1L]]
-  fields <- character()
-  buf <- character()
-  in_q <- FALSE
-  for (ch in chars) {
-    if (ch == "\"") {
-      in_q <- !in_q
-    } else if (ch == "," && !in_q) {
-      fields <- c(fields, paste0(buf, collapse = ""))
-      buf <- character()
-    } else {
-      buf <- c(buf, ch)
-    }
-  }
-  fields <- c(fields, paste0(buf, collapse = ""))
-  trimws(fields)
+  rows <- .qv_csv_records(line)
+  if (length(rows) != 1L) cli::cli_abort("Expected one CSV record.")
+  rows[[1L]]
 }
-
 
 .qv_empty_replicates <- function() {
   tibble::tibble(
@@ -642,7 +538,9 @@ read_qview <- function(path,
     analyte         = character(),
     unit            = character(),
     pixel_intensity = numeric(),
-    dilution        = numeric()
+    dilution        = numeric(),
+    raw_value = character(), flag = character(), error_codes = character(),
+    statistic_label = character()
   )
 }
 
@@ -654,7 +552,9 @@ read_qview <- function(path,
     statistic  = character(),
     analyte    = character(),
     value      = numeric(),
-    unit       = character()
+    unit       = character(),
+    raw_value = character(), flag = character(), error_codes = character(),
+    statistic_label = character()
   )
 }
 

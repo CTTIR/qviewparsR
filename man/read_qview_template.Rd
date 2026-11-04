@@ -22,7 +22,7 @@ A \code{\link[tibble:tibble]{tibble::tibble()}} with one row per well and column
 (character), \code{dilution} (numeric).
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 }
 \details{
 Parses the plate-template CSV that Q-View imports for sample
@@ -31,10 +31,15 @@ the top-left declares the plate dimensions, followed by sections
 labelled \verb{Group Name}, \verb{Group Type}, and \verb{Dilution Factor}. Each
 section is one row per plate row and one column per plate column.
 
-All template data is also embedded inside the \code{.Q-View} file itself
-(and is recovered by \code{\link[=read_qview]{read_qview()}}); this function exists for
-setting up new plates or cross-validating Q-View imports against
-the original template.
+All three required sections must have each declared row and column
+exactly once. Dimensions must fit the source and use at most 26 single-
+letter rows; this does not extend binary report support beyond 96 wells.
+Nonblank dilution values must be positive finite numbers. Blank sample
+and dilution cells remain missing. Identifiers are decoded as text,
+preserving leading zeroes, quoted punctuation and non-dilution suffixes.
+Text uses the UTF-8-then-Latin-1 fallback described in \code{\link[=read_qview_report]{read_qview_report()}}.
+The template is an independent assignment source; binary report extraction
+does not recover every original template field.
 }
 \examples{
 path <- system.file("extdata", "example-template.csv",

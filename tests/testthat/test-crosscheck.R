@@ -46,6 +46,38 @@
   pairs
 }
 
+.grid_agreement <- function(pi, grid) {
+  keys <- c("well", "analyte")
+  parsed_keys <- sort(paste(pi$well, pi$analyte, sep = "\r"))
+  reference_keys <- sort(paste(grid$well, grid$analyte, sep = "\r"))
+  j <- merge(pi[c("well", "analyte", "pixel_intensity")], grid, by = keys)
+  rel <- ifelse(j$grid != 0,
+                abs(j$pixel_intensity - j$grid) / abs(j$grid),
+                abs(j$pixel_intensity - j$grid))
+  c(unique_parsed = !anyDuplicated(pi[keys]),
+    unique_reference = !anyDuplicated(grid[keys]),
+    complete_keys = identical(parsed_keys, reference_keys),
+    complete_join = nrow(j) == nrow(grid),
+    numeric_agreement = all(is.finite(rel) & rel <= 1e-6))
+}
+
+.expect_grid_agreement <- function(pi, grid) {
+  checks <- .grid_agreement(pi, grid)
+  expect_true(all(checks), info = paste(names(checks)[!checks], collapse = ", "))
+}
+
+test_that("synthetic independent grid checks require complete key coverage", {
+  reference <- data.frame(well = c("A1", "A2", "B1"),
+                          analyte = c("X", "X", "X"), grid = c(0, 2, 300))
+  parsed <- data.frame(well = c("B1", "A1", "A2"), analyte = "X",
+                       pixel_intensity = c(300, 0, 2))
+  .expect_grid_agreement(parsed, reference)
+  expect_failure(.expect_grid_agreement(parsed[-1L, ], reference))
+  expect_failure(.expect_grid_agreement(rbind(parsed, parsed[1L, ]), reference))
+  wrong <- parsed; wrong$pixel_intensity[1L] <- 30
+  expect_failure(.expect_grid_agreement(wrong, reference))
+})
+
 test_that("parsed pixel intensities match grid exports at 1e-6", {
   pairs <- .grid_pairs()
   skip_if(length(pairs) == 0L, "no .Q-View + grid-export pairs available")
@@ -54,19 +86,10 @@ test_that("parsed pixel intensities match grid exports at 1e-6", {
     grid <- .parse_grid(pr$grid)
     pi <- qv$pixel_intensities
     pi <- pi[!is.na(pi$well) & !is.na(pi$pixel_intensity), , drop = FALSE]
-    pi <- pi[!duplicated(pi[c("well", "analyte")]), , drop = FALSE]
-    j <- merge(pi[c("well", "analyte", "pixel_intensity")], grid,
-               by = c("well", "analyte"))
-    expect_gt(nrow(j), 0L)
-    rel <- ifelse(j$grid != 0,
-                  abs(j$pixel_intensity - j$grid) / abs(j$grid),
-                  abs(j$pixel_intensity - j$grid))
-    expect_true(all(rel <= 1e-6),
-                info = paste(basename(pr$qview),
-                  "mismatches:",
-                  paste(utils::head(sprintf("%s/%s p=%s g=%s",
-                    j$well[rel > 1e-6], j$analyte[rel > 1e-6],
-                    j$pixel_intensity[rel > 1e-6], j$grid[rel > 1e-6]), 3),
-                    collapse = "; ")))
+    # Compare the declared scientific panel only; Ref Spot is explicitly not
+    # returned as a quantified analyte. No matching-key subset is sufficient.
+    panel <- setdiff(qv$analytes$analyte, "Ref Spot")
+    grid <- grid[grid$analyte %in% panel, , drop = FALSE]
+    .expect_grid_agreement(pi, grid)
   }
 })

@@ -14,13 +14,16 @@
 \value{
 A \code{\link[tibble:tibble]{tibble::tibble()}} with one row per \code{well_type} x \code{analyte}
 combination, columns: \code{well_type}, \code{analyte}, \code{unit}, \code{n}, \code{mean},
-\code{sd}, \code{cv}, \code{min}, \code{max}.
+\code{sd}, \code{cv}, \code{min}, \code{max}, \code{n_observed}, \code{n_missing}, \code{n_censored}.
 }
 \description{
 Per-analyte mean, standard deviation, and coefficient of variation
 (\code{sd / mean}) of pixel intensities, by well-group type. Calibrator /
 standard wells are reported separately so calibration variability is
-easy to inspect.
+easy to inspect. Missing and censored values are excluded from numerical
+estimates. \code{n} counts all rows; \code{n_observed}, \code{n_missing}, and \code{n_censored}
+describe their interpretation. Groups without observed values have \code{NA}
+estimates, and a single observation has \code{NA} standard deviation.
 }
 \examples{
 path <- system.file("extdata", "example.Q-View", package = "qviewparsR")

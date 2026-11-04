@@ -37,7 +37,8 @@ test_that("summary.qview returns an empty tibble when there is no data", {
   expect_s3_class(s, "tbl_df")
   expect_equal(nrow(s), 0L)
   expect_named(s, c("well_type", "analyte", "unit", "n",
-                    "mean", "sd", "cv", "min", "max"))
+                    "mean", "sd", "cv", "min", "max",
+                    "n_observed", "n_missing", "n_censored"))
 })
 
 test_that("print.qview_summary prints and returns invisibly", {

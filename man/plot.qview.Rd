@@ -30,6 +30,8 @@ pixel intensity per well.
 intensity per analyte.
 }
 
+Missing and censored measurements are excluded from numeric plots.
+Their original values and flags remain available in the parsed tables.
 Requires the \code{ggplot2} package (Suggested).
 }
 \examples{

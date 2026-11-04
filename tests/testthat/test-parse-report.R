@@ -1,51 +1,24 @@
 # Unit tests for the report-row parser, exercised with small synthetic
 # inputs so they run on CI without the (multi-MB) .Q-View fixtures.
 
-test_that("complete replicate rows win over stale truncated duplicates", {
-  # The H2 container retains superseded page versions of a well's row; a
-  # version cut at a 2048-byte page boundary parses as a short row with a
-  # stale group label. The current, intact row must win.
-  analytes <- tibble::tibble(
-    spot_number = 1:3,
-    analyte = c("Ba", "Bb", "C3a"),
-    unit = c("ng/ml", "ug/ml", "ng/ml")
-  )
+test_that("conflicting complete or truncated page candidates are refused", {
+  analytes <- tibble::tibble(spot_number = 1:3,
+    analyte = c("Ba", "Bb", "C3a"), unit = c("ng/ml", "ug/ml", "ng/ml"))
   lines <- c(
-    # stale / truncated version of well D1 (only 2 of 3 analytes, Bb wrong)
     "Cal 4,Pixel Intensity (Replicate 1),D1,NA,913,31",
-    # current, complete version of well D1 (all 3 analytes, Bb correct)
-    "3738433602 (1:100),Pixel Intensity (Replicate 1),D1,NA,913,315,482"
-  )
-  rows <- .qv_parse_report_rows(lines, analytes)
-  d1 <- rows$replicates[rows$replicates$well == "D1", , drop = FALSE]
-
-  # exactly one reading per analyte for the physical well
-  expect_equal(nrow(d1), 3L)
-  expect_equal(sort(d1$analyte), c("Ba", "Bb", "C3a"))
-
-  bb <- d1$pixel_intensity[d1$analyte == "Bb"]
-  expect_equal(bb, 315)            # not the truncated 31
-  # the surviving row carries the complete version's group label
-  expect_equal(unique(d1$well_group), "3738433602 (1:100)")
+    "3738433602 (1:100),Pixel Intensity (Replicate 1),D1,NA,913,315,482")
+  expect_error(.qv_parse_report_rows(lines, analytes), "Incomplete or extra")
 })
 
-test_that("the most frequent value wins across duplicate page copies", {
-  # G1 in the wild: a truncated copy (Factor P = 6), two committed copies
-  # of the correct row (Factor P = 64037), and one stale alternative
-  # (Factor P = 1801). Majority across copies must pick 64037.
+test_that("copy counts do not establish the current committed value", {
   analytes <- tibble::tibble(spot_number = 1:2,
-                             analyte = c("C1q", "Factor P"),
-                             unit = c("ug/ml", "ng/ml"))
+    analyte = c("C1q", "Factor P"), unit = c("ug/ml", "ng/ml"))
   lines <- c(
-    "Low,Pixel Intensity (Replicate 1),G1,NA,62397,6",        # truncated
-    "Low,Pixel Intensity (Replicate 1),G1,NA,62397,64037",    # committed copy 1
-    "Low,Pixel Intensity (Replicate 1),G1,NA,62397,64037",    # committed copy 2
-    "Low,Pixel Intensity (Replicate 1),G1,NA,4424,1801"       # stale alternative
-  )
-  rows <- .qv_parse_report_rows(lines, analytes)
-  fp <- rows$replicates$pixel_intensity[
-    rows$replicates$well == "G1" & rows$replicates$analyte == "Factor P"]
-  expect_equal(fp, 64037)
+    "Low,Pixel Intensity (Replicate 1),G1,NA,62397,6",
+    "Low,Pixel Intensity (Replicate 1),G1,NA,62397,64037",
+    "Low,Pixel Intensity (Replicate 1),G1,NA,62397,64037",
+    "Low,Pixel Intensity (Replicate 1),G1,NA,4424,1801")
+  expect_error(.qv_parse_report_rows(lines, analytes), "Ambiguous conflicting")
 })
 
 test_that("distinct physical wells are all retained", {

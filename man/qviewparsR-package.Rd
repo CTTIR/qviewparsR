@@ -6,7 +6,7 @@
 \alias{qviewparsR-package}
 \title{qviewparsR: Read .Q-View Multiplex ELISA Project Files}
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
 Pure-R parser for \code{.Q-View} binary project files used in
 chemiluminescent multiplex ELISA plate imaging and quantification.

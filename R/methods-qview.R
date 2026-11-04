@@ -21,7 +21,7 @@ is_qview <- function(x) inherits(x, "qview")
 #' Compact summary of a parsed `qview` object: project / plate
 #' identifiers, analyte panel, well-group counts by type, and whether
 #' the embedded report carries quantitative concentrations or only
-#' qualitative pixel intensities.
+#' reported pixel intensities.
 #'
 #' @param x A `qview` object returned by [read_qview()].
 #' @param ... Ignored.
@@ -73,7 +73,7 @@ print.qview <- function(x, ...) {
   cli::cli_bullets(c(
     "*" = "replicate rows:    {.val {nrow(x$pixel_intensities)}}",
     "*" = "summary stat rows: {.val {nrow(x$summary_statistics)}}",
-    "*" = "concentrations:    {if (is.null(x$concentrations)) 'qualitative only' else paste0(nrow(x$concentrations), ' rows')}",
+    "*" = "concentrations:    {if (is.null(x$concentrations)) 'not recovered' else paste0(nrow(x$concentrations), ' rows')}",
     "*" = "curve fit:         {if (is.null(x$curve_fit)) 'not reported' else paste0(nrow(x$curve_fit), ' analytes')}"
   ))
   invisible(x)
@@ -85,14 +85,17 @@ print.qview <- function(x, ...) {
 #' Per-analyte mean, standard deviation, and coefficient of variation
 #' (`sd / mean`) of pixel intensities, by well-group type. Calibrator /
 #' standard wells are reported separately so calibration variability is
-#' easy to inspect.
+#' easy to inspect. Missing and censored values are excluded from numerical
+#' estimates. `n` counts all rows; `n_observed`, `n_missing`, and `n_censored`
+#' describe their interpretation. Groups without observed values have `NA`
+#' estimates, and a single observation has `NA` standard deviation.
 #'
 #' @param object A `qview` object returned by [read_qview()].
 #' @param ... Unused; for S3 generic compatibility.
 #'
 #' @return A [tibble::tibble()] with one row per `well_type` x `analyte`
 #'   combination, columns: `well_type`, `analyte`, `unit`, `n`, `mean`,
-#'   `sd`, `cv`, `min`, `max`.
+#'   `sd`, `cv`, `min`, `max`, `n_observed`, `n_missing`, `n_censored`.
 #'
 #' @examples
 #' path <- system.file("extdata", "example.Q-View", package = "qviewparsR")
@@ -113,23 +116,38 @@ summary.qview <- function(object, ...) {
       analyte = character(), unit = character(),
       n = integer(),
       mean = numeric(), sd = numeric(), cv = numeric(),
-      min = numeric(), max = numeric()
+      min = numeric(), max = numeric(),
+      n_observed = integer(), n_missing = integer(), n_censored = integer()
     ))
   }
+  if (anyDuplicated(wg$well_group)) {
+    cli::cli_abort("Well-group identities must be unique before summarising.")
+  }
+  pi$observed <- .qv_observed(pi, "pixel_intensity")
+  pi$censored <- if ("flag" %in% names(pi)) {
+    !is.na(pi$flag) & pi$flag %in% c("<", ">", "incalculable")
+  } else {
+    rep(FALSE, nrow(pi))
+  }
+  pi$pixel_intensity[!pi$observed] <- NA_real_
   d <- dplyr::left_join(pi, wg, by = "well_group")
   out <- d |>
     dplyr::group_by(.data$well_type, .data$analyte, .data$unit) |>
     dplyr::summarise(
       n    = dplyr::n(),
-      mean = mean(.data$pixel_intensity, na.rm = TRUE),
+      n_observed = sum(.data$observed),
+      n_missing = sum(!.data$observed & !.data$censored),
+      n_censored = sum(.data$censored),
+      mean = if (any(.data$observed)) mean(.data$pixel_intensity, na.rm = TRUE) else NA_real_,
       sd   = stats::sd(.data$pixel_intensity, na.rm = TRUE),
-      min  = suppressWarnings(min(.data$pixel_intensity, na.rm = TRUE)),
-      max  = suppressWarnings(max(.data$pixel_intensity, na.rm = TRUE)),
+      min  = if (any(.data$observed)) min(.data$pixel_intensity, na.rm = TRUE) else NA_real_,
+      max  = if (any(.data$observed)) max(.data$pixel_intensity, na.rm = TRUE) else NA_real_,
       .groups = "drop"
     )
   out$cv <- ifelse(out$mean > 0, out$sd / out$mean, NA_real_)
   out <- out[, c("well_type", "analyte", "unit", "n",
-                 "mean", "sd", "cv", "min", "max")]
+                 "mean", "sd", "cv", "min", "max",
+                 "n_observed", "n_missing", "n_censored")]
   structure(out, class = c("qview_summary", class(out)))
 }
 
@@ -199,6 +217,8 @@ as_tibble.qview <- function(x, ...) {
 #' * `"replicate_scatter"` -- replicate 1 vs replicate 2 pixel
 #'   intensity per analyte.
 #'
+#' Missing and censored measurements are excluded from numeric plots.
+#' Their original values and flags remain available in the parsed tables.
 #' Requires the `ggplot2` package (Suggested).
 #'
 #' @param x A `qview` object returned by [read_qview()].
@@ -260,6 +280,7 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
   if (nrow(d) == 0L) {
     cli::cli_abort("No replicate-1 pixel intensities are available to plot.")
   }
+  d$pixel_intensity[!.qv_observed(d, "pixel_intensity")] <- NA_real_
   d$plate_row <- factor(substr(d$well, 1L, 1L),
                         levels = rev(LETTERS[1:8]))
   d$plate_col <- factor(as.integer(substring(d$well, 2L)),
@@ -276,9 +297,11 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
 }
 
 
-.qv_plot_replicate_scatter <- function(x) {
+.qv_plot_replicate_scatter <- function(x, allow_empty = FALSE) {
   reps <- x$pixel_intensities
+  reps <- reps[.qv_observed(reps, "pixel_intensity"), , drop = FALSE]
   if (nrow(reps) == 0L) {
+    if (allow_empty) return(NULL)
     cli::cli_abort("No replicate pixel intensities are available to plot.")
   }
   # A well-group label can attach to more than one well (e.g. a re-used
@@ -293,7 +316,13 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
     values_fn = function(v) mean(v, na.rm = TRUE)
   )
   if (!all(c("rep_1", "rep_2") %in% colnames(wide))) {
+    if (allow_empty) return(NULL)
     cli::cli_abort("Need replicate 1 and replicate 2 readings to draw the scatter.")
+  }
+  wide <- wide[is.finite(wide$rep_1) & is.finite(wide$rep_2), , drop = FALSE]
+  if (nrow(wide) == 0L) {
+    if (allow_empty) return(NULL)
+    cli::cli_abort("No complete observed replicate pairs are available to plot.")
   }
   ggplot2::ggplot(wide, ggplot2::aes(.data$rep_1, .data$rep_2)) +
     ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
@@ -338,6 +367,7 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
 
 .qv_plot_summary <- function(qv) {
   s <- summary(qv)
+  s <- s[is.finite(s$mean), , drop = FALSE]
   if (nrow(s) == 0L) return(NULL)
   ggplot2::ggplot(s, ggplot2::aes(x = .data$analyte, y = .data$mean,
                                   fill = .data$well_type)) +
@@ -358,6 +388,8 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
 .qv_plot_concentrations <- function(qv) {
   d <- qv$concentrations
   if (is.null(d) || nrow(d) == 0L) return(NULL)
+  d <- d[.qv_observed(d, "concentration"), , drop = FALSE]
+  if (nrow(d) == 0L) return(NULL)
   ggplot2::ggplot(d, ggplot2::aes(x = .data$well_group, y = .data$concentration,
                                   fill = .data$analyte)) +
     ggplot2::geom_col(position = "dodge") +
@@ -406,7 +438,8 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
 .qv_plot_distribution <- function(qv) {
   d <- qv$pixel_intensities
   if (is.null(d) || nrow(d) == 0L) return(NULL)
-  d <- d[!is.na(d$pixel_intensity) & d$analyte != "Ref Spot", , drop = FALSE]
+  d <- d[.qv_observed(d, "pixel_intensity") & !is.na(d$analyte) &
+           d$analyte != "Ref Spot", , drop = FALSE]
   if (nrow(d) == 0L) return(NULL)
   d$analyte <- factor(d$analyte, levels = unique(d$analyte))
   ggplot2::ggplot(d, ggplot2::aes(x = .data$analyte,
@@ -448,7 +481,7 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
     ggplot2::labs(title = "Pixel-intensity distribution") + base_thm +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 30, hjust = 1))
 
-  p3 <- .qv_plot_replicate_scatter(qv)
+  p3 <- .qv_plot_replicate_scatter(qv, allow_empty = TRUE)
   if (!is.null(p3)) p3 <- p3 +
     ggplot2::labs(title = "Replicate concordance",
                   x = "Replicate 1 (PI)", y = "Replicate 2 (PI)") + base_thm
@@ -479,7 +512,7 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
   patchwork::wrap_plots(p1, p2, p3, p4, ncol = 2L, nrow = 2L) +
     patchwork::plot_annotation(
       title    = hdr,
-      subtitle = "Publication overview: layout, distribution, replicate concordance, group means",
+      subtitle = "Layout, observed intensities, replicate concordance and group means; missing/censored values excluded",
       tag_levels = "A",
       theme = ggplot2::theme(
         plot.title    = ggplot2::element_text(face = "bold", size = 13),
@@ -510,6 +543,14 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
   )
 }
 
+
+# A censor bound is not an observed value. Older objects without flags retain
+# their numerical behavior, while nonfinite values are never plotted/summarised.
+.qv_observed <- function(data, column) {
+  finite <- is.finite(data[[column]])
+  if (!"flag" %in% names(data)) return(finite)
+  finite & (is.na(data$flag) | data$flag == "")
+}
 
 # null-coalescing helper local to this file (keeps R >= 4.1 compatibility).
 `%||%` <- function(a, b) if (is.null(a) || (length(a) == 1L && is.na(a))) b else a
