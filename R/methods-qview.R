@@ -56,7 +56,8 @@ print.qview <- function(x, ...) {
     show$panel <- paste0(show$analyte,
                          ifelse(is.na(show$unit), "",
                                 paste0(" (", show$unit, ")")))
-    cli::cli_inform(paste(show$panel, collapse = ", "))
+    panel_text <- paste(show$panel, collapse = ", ")
+    cli::cli_inform("{panel_text}")
   }
 
   cli::cli_h2("Well groups ({nrow(x$well_groups)})")
