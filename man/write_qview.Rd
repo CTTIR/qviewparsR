@@ -17,7 +17,13 @@ write_qview_xlsx(
   call = rlang::caller_env()
 )
 
-write_qview_csv(qv, path, template = NULL, call = rlang::caller_env())
+write_qview_csv(
+  qv,
+  path,
+  template = NULL,
+  call = rlang::caller_env(),
+  overwrite = FALSE
+)
 
 write_qview_rds(qv, path, overwrite = FALSE, call = rlang::caller_env())
 
@@ -29,7 +35,13 @@ qview_to_xlsx(
   call = rlang::caller_env()
 )
 
-qview_to_csv_dir(qv, dir, template = NULL, call = rlang::caller_env())
+qview_to_csv_dir(
+  qv,
+  dir,
+  template = NULL,
+  call = rlang::caller_env(),
+  overwrite = FALSE
+)
 }
 \arguments{
 \item{qv}{A \code{qview} object from \code{\link[=read_qview]{read_qview()}}.}
@@ -42,8 +54,11 @@ directory (created if it does not exist).}
 \code{\link[=read_qview_template]{read_qview_template()}}) to include as an extra sheet / file.}
 
 \item{overwrite}{Logical. If \code{FALSE} (the default), an existing
-destination triggers an error; set to \code{TRUE} to replace it.
-Ignored by \code{\link[=write_qview_csv]{write_qview_csv()}} (it only adds files).}
+file or non-empty CSV directory triggers an error. An existing empty
+CSV directory is allowed. With \code{TRUE}, CSV replacement accepts only
+the managed table filenames listed below; unrelated entries, links,
+and non-regular files are refused. Tables absent from the new object
+are removed only during this explicit replacement.}
 
 \item{call}{The execution environment of the calling function. Used
 for error reporting; experts only.}
@@ -55,7 +70,7 @@ Use \code{path} instead.}
 \code{qv}, invisibly, to support pipelines.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 }
 \details{
 Three writers, one for each common destination. All return the input
@@ -66,6 +81,27 @@ Three writers, one for each common destination. All return the input
 \item \code{\link[=write_qview_rds]{write_qview_rds()}}  -- a single \code{.rds} containing the full \code{qview}
 object (lossless, the only round-trippable format).
 }
+
+Tables are checked and written into a private staging directory beside
+the destination before publication. An existing destination is moved to
+a backup during replacement and restored if publication fails. If that
+restoration fails, the error names the retained backup. This is not a
+crash-atomic transaction: process termination, filesystem failure, or
+concurrent readers/writers can observe an absent destination or leave
+recovery files. Concurrent writers are not synchronized.
+
+Replacement copies and verifies the existing filesystem permission mode
+before publication, including the CSV directory and each managed CSV file
+present in both bundles. A new CSV directory is created with mode \code{0700}.
+Mode support depends on the operating system and filesystem; ownership
+and access-control lists (ACLs) are not copied by these writers.
+
+CSV bundles contain only non-empty tables named \code{metadata}, \code{analytes},
+\code{well_groups}, \code{plate_layout}, \code{pixel_intensities}, \code{summary_statistics},
+\code{concentrations}, \code{curve_fit}, \code{manifest}, \code{segments}, and optional
+\code{template}, each with a \code{.csv} suffix. Use a dedicated directory.
+CSV and XLSX require one-dimensional atomic columns; RDS retains the
+full object, including additional fields and list columns.
 }
 \examples{
 path <- system.file("extdata", "example.Q-View", package = "qviewparsR")
