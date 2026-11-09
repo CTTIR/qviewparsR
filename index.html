@@ -43,7 +43,7 @@
     <!-- Standard logo aliases contain the named v5 light and dark hexes. -->
     <a class="navbar-brand me-2" href="index.html"><img src="logo.svg" alt="" class="themakr-navbar-logo" data-cttir-dark-src="reference/figures/logo-dark.svg">qviewparsR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,7 +88,7 @@
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <p><code>qviewparsR</code> is <strong>pure R</strong> — no compiled code, no Java runtime, no H2 database driver, and no system libraries — so it installs the same way on <strong>Windows, macOS, and Linux</strong>. The package requires <strong>R &gt;= 4.1.0</strong> and its declared R dependencies.</p>
-<p>The 1.0.1 reliability changes described here are source changes. Use the GitHub installation below until CRAN lists version 1.0.1 or later.</p>
+<p>The 1.1.0 reliability changes described here are not yet on CRAN. Use the GitHub installation below until CRAN lists version 1.1.0 or later.</p>
 <p>Install the released version from <a href="https://CRAN.R-project.org/package=qviewparsR" class="external-link">CRAN</a>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"qviewparsR"</span><span class="op">)</span></span></code></pre></div>
@@ -157,7 +157,7 @@
 <div class="section level3">
 <h3 id="interpretation-and-recovery">Interpretation and recovery<a class="anchor" aria-label="anchor" href="#interpretation-and-recovery"></a>
 </h3>
-<p>The binary reader extracts embedded reports; it does not reconstruct H2 transactions or establish which conflicting database record is current. Version 1.0.1 refuses conflicting observations instead of selecting the most frequent value. Export a fresh CSV or XLSX report from Q-View and use <code><a href="reference/read_qview_report.html">read_qview_report()</a></code> when a binary report is ambiguous. Keep the original container and producer export for provenance.</p>
+<p>The binary reader extracts embedded reports; it does not reconstruct H2 transactions or establish which conflicting database record is current. Version 1.1.0 refuses conflicting observations instead of selecting the most frequent value. Export a fresh CSV or XLSX report from Q-View and use <code><a href="reference/read_qview_report.html">read_qview_report()</a></code> when a binary report is ambiguous. Keep the original container and producer export for provenance.</p>
 <p>Reports currently support wells A1–H12. Malformed numeric values, ambiguous analyte identities, invalid wells and malformed template geometry are errors. Recognized missing and censored measurements retain their original decoded text and flags. A <code>&lt;</code> or <code>&gt;</code> concentration is a bound, not an exact observation; summary estimates and numeric plots exclude censored and missing values. Summary counts distinguish observed, missing and censored records. Flat text reports use UTF-8 when valid and otherwise fall back to Latin-1; XLSX text is already decoded. The selected flat-file encoding is recorded in metadata. Binary report text outside the supported printable representation is refused rather than silently stripped; use the producer flat export instead. No step imputes zero or independently validates the producer’s calibration.</p>
 <p>These changes make some formerly accepted inputs fail deliberately. Do not remove conflicting records merely to obtain a successful import; reconcile them with the producer export. The bundled examples are synthetic. Checks against private instrument exports remain unperformed when those files are unavailable.</p>
 </div>
@@ -472,16 +472,16 @@
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<p>If you use <code>qviewparsR</code> in academic work, please cite the CRAN release. <code>CITATION.cff</code> and <code>.zenodo.json</code> retain the archived 1.0.0 record; they do not assert that the 1.0.1 source patch has been released or archived. For a source snapshot, also record its Git commit.</p>
+<p>If you use <code>qviewparsR</code> in academic work, please cite the CRAN release. <code>CITATION.cff</code> uses the Zenodo concept DOI, which always resolves to the latest archived release; the archived 1.0.0 snapshot keeps its own version DOI (below). For an unreleased source snapshot, also record its Git commit.</p>
 <blockquote>
-<p>Heller R, Mannes M (2026). <em>qviewparsR: Read .Q-View Multiplex ELISA Project Files</em>. <a href="doi:%5B10.32614/CRAN.package.qviewparsR" class="uri">doi:[10.32614/CRAN.package.qviewparsR</a>](<a href="https://doi.org/10.32614/CRAN.package.qviewparsR" class="external-link uri">https://doi.org/10.32614/CRAN.package.qviewparsR</a>). R package version 1.0.0, <a href="https://CRAN.R-project.org/package=qviewparsR" class="external-link uri">https://CRAN.R-project.org/package=qviewparsR</a>.</p>
+<p>Heller R, Mannes M (2026). <em>qviewparsR: Read .Q-View Multiplex ELISA Project Files</em>. <a href="doi:%5B10.32614/CRAN.package.qviewparsR" class="uri">doi:[10.32614/CRAN.package.qviewparsR</a>](<a href="https://doi.org/10.32614/CRAN.package.qviewparsR" class="external-link uri">https://doi.org/10.32614/CRAN.package.qviewparsR</a>). R package version 1.1.0, <a href="https://CRAN.R-project.org/package=qviewparsR" class="external-link uri">https://CRAN.R-project.org/package=qviewparsR</a>.</p>
 </blockquote>
 <p>BibTeX:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="va">@Manual</span>{<span class="ot">qviewparsR</span>,</span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="dt">title</span>  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},</span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="dt">author</span> = {R. Heller and M. Mannes},</span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="dt">year</span>   = {2026},</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="dt">note</span>   = {R package version 1.0.0},</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="dt">note</span>   = {R package version 1.1.0},</span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="dt">doi</span>    = {10.32614/CRAN.package.qviewparsR},</span>
 <span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="dt">url</span>    = {https://CRAN.R-project.org/package=qviewparsR},</span>
 <span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>}</span></code></pre></div>

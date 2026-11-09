@@ -15,7 +15,7 @@
     <!-- Standard logo aliases contain the named v5 light and dark hexes. -->
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo" data-cttir-dark-src="../reference/figures/logo-dark.svg">qviewparsR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,9 +46,15 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.0.1" id="qviewparsr-101">qviewparsR 1.0.1<a class="anchor" aria-label="anchor" href="#qviewparsr-101"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.1.0" id="qviewparsr-110">qviewparsR 1.1.0<a class="anchor" aria-label="anchor" href="#qviewparsr-110"></a></h2>
 <div class="section level3">
-<h3 id="measurement-integrity-1-0-1">Measurement integrity<a class="anchor" aria-label="anchor" href="#measurement-integrity-1-0-1"></a></h3>
+<h3 id="packaging-1-1-0">Packaging<a class="anchor" aria-label="anchor" href="#packaging-1-1-0"></a></h3>
+<ul><li>Bump the version to 1.1.0 for the CRAN update; the reliability changes below were previously developed as 1.0.1 and never released.</li>
+<li>Quote software names (‘H2’, ‘Java’) in the DESCRIPTION and phrase the description as full sentences.</li>
+<li>Align citation metadata: <code>citation("qviewparsR")</code> now uses the CRAN DOI, <code>CITATION.cff</code> uses the Zenodo concept DOI, and all version fields read 1.1.0.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="measurement-integrity-1-1-0">Measurement integrity<a class="anchor" aria-label="anchor" href="#measurement-integrity-1-1-0"></a></h3>
 <ul><li>Refuse conflicting embedded records rather than infer a current database transaction from page-copy frequency. Use a fresh producer CSV/XLSX export with <code><a href="../reference/read_qview_report.html">read_qview_report()</a></code> if a binary report contains ambiguous records.</li>
 <li>Preserve sample identities and decoded quoting/encoding; reject malformed nonblank numbers, unsupported report wells and ambiguous analyte keys.</li>
 <li>Retain recognized missing/censored measurements and raw values. Summaries distinguish observed, missing and censored counts; numeric plots exclude bounds and missing values. All-missing groups have <code>NA</code> estimates.</li>
@@ -56,7 +62,7 @@
 <li>Print imported analyte names and units literally, without evaluating brace-delimited expressions as diagnostic formatting code.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="app-and-export-reliability-1-0-1">App and export reliability<a class="anchor" aria-label="anchor" href="#app-and-export-reliability-1-0-1"></a></h3>
+<h3 id="app-and-export-reliability-1-1-0">App and export reliability<a class="anchor" aria-label="anchor" href="#app-and-export-reliability-1-1-0"></a></h3>
 <ul><li>Clear stale results when uploads or parsing options change; bound image export memory and prevent plot-error logging from causing reactive loops.</li>
 <li>Stage exports before replacement; require explicit CSV overwrite and preserve unrelated files. CSV bundles include segment metadata.</li>
 </ul><p>These are compatibility changes for ambiguous/malformed inputs and existing CSV destinations. Version 1.0.0’s majority-vote MVCC claim below describes the old implementation and is superseded: copy frequency cannot prove transaction recency or scientific correctness. No instrument validation or CRAN acceptance of this patch is implied.</p>
