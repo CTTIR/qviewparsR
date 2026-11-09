@@ -28,8 +28,8 @@ for those dependencies (see the platform notes below).
 database driver, and no system libraries — so it installs the same way on
 **Windows, macOS, and Linux**. The package requires **R >= 4.1.0** and its declared R dependencies.
 
-The 1.0.1 reliability changes described here are source changes. Use the
-GitHub installation below until CRAN lists version 1.0.1 or later.
+The 1.1.0 reliability changes described here are not yet on CRAN. Use the
+GitHub installation below until CRAN lists version 1.1.0 or later.
 
 Install the released version from
 [CRAN](https://CRAN.R-project.org/package=qviewparsR):
@@ -117,7 +117,7 @@ Use RDS for a lossless R round trip. Replacing an existing export requires
 
 The binary reader extracts embedded reports; it does not reconstruct H2
 transactions or establish which conflicting database record is current.
-Version 1.0.1 refuses conflicting observations instead of selecting the most
+Version 1.1.0 refuses conflicting observations instead of selecting the most
 frequent value. Export a fresh CSV or XLSX report from Q-View and use
 `read_qview_report()` when a binary report is ambiguous. Keep the original
 container and producer export for provenance.
@@ -254,14 +254,14 @@ returned object.
 ## Citation
 
 If you use `qviewparsR` in academic work, please cite the CRAN release.
-`CITATION.cff` and `.zenodo.json` retain the archived 1.0.0 record; they do not
-assert that the 1.0.1 source patch has been released or archived. For a source
-snapshot, also record its Git commit.
+`CITATION.cff` uses the Zenodo concept DOI, which always resolves to the
+latest archived release; the archived 1.0.0 snapshot keeps its own version DOI
+(below). For an unreleased source snapshot, also record its Git commit.
 
 > Heller R, Mannes M (2026). _qviewparsR: Read .Q-View Multiplex ELISA
 > Project Files_.
 > doi:[10.32614/CRAN.package.qviewparsR](https://doi.org/10.32614/CRAN.package.qviewparsR).
-> R package version 1.0.0,
+> R package version 1.1.0,
 > <https://CRAN.R-project.org/package=qviewparsR>.
 
 BibTeX:
@@ -271,7 +271,7 @@ BibTeX:
   title  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},
   author = {R. Heller and M. Mannes},
   year   = {2026},
-  note   = {R package version 1.0.0},
+  note   = {R package version 1.1.0},
   doi    = {10.32614/CRAN.package.qviewparsR},
   url    = {https://CRAN.R-project.org/package=qviewparsR},
 }

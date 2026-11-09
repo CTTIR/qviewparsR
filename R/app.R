@@ -433,7 +433,7 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
       shiny::tags$blockquote(
         "Heller R, Mannes M (2026). ",
         shiny::tags$em("qviewparsR: Read .Q-View Multiplex ELISA Project Files. "),
-        "R package version 1.0.0. doi:10.32614/CRAN.package.qviewparsR"
+        "R package version 1.1.0. doi:10.32614/CRAN.package.qviewparsR"
       ),
       shiny::h4("BibTeX"),
       shiny::tags$pre(
@@ -441,7 +441,7 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
   title  = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},
   author = {R. Heller and M. Mannes},
   year   = {2026},
-  note   = {R package version 1.0.0},
+  note   = {R package version 1.1.0},
   doi    = {10.32614/CRAN.package.qviewparsR},
   url    = {https://CRAN.R-project.org/package=qviewparsR}
 }"

@@ -1,4 +1,14 @@
-# qviewparsR 1.0.1
+# qviewparsR 1.1.0
+
+## Packaging
+
+* Bump the version to 1.1.0 for the CRAN update; the reliability changes
+  below were previously developed as 1.0.1 and never released.
+* Quote software names ('H2', 'Java') in the DESCRIPTION and phrase the
+  description as full sentences.
+* Align citation metadata: `citation("qviewparsR")` now uses the CRAN DOI,
+  `CITATION.cff` uses the Zenodo concept DOI, and all version fields read
+  1.1.0.
 
 ## Measurement integrity
 

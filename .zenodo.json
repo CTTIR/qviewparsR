@@ -1,8 +1,8 @@
 {
   "upload_type": "software",
   "title": "qviewparsR: Read .Q-View Multiplex ELISA project files",
-  "version": "1.0.0",
-  "publication_date": "2026-08-11",
+  "version": "1.1.0",
+  "publication_date": "2026-11-10",
   "creators": [
     {
       "name": "Heller, Raban",
@@ -23,6 +23,5 @@
       "scheme": "url",
       "resource_type": "software"
     }
-  ],
-  "notes": "Published record; DOI already registered."
+  ]
 }

@@ -1,37 +1,40 @@
-## Status
+## Update submission
 
-Version 1.0.0 was accepted on CRAN and published 2026-07-23
-(doi:10.32614/CRAN.package.qviewparsR). The notes below are retained for
-reference; they will be replaced at the next submission.
+This is an update of qviewparsR from version 1.0.0 (on CRAN since
+2026-07-23) to version 1.1.0. It is a reliability release: the binary
+reader now refuses conflicting embedded records instead of choosing the
+most frequent copy, report and template readers validate malformed input,
+missing/censored values are retained and summarised separately, and the
+CSV/XLSX/RDS exporters stage output and require explicit overwriting. See
+NEWS.md for details. The DESCRIPTION text now quotes software names.
 
 ## R CMD check results
 
-0 errors | 0 warnings | 1 note
+0 errors | 0 warnings | 0 notes
 
-The one NOTE is the expected new-submission note, plus a title-case
-false positive:
-
-* "New submission" — this was the first CRAN release of qviewparsR.
-* The title-case check suggests `.q-View`, but `.Q-View` is the proper
-  name of the binary file format the package reads (the capital "Q" is
-  part of the format name, not a title-case error). The title is left as
-  the correct proper noun.
-
-(Local builds occasionally surface a single transient "unable to verify
-current time" NOTE driven by the build host's network posture; it is not
-raised by the package itself.)
+* The title-case check may suggest `.q-View`; `.Q-View` is the proper name
+  of the binary file format the package reads (the capital "Q" is part of
+  the format name), so the title keeps the correct spelling. This is
+  unchanged from the accepted 1.0.0 release.
 
 ## Test environments
 
-* Local: Ubuntu Linux, R 4.6.1
-* GitHub Actions: ubuntu-latest (release, devel, oldrel-1),
-  macos-latest (release), windows-latest (release)
+* Local: macOS (aarch64-apple-darwin), R 4.6.1,
+  `R CMD check --as-cran --no-manual` (no LaTeX installation is available
+  locally, so the PDF manual was not built there).
+* GitHub Actions (r-lib/actions v2, `--as-cran`): macos-latest (release),
+  windows-latest (release), ubuntu-latest (devel, release, oldrel-1),
+  ubuntu-22.04 (R 4.1, the minimum supported version).
+
+## Reverse dependencies
+
+There are currently no reverse dependencies on CRAN
+(`tools::package_dependencies("qviewparsR", reverse = TRUE, which = "all")`
+returns none).
 
 ## Notes
 
-* The package is a lean parser and export pipeline with no compiled
-  code. Vignette and tests skip cleanly when no Q-View fixture is
-  available. No examples access the network.
-* `read_qview_report()` reads the flat report exports Q-View writes
-  alongside the binary container; a small synthetic
-  `example-report.csv` fixture ships in `inst/extdata/`.
+* The package is pure R with no compiled code. Examples and the vignette
+  use only small synthetic fixtures shipped in `inst/extdata/`; they do not
+  access the network and write only to `tempdir()`.
+* End-to-end Shiny tests (shinytest2/chromote) are skipped on CRAN.
