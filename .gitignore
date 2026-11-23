@@ -32,6 +32,7 @@ _coverage/
 # Local records and development material
 /.local-private/
 /admin/
+/planning/
 AGENTS.md
 CLAUDE.md
 CLAUDE_CODE_*.md
