@@ -257,7 +257,7 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
 }
 
 
-.qv_plot_plate_map <- function(x) {
+.qv_plot_plate_map <- function(x, label_size = 2.5) {
   d <- x$plate_layout
   d$plate_col <- factor(d$plate_col, levels = sort(unique(d$plate_col)))
   d$plate_row <- factor(d$plate_row,
@@ -266,7 +266,7 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
                                   fill = .data$well_type)) +
     ggplot2::geom_tile(colour = "grey30") +
     ggplot2::geom_text(ggplot2::aes(label = .data$sample_id),
-                       size = 2.5, na.rm = TRUE) +
+                       size = label_size, na.rm = TRUE) +
     ggplot2::scale_fill_viridis_d(option = "D", begin = 0.2, end = 0.85,
                                   na.value = "grey90") +
     ggplot2::labs(title = paste0("Plate map: ", x$metadata$plate %||% ""),
@@ -286,11 +286,21 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
                         levels = rev(LETTERS[1:8]))
   d$plate_col <- factor(as.integer(substring(d$well, 2L)),
                         levels = 1:12)
+  # Draw every plate position so that wells keep their physical place even
+  # when only a few are measured; unmeasured wells form a pale background.
+  plate <- expand.grid(plate_col = factor(1:12, levels = 1:12),
+                       plate_row = factor(LETTERS[1:8], levels = rev(LETTERS[1:8])),
+                       analyte = unique(d$analyte), stringsAsFactors = FALSE)
   ggplot2::ggplot(d, ggplot2::aes(.data$plate_col, .data$plate_row,
                                   fill = .data$pixel_intensity)) +
-    ggplot2::geom_tile() +
+    ggplot2::geom_tile(data = plate, fill = "grey95", colour = "white",
+                       inherit.aes = FALSE,
+                       ggplot2::aes(.data$plate_col, .data$plate_row)) +
+    ggplot2::geom_tile(colour = "white") +
     ggplot2::facet_wrap(~ .data$analyte) +
-    ggplot2::scale_fill_viridis_c(option = "C", na.value = "grey95") +
+    ggplot2::scale_x_discrete(drop = FALSE) +
+    ggplot2::scale_y_discrete(drop = FALSE) +
+    ggplot2::scale_fill_viridis_c(option = "C", na.value = "grey80") +
     ggplot2::labs(title = "Pixel intensity (Replicate 1) per analyte",
                   x = NULL, y = NULL, fill = "PI") +
     ggplot2::theme_minimal() +
@@ -326,9 +336,15 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
     cli::cli_abort("No complete observed replicate pairs are available to plot.")
   }
   ggplot2::ggplot(wide, ggplot2::aes(.data$rep_1, .data$rep_2)) +
+    # Mirrored blank points give both axes of each panel the same range, so
+    # the identity line is the panel diagonal.
+    ggplot2::geom_blank(ggplot2::aes(x = .data$rep_2, y = .data$rep_1)) +
     ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
     ggplot2::geom_point(alpha = 0.6) +
     ggplot2::facet_wrap(~ .data$analyte, scales = "free") +
+    ggplot2::scale_x_continuous(n.breaks = 4,
+                                guide = ggplot2::guide_axis(check.overlap = TRUE)) +
+    ggplot2::scale_y_continuous(n.breaks = 4) +
     ggplot2::labs(title = "Replicate concordance",
                   x = "Replicate 1 (PI)",
                   y = "Replicate 2 (PI)") +
@@ -443,13 +459,11 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
            d$analyte != "Ref Spot", , drop = FALSE]
   if (nrow(d) == 0L) return(NULL)
   d$analyte <- factor(d$analyte, levels = unique(d$analyte))
+  # A neutral fill: in the overview, the viridis colours denote well types.
   ggplot2::ggplot(d, ggplot2::aes(x = .data$analyte,
-                                  y = .data$pixel_intensity,
-                                  fill = .data$analyte)) +
-    ggplot2::geom_boxplot(outlier.size = 0.6, alpha = 0.85,
+                                  y = .data$pixel_intensity)) +
+    ggplot2::geom_boxplot(outlier.size = 0.6, fill = "grey80",
                           colour = "grey20") +
-    ggplot2::scale_fill_viridis_d(option = "D", begin = 0.2, end = 0.85,
-                                  guide = "none") +
     ggplot2::labs(x = NULL, y = "Pixel intensity") +
     ggplot2::theme_minimal(base_size = 10) +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 30, hjust = 1))
@@ -471,7 +485,7 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
                    plot.tag   = ggplot2::element_text(face = "bold", size = 12),
                    legend.position = "right")
 
-  p1 <- .qv_plot_plate_map(qv)
+  p1 <- .qv_plot_plate_map(qv, label_size = 1.8)
   if (!is.null(p1)) p1 <- p1 +
     ggplot2::labs(title = "Plate layout", subtitle = NULL) +
     base_thm +

@@ -92,3 +92,41 @@ test_that(".qv_blank_plot and .qv_metadata_kv behave", {
   expect_named(kv, c("field", "value"))
   expect_true("project" %in% kv$field)
 })
+
+test_that("the intensity heatmap keeps every well at its physical position", {
+  skip_if_not_installed("ggplot2")
+  qv <- read_qview(system.file("extdata", "example.Q-View", package = "qviewparsR"),
+                   verbose = FALSE)
+  p <- plot(qv, type = "intensity_heatmap")
+  built <- ggplot2::ggplot_build(p)
+  n_analytes <- length(unique(p$data$analyte))
+  # Background layer: all 96 positions in every analyte panel.
+  expect_equal(nrow(built$data[[1L]]), 96L * n_analytes)
+  expect_identical(ggplot2::layer_scales(p)$x$get_limits(), as.character(1:12))
+  expect_identical(ggplot2::layer_scales(p)$y$get_limits(), rev(LETTERS[1:8]))
+  # The measured layer still holds only the observed replicate-1 rows.
+  expect_equal(nrow(built$data[[2L]]), nrow(p$data))
+})
+
+test_that("replicate concordance panels share one range on both axes", {
+  skip_if_not_installed("ggplot2")
+  qv <- read_qview(system.file("extdata", "example.Q-View", package = "qviewparsR"),
+                   verbose = FALSE)
+  built <- ggplot2::ggplot_build(plot(qv, type = "replicate_scatter"))
+  for (params in built$layout$panel_params) {
+    expect_equal(params$x.range, params$y.range)
+  }
+})
+
+test_that("overview panels avoid label overlap and colour reuse", {
+  skip_if_not_installed("ggplot2")
+  skip_if_not_installed("patchwork")
+  qv <- read_qview(system.file("extdata", "example.Q-View", package = "qviewparsR"),
+                   verbose = FALSE)
+  overview <- .qv_plot_overview(qv)
+  expect_equal(overview[[1L]]$layers[[2L]]$aes_params$size, 1.8)
+  expect_equal(plot(qv, type = "plate_map")$layers[[2L]]$aes_params$size, 2.5)
+  distribution <- .qv_plot_distribution(qv)
+  expect_null(distribution$mapping$fill)
+  expect_identical(distribution$layers[[1L]]$aes_params$fill, "grey80")
+})

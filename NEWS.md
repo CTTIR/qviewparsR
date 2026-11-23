@@ -42,6 +42,17 @@
 * `read_qview()`, `read_qview_report()` and `read_qview_template()` refuse a
   directory path with an informative error instead of a connection error.
 
+## Plots
+
+* `plot(type = "intensity_heatmap")` draws the full 8 x 12 plate in every
+  analyte panel, so measured wells keep their physical position instead of
+  unmeasured rows and columns being dropped from the axes.
+* `plot(type = "replicate_scatter")` gives both axes of each panel the same
+  range, so the dashed identity line is the panel diagonal.
+* In the app's overview figure, plate-map labels are smaller so that they fit
+  their wells, and the intensity boxplots use a neutral fill instead of
+  reusing the well-type colours.
+
 ## App and export reliability
 
 * Clear stale results when uploads or parsing options change; bound image
