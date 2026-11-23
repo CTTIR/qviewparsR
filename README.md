@@ -286,7 +286,7 @@ software DOI:
 
 ```bibtex
 @software{heller_2026_21395352,
-  author    = {Heller, R. and Mannes, Marco},
+  author    = {Heller, R. and Mannes, M.},
   title     = {qviewparsR: Read .Q-View Multiplex ELISA Project Files},
   month     = jul,
   year      = 2026,
