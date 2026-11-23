@@ -128,3 +128,10 @@ html[data-bs-theme="light"] pre code span.kw a {
 html[data-bs-theme] pre code span[style*="color:"] {
   color: var(--cttir-text) !important;
 }
+
+/* The site header already shows the package logo; the logos embedded in the
+   README and vignette are for GitHub and standalone vignette HTML only. */
+.template-home .page-header .cttir-readme-logo,
+.template-article .cttir-vignette-logo {
+  display: none;
+}
