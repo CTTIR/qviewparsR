@@ -25,7 +25,7 @@ test_that("CSV replacement is explicit, coherent, and includes segments", {
   before <- .export_tree_hashes(out)
   replacement <- .export_preservation_qview("after")
   replacement$concentrations <- NULL
-  expect_error(write_qview_csv(replacement, out), "already exists")
+  expect_error(write_qview_csv(replacement, out, overwrite = FALSE), "already exists")
   expect_identical(.export_tree_hashes(out), before)
   expect_invisible(write_qview_csv(replacement, out, overwrite = TRUE))
   expect_false(file.exists(file.path(out, "concentrations.csv")))
@@ -58,8 +58,52 @@ test_that("CSV preserves positional call arguments and deprecated forwarding", {
   expect_warning(qview_to_csv_dir(qv, out, NULL, environment(), TRUE),
                  "deprecated")
   expect_true(file.exists(file.path(out, "concentrations.csv")))
-  expect_warning(expect_error(qview_to_csv_dir(qv, out, NULL, environment()),
+  expect_warning(expect_error(qview_to_csv_dir(qv, out, NULL, environment(), FALSE),
                               "already exists"), "deprecated")
+})
+
+test_that("implicit replacement of a CSV bundle is deprecated, not removed", {
+  withr::local_options(lifecycle_verbosity = "warning")
+  d <- withr::local_tempdir()
+  out <- file.path(d, "bundle")
+  qv <- .export_preservation_qview()
+  write_qview_csv(qv, out)
+  # Version 1.0.0 rewrote an existing bundle when called again; this keeps
+  # working with a deprecation warning, and the replacement is coherent.
+  replacement <- .export_preservation_qview("after")
+  replacement$concentrations <- NULL
+  expect_warning(write_qview_csv(replacement, out),
+                 class = "lifecycle_warning_deprecated")
+  expect_false(file.exists(file.path(out, "concentrations.csv")))
+  metadata <- readr::read_csv(file.path(out, "metadata.csv"),
+                              col_types = readr::cols(.default = "c"))
+  expect_identical(metadata$value[metadata$field == "project"], "after")
+  expect_identical(list.files(d, all.files = TRUE, no.. = TRUE), "bundle")
+  # The deprecated alias forwards the missing argument the same way.
+  warnings <- character()
+  withCallingHandlers(
+    qview_to_csv_dir(qv, out),
+    lifecycle_warning_deprecated = function(w) {
+      warnings <<- c(warnings, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_length(warnings, 2L)
+  expect_true(file.exists(file.path(out, "concentrations.csv")))
+  # An explicit FALSE, unrelated content and other writers stay strict.
+  expect_error(write_qview_csv(qv, out, overwrite = FALSE), "already exists")
+  writeLines("notes", file.path(out, "notes.txt"))
+  before <- .export_tree_hashes(out)
+  expect_no_warning(expect_error(write_qview_csv(qv, out), "already exists"))
+  expect_identical(.export_tree_hashes(out), before)
+  rds <- file.path(d, "plate.rds")
+  write_qview_rds(qv, rds)
+  expect_error(write_qview_rds(qv, rds), "already exists\\.")
+  xlsx <- file.path(d, "plate.xlsx")
+  write_qview_xlsx(qv, xlsx)
+  error <- tryCatch(write_qview_xlsx(qv, xlsx), error = identity)
+  expect_match(conditionMessage(error), "already exists.")
+  expect_no_match(conditionMessage(error), "CSV directory")
 })
 
 test_that("CSV refuses unrelated or nonregular destination contents", {

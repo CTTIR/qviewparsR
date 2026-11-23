@@ -58,7 +58,13 @@ file or non-empty CSV directory triggers an error. An existing empty
 CSV directory is allowed. With \code{TRUE}, CSV replacement accepts only
 the managed table filenames listed below; unrelated entries, links,
 and non-regular files are refused. Tables absent from the new object
-are removed only during this explicit replacement.}
+are removed only during this explicit replacement.
+
+Deprecated behaviour, for \code{\link[=write_qview_csv]{write_qview_csv()}} only: when
+\code{overwrite} is not supplied and \code{path} already holds a bundle written by
+\code{\link[=write_qview_csv]{write_qview_csv()}} (nothing but managed CSV files), the bundle is still
+replaced, as in version 1.0.0, with a deprecation warning. Supply
+\code{overwrite = TRUE} to replace an existing bundle.}
 
 \item{call}{The execution environment of the calling function. Used
 for error reporting; experts only.}

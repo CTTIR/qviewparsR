@@ -22,6 +22,12 @@
 #'   the managed table filenames listed below; unrelated entries, links,
 #'   and non-regular files are refused. Tables absent from the new object
 #'   are removed only during this explicit replacement.
+#'
+#'   Deprecated behaviour, for [write_qview_csv()] only: when
+#'   `overwrite` is not supplied and `path` already holds a bundle written by
+#'   [write_qview_csv()] (nothing but managed CSV files), the bundle is still
+#'   replaced, as in version 1.0.0, with a deprecation warning. Supply
+#'   `overwrite = TRUE` to replace an existing bundle.
 #' @param call The execution environment of the calling function. Used
 #'   for error reporting; experts only.
 #'
@@ -104,6 +110,16 @@ write_qview_csv <- function(qv,
   .check_qview(qv, call = call)
   .check_string(path, call = call)
   .check_flag(overwrite, call = call)
+  if (missing(overwrite) && .qv_is_csv_bundle(path)) {
+    # Version 1.0.0 rewrote an existing bundle without being asked; keep that
+    # call working through a deprecation period instead of failing.
+    lifecycle::deprecate_warn(
+      "1.1.0",
+      "write_qview_csv(overwrite = 'must be `TRUE` to replace an existing CSV bundle')",
+      details = "The existing bundle was replaced; set `overwrite = TRUE` to keep doing so."
+    )
+    overwrite <- TRUE
+  }
   tables <- .qv_export_tables(qv, template, call = call)
   .qv_export_staged(path, "directory", overwrite, function(stage) {
     for (name in names(tables)) {
@@ -226,8 +242,13 @@ write_qview_rds <- function(qv,
   }
   if (length(entries) > 0L && !overwrite) {
     cli::cli_abort(
-      c("{.path {path}} already exists and is not an empty CSV directory.",
-        "i" = "Set {.code overwrite = TRUE} to replace managed output."),
+      if (kind == "directory") {
+        c("{.path {path}} already exists and is not an empty CSV directory.",
+          "i" = "Set {.code overwrite = TRUE} to replace managed output.")
+      } else {
+        c("{.path {path}} already exists.",
+          "i" = "Set {.code overwrite = TRUE} to replace it.")
+      },
       call = call
     )
   }
@@ -249,6 +270,19 @@ write_qview_rds <- function(qv,
     }
   }
   TRUE
+}
+
+
+# TRUE only for an existing, non-empty regular directory that holds nothing
+# but regular managed CSV files, i.e. a bundle written by write_qview_csv().
+.qv_is_csv_bundle <- function(path) {
+  path <- path.expand(path)
+  if (!identical(.qv_export_type(path), "directory")) return(FALSE)
+  entries <- fs::dir_ls(path, all = TRUE, recurse = FALSE)
+  length(entries) > 0L &&
+    all(basename(entries) %in% paste0(.qv_export_table_names(), ".csv")) &&
+    all(vapply(entries, function(x) identical(.qv_export_type(x), "file"),
+               logical(1L)))
 }
 
 
@@ -417,7 +451,11 @@ qview_to_csv_dir <- function(qv,
   lifecycle::deprecate_warn(
     "1.0.0", "qview_to_csv_dir()", "write_qview_csv()"
   )
-  write_qview_csv(qv, path = dir, template = template, call = call,
-                  overwrite = overwrite)
+  if (missing(overwrite)) {
+    write_qview_csv(qv, path = dir, template = template, call = call)
+  } else {
+    write_qview_csv(qv, path = dir, template = template, call = call,
+                    overwrite = overwrite)
+  }
 }
 # Version 1.0.0

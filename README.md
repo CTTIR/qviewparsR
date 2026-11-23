@@ -111,7 +111,9 @@ list.files(out, recursive = TRUE)
 CSV exports retain exact text. Spreadsheet applications can interpret text
 starting with formula characters; import such columns explicitly as text.
 Use RDS for a lossless R round trip. Replacing an existing export requires
-`overwrite = TRUE`; use a dedicated directory for CSV bundles.
+`overwrite = TRUE`; use a dedicated directory for CSV bundles. A CSV bundle
+written by an earlier `write_qview_csv()` call is still replaced without
+`overwrite`, as in version 1.0.0, but with a deprecation warning.
 
 ### Interpretation and recovery
 
