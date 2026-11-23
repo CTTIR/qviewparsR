@@ -7,8 +7,8 @@
 #'
 #' @param row Integer or character. Either a 0/1-based row index or
 #'   already a single letter (`"A"`...).
-#' @param col Integer column index (1-based or 0-based; values >= 1 are
-#'   treated as 1-based). Nonintegral or out-of-range indices are refused.
+#' @param col Integer column index: 1-based by default, 0-based when
+#'   `zero_based = TRUE`. Nonintegral or out-of-range indices are refused.
 #' @param zero_based Logical. If `TRUE`, treat `row` and `col` as
 #'   0-based; if `FALSE` (default), treat them as 1-based.
 #'

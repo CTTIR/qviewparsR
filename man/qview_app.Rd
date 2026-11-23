@@ -28,8 +28,9 @@ displays the parsed metadata, analytes, well groups, and replicate
 tables, and lets the user download the parsed result as \code{xlsx},
 \code{rds}, or a zip of per-table CSV files.
 
-Requires the \code{shiny}, \code{bslib}, and \code{DT} packages (listed under
-\code{Suggests}).
+Requires the \code{shiny}, \code{bslib}, \code{DT}, \code{ggplot2} and \code{withr} packages
+(listed under \code{Suggests}); the Overview figure also needs \code{patchwork}.
+The CSV zip download uses \code{\link[utils:zip]{utils::zip()}}, which needs a \code{zip} program.
 }
 \examples{
 if (interactive()) {

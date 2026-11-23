@@ -14,4 +14,4 @@ differences. Their numerical values must not be interpreted as experimental
 measurements or evidence of assay performance. Tests against private producer
 exports are separate and require the corresponding files supplied locally.
 
-The maintenance patch preserves the original three input files unchanged.
+The three files are unchanged since version 1.0.0.

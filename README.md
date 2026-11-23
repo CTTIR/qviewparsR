@@ -61,7 +61,7 @@ pak::pak("CTTIR/qviewparsR")
 Installing the package pulls in its required imports automatically. The
 optional features need a few extra packages: plotting uses `ggplot2`
 (plus `patchwork` for the overview figure), and the interactive app
-(`qview_app()`) uses `shiny`, `bslib`, and `DT`.
+(`qview_app()`) uses `shiny`, `bslib`, `DT`, `ggplot2` and `withr`.
 
 ## Quick start
 
@@ -248,7 +248,7 @@ returned object.
 | Reader | `read_qview()`, `read_qview_report()` |
 | Helpers | `strip_qview_prefix()`, `well_label()` |
 | Optional | `read_qview_template()` |
-| Methods | `print.qview()`, `plot.qview()` |
+| Methods | `is_qview()`, `print.qview()`, `plot.qview()`, `as_tibble.qview()` |
 | Export | `write_qview_xlsx()`, `write_qview_csv()`, `write_qview_rds()` |
 | Summary | `summary.qview()` (mean / SD / CV per analyte x well type) |
 | Shiny app | `qview_app()` |

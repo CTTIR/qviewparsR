@@ -8,8 +8,9 @@
 #' tables, and lets the user download the parsed result as `xlsx`,
 #' `rds`, or a zip of per-table CSV files.
 #'
-#' Requires the `shiny`, `bslib`, and `DT` packages (listed under
-#' `Suggests`).
+#' Requires the `shiny`, `bslib`, `DT`, `ggplot2` and `withr` packages
+#' (listed under `Suggests`); the Overview figure also needs `patchwork`.
+#' The CSV zip download uses [utils::zip()], which needs a `zip` program.
 #'
 #' @param max_upload_mb Numeric. Maximum upload size per request, in
 #'   megabytes. Q-View project files routinely exceed the Shiny upload

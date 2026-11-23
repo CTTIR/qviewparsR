@@ -18,13 +18,15 @@ ready for downstream statistical analysis.
 \section{Main functions}{
 
 \itemize{
-\item Reader: \code{\link[=read_qview]{read_qview()}} -- parse a \code{.Q-View} file.
+\item Readers: \code{\link[=read_qview]{read_qview()}} -- parse a \code{.Q-View} file;
+\code{\link[=read_qview_report]{read_qview_report()}} -- parse its flat CSV/XLSX report export.
+\item Export: \code{\link[=write_qview_xlsx]{write_qview_xlsx()}}, \code{\link[=write_qview_csv]{write_qview_csv()}}, \code{\link[=write_qview_rds]{write_qview_rds()}}.
 \item Helpers: \code{\link[=strip_qview_prefix]{strip_qview_prefix()}} reverse the Q-View internal naming
 convention; \code{\link[=well_label]{well_label()}} map (row, column) to plate notation.
 \item Optional: \code{\link[=read_qview_template]{read_qview_template()}} parse a Q-View well-assignment
 template CSV.
-\item Methods: \code{\link[=is_qview]{is_qview()}}, \code{\link[=print.qview]{print.qview()}}, \code{\link[=plot.qview]{plot.qview()}},
-\code{\link[=as_tibble.qview]{as_tibble.qview()}}.
+\item Methods: \code{\link[=is_qview]{is_qview()}}, \code{\link[=print.qview]{print.qview()}}, \code{\link[=summary.qview]{summary.qview()}},
+\code{\link[=plot.qview]{plot.qview()}}, \code{\link[=as_tibble.qview]{as_tibble.qview()}}.
 \item Shiny: \code{\link[=qview_app]{qview_app()}} interactive upload / preview / download.
 }
 }

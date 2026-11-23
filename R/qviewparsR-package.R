@@ -11,13 +11,15 @@
 #' ready for downstream statistical analysis.
 #'
 #' @section Main functions:
-#' * Reader: [read_qview()] -- parse a `.Q-View` file.
+#' * Readers: [read_qview()] -- parse a `.Q-View` file;
+#'   [read_qview_report()] -- parse its flat CSV/XLSX report export.
+#' * Export: [write_qview_xlsx()], [write_qview_csv()], [write_qview_rds()].
 #' * Helpers: [strip_qview_prefix()] reverse the Q-View internal naming
 #'   convention; [well_label()] map (row, column) to plate notation.
 #' * Optional: [read_qview_template()] parse a Q-View well-assignment
 #'   template CSV.
-#' * Methods: [is_qview()], [print.qview()], [plot.qview()],
-#'   [as_tibble.qview()].
+#' * Methods: [is_qview()], [print.qview()], [summary.qview()],
+#'   [plot.qview()], [as_tibble.qview()].
 #' * Shiny: [qview_app()] interactive upload / preview / download.
 #'
 #' @keywords internal

@@ -145,3 +145,9 @@ test_that("plot downloads reject invalid dimensions before calling a device", {
   expect_equal(.qv_plot_export_size(10, 7, 600)$dpi, 600)
   expect_error(.qv_plot_export_size(30, 30, 1200), "50 million")
 })
+
+test_that("a missing branding asset fails with a classed error naming it", {
+  error <- tryCatch(.cttir_brand_text("absent-asset.svg"), error = identity)
+  expect_s3_class(error, "rlang_error")
+  expect_match(conditionMessage(error), "absent-asset.svg", fixed = TRUE)
+})

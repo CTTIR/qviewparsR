@@ -10,8 +10,8 @@ well_label(row, col, zero_based = FALSE)
 \item{row}{Integer or character. Either a 0/1-based row index or
 already a single letter (\code{"A"}...).}
 
-\item{col}{Integer column index (1-based or 0-based; values >= 1 are
-treated as 1-based). Nonintegral or out-of-range indices are refused.}
+\item{col}{Integer column index: 1-based by default, 0-based when
+\code{zero_based = TRUE}. Nonintegral or out-of-range indices are refused.}
 
 \item{zero_based}{Logical. If \code{TRUE}, treat \code{row} and \code{col} as
 0-based; if \code{FALSE} (default), treat them as 1-based.}
