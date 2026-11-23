@@ -89,12 +89,17 @@ test_that("implicit replacement of a CSV bundle is deprecated, not removed", {
     }
   )
   expect_length(warnings, 2L)
+  expect_no_match(paste(warnings, collapse = "\n"),
+                  "used\\s+in\\s+the\\s+qviewparsR\\s+package")
   expect_true(file.exists(file.path(out, "concentrations.csv")))
-  # An explicit FALSE, unrelated content and other writers stay strict.
+  # An explicit `overwrite`, either value, and other writers stay strict.
   expect_error(write_qview_csv(qv, out, overwrite = FALSE), "already exists")
   writeLines("notes", file.path(out, "notes.txt"))
   before <- .export_tree_hashes(out)
-  expect_no_warning(expect_error(write_qview_csv(qv, out), "already exists"))
+  expect_no_warning(expect_error(write_qview_csv(qv, out, overwrite = FALSE),
+                                 "already exists"))
+  expect_no_warning(expect_error(write_qview_csv(qv, out, overwrite = TRUE),
+                                 "unrelated"))
   expect_identical(.export_tree_hashes(out), before)
   rds <- file.path(d, "plate.rds")
   write_qview_rds(qv, rds)
@@ -104,6 +109,61 @@ test_that("implicit replacement of a CSV bundle is deprecated, not removed", {
   error <- tryCatch(write_qview_xlsx(qv, xlsx), error = identity)
   expect_match(conditionMessage(error), "already exists.")
   expect_no_match(conditionMessage(error), "CSV directory")
+})
+
+test_that("writing into a shared directory without overwrite is deprecated, not removed", {
+  withr::local_options(lifecycle_verbosity = "warning")
+  d <- withr::local_tempdir()
+  out <- file.path(d, "results")
+  dir.create(file.path(out, "figures"), recursive = TRUE)
+  writeLines("notes", file.path(out, "notes.txt"))
+  writeLines("figure", file.path(out, "figures", "plate.svg"))
+  unrelated <- .export_tree_hashes(out)
+  qv <- .export_preservation_qview()
+  # Version 1.0.0 wrote the tables beside existing files; that call keeps
+  # working with a deprecation warning and never removes anything.
+  expect_warning(write_qview_csv(qv, out), class = "lifecycle_warning_deprecated")
+  hashes <- .export_tree_hashes(out)
+  expect_identical(hashes[names(unrelated)], unrelated)
+  expect_setequal(setdiff(names(hashes), names(unrelated)),
+                  paste0(c("metadata", "analytes", "pixel_intensities",
+                           "concentrations", "segments"), ".csv"))
+  replacement <- .export_preservation_qview("after")
+  replacement$concentrations <- NULL
+  expect_warning(write_qview_csv(replacement, out),
+                 class = "lifecycle_warning_deprecated")
+  metadata <- readr::read_csv(file.path(out, "metadata.csv"),
+                              col_types = readr::cols(.default = "c"))
+  expect_identical(metadata$value[metadata$field == "project"], "after")
+  expect_true(file.exists(file.path(out, "concentrations.csv")))
+  expect_identical(.export_tree_hashes(out)[names(unrelated)], unrelated)
+  # A link or non-regular entry at a table name stops the call before any write.
+  dir.create(file.path(out, "curve_fit.csv"))
+  replacement$curve_fit <- tibble::tibble(analyte = "A", regression_model = "4PL")
+  before <- .export_tree_hashes(out)
+  expect_error(write_qview_csv(replacement, out), "non-regular")
+  expect_identical(.export_tree_hashes(out), before)
+  # The warning points at the calling code, also through the deprecated alias.
+  warnings <- character()
+  withCallingHandlers(
+    qview_to_csv_dir(qv, file.path(d, "plain")),
+    lifecycle_warning_deprecated = function(w) {
+      warnings <<- c(warnings, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  writeLines("notes", file.path(d, "plain", "notes.txt"))
+  withCallingHandlers(
+    qview_to_csv_dir(qv, file.path(d, "plain")),
+    lifecycle_warning_deprecated = function(w) {
+      warnings <<- c(warnings, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_length(warnings, 3L)
+  expect_match(warnings[[3L]], "dedicated\\s+CSV\\s+directory")
+  expect_no_match(paste(warnings, collapse = "\n"),
+                  "used\\s+in\\s+the\\s+qviewparsR\\s+package")
 })
 
 test_that("CSV refuses unrelated or nonregular destination contents", {

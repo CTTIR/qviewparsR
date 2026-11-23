@@ -23,11 +23,15 @@
 #'   and non-regular files are refused. Tables absent from the new object
 #'   are removed only during this explicit replacement.
 #'
-#'   Deprecated behaviour, for [write_qview_csv()] only: when
+#'   Deprecated behaviour, for [write_qview_csv()] only, kept for calls
+#'   written for version 1.0.0, which had no `overwrite` argument: when
 #'   `overwrite` is not supplied and `path` already holds a bundle written by
-#'   [write_qview_csv()] (nothing but managed CSV files), the bundle is still
-#'   replaced, as in version 1.0.0, with a deprecation warning. Supply
-#'   `overwrite = TRUE` to replace an existing bundle.
+#'   [write_qview_csv()] (nothing but managed CSV files), the bundle is
+#'   replaced with a deprecation warning; supply `overwrite = TRUE` to replace
+#'   an existing bundle. When `path` is an existing directory that also holds
+#'   other entries, the tables are written beside them with a deprecation
+#'   warning, replacing same-named regular files and removing nothing, as in
+#'   version 1.0.0; use a dedicated directory instead.
 #' @param call The execution environment of the calling function. Used
 #'   for error reporting; experts only.
 #'
@@ -110,17 +114,23 @@ write_qview_csv <- function(qv,
   .check_qview(qv, call = call)
   .check_string(path, call = call)
   .check_flag(overwrite, call = call)
-  if (missing(overwrite) && .qv_is_csv_bundle(path)) {
-    # Version 1.0.0 rewrote an existing bundle without being asked; keep that
-    # call working through a deprecation period instead of failing.
+  # Version 1.0.0 had no `overwrite` and wrote into any existing directory.
+  # Calls in that form keep working through a deprecation period.
+  existing <- if (missing(overwrite)) .qv_csv_destination(path) else "none"
+  tables <- .qv_export_tables(qv, template, call = call)
+  if (identical(existing, "shared")) {
+    .qv_export_csv_beside(tables, path, call = call)
+    return(invisible(qv))
+  }
+  if (identical(existing, "bundle")) {
     lifecycle::deprecate_warn(
       "1.1.0",
       "write_qview_csv(overwrite = 'must be `TRUE` to replace an existing CSV bundle')",
-      details = "The existing bundle was replaced; set `overwrite = TRUE` to keep doing so."
+      details = "The existing bundle was replaced; set `overwrite = TRUE` to keep doing so.",
+      user_env = call
     )
     overwrite <- TRUE
   }
-  tables <- .qv_export_tables(qv, template, call = call)
   .qv_export_staged(path, "directory", overwrite, function(stage) {
     for (name in names(tables)) {
       df <- tables[[name]]
@@ -273,16 +283,48 @@ write_qview_rds <- function(qv,
 }
 
 
-# TRUE only for an existing, non-empty regular directory that holds nothing
-# but regular managed CSV files, i.e. a bundle written by write_qview_csv().
-.qv_is_csv_bundle <- function(path) {
+# Classify an existing CSV destination: "bundle" for a non-empty regular
+# directory holding nothing but regular managed CSV files (a bundle written by
+# write_qview_csv()), "shared" for any other non-empty regular directory, and
+# "none" otherwise (absent, empty, a link or not a directory).
+.qv_csv_destination <- function(path) {
   path <- path.expand(path)
-  if (!identical(.qv_export_type(path), "directory")) return(FALSE)
+  if (!identical(.qv_export_type(path), "directory")) return("none")
   entries <- fs::dir_ls(path, all = TRUE, recurse = FALSE)
-  length(entries) > 0L &&
-    all(basename(entries) %in% paste0(.qv_export_table_names(), ".csv")) &&
-    all(vapply(entries, function(x) identical(.qv_export_type(x), "file"),
-               logical(1L)))
+  if (!length(entries)) return("none")
+  managed <- basename(entries) %in% paste0(.qv_export_table_names(), ".csv")
+  regular <- vapply(entries, function(x) identical(.qv_export_type(x), "file"),
+                    logical(1L))
+  if (all(managed & regular)) "bundle" else "shared"
+}
+
+
+# Deprecated 1.0.0 behaviour: write the managed tables into a directory that
+# also holds other entries, replacing same-named regular files and removing
+# nothing. Every target is checked before the first file is written.
+.qv_export_csv_beside <- function(tables, path, call) {
+  path <- path.expand(path)
+  tables <- tables[!vapply(tables, function(df) is.null(df) || nrow(df) == 0L,
+                           logical(1L))]
+  targets <- file.path(path, paste0(names(tables), ".csv"))
+  types <- vapply(targets, .qv_export_type, character(1L))
+  if (any(!is.na(types) & types != "file")) {
+    cli::cli_abort(
+      "CSV destination {.path {path}} contains links or non-regular files.",
+      call = call
+    )
+  }
+  lifecycle::deprecate_warn(
+    "1.1.0",
+    "write_qview_csv(path = 'must be a new, empty or dedicated CSV directory')",
+    details = c(
+      i = "The tables were written beside the existing entries, as in version 1.0.0; nothing was removed.",
+      i = "Write each bundle to its own directory."
+    ),
+    user_env = call
+  )
+  for (i in seq_along(tables)) readr::write_csv(tables[[i]], targets[[i]])
+  invisible(path)
 }
 
 

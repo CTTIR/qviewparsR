@@ -59,18 +59,22 @@
   export memory and prevent plot-error logging from causing reactive loops.
 * Stage exports before replacement; require explicit CSV overwrite and
   preserve unrelated files. CSV bundles include segment metadata.
-* Replacing an existing CSV bundle without `overwrite` is deprecated rather
-  than an error: when `overwrite` is not supplied and the destination holds
-  only a bundle written by `write_qview_csv()`, the bundle is replaced as in
-  1.0.0 with a deprecation warning. An explicit `overwrite = FALSE`,
-  unrelated files and the RDS/XLSX writers remain strict.
+* `write_qview_csv()` calls written for 1.0.0, without `overwrite`, are
+  deprecated rather than refused. An existing bundle written by
+  `write_qview_csv()` is replaced, removing tables absent from the new object;
+  in a directory that also holds other entries the tables are written beside
+  them, replacing same-named files and removing nothing, as in 1.0.0. Both
+  cases warn. Calls that supply `overwrite` follow the strict rules above,
+  links or non-regular entries at table names are always refused, and the
+  RDS/XLSX writers are unchanged.
 * An existing RDS or XLSX destination is reported as an existing file rather
   than as a non-empty CSV directory.
 
-These are compatibility changes for ambiguous/malformed inputs. Version 1.0.0's majority-vote MVCC claim below describes the
-old implementation and is superseded: copy frequency cannot prove transaction
-recency or scientific correctness. No instrument validation or CRAN acceptance
-of this patch is implied.
+These are compatibility changes for ambiguous/malformed inputs and for export
+destinations that are symbolic links. Version 1.0.0's majority-vote MVCC
+claim below describes the old implementation and is superseded: copy
+frequency cannot prove transaction recency or scientific correctness. No
+instrument validation or CRAN acceptance of this patch is implied.
 
 # qviewparsR 1.0.0
 

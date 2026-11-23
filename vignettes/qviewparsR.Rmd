@@ -247,8 +247,10 @@ stopifnot(identical(readRDS(file.path(out, "plate.rds")), qv))
 
 All writers require `overwrite = TRUE` to replace existing output. CSV
 replacement is for a dedicated bundle directory and refuses unrelated files.
-Calling `write_qview_csv()` again on a bundle it wrote still replaces it
-without `overwrite`, as version 1.0.0 did, but this is deprecated and warns.
+Calls written for version 1.0.0, without `overwrite`, still work but are
+deprecated and warn: `write_qview_csv()` replaces a bundle it wrote earlier,
+and writes the tables beside the other files of a shared directory without
+removing anything.
 Keep archival CSV as data: spreadsheet applications may interpret text beginning
 with formula characters. Import such columns explicitly as text when viewing them.
 

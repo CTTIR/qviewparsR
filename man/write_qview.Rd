@@ -60,11 +60,15 @@ the managed table filenames listed below; unrelated entries, links,
 and non-regular files are refused. Tables absent from the new object
 are removed only during this explicit replacement.
 
-Deprecated behaviour, for \code{\link[=write_qview_csv]{write_qview_csv()}} only: when
+Deprecated behaviour, for \code{\link[=write_qview_csv]{write_qview_csv()}} only, kept for calls
+written for version 1.0.0, which had no \code{overwrite} argument: when
 \code{overwrite} is not supplied and \code{path} already holds a bundle written by
-\code{\link[=write_qview_csv]{write_qview_csv()}} (nothing but managed CSV files), the bundle is still
-replaced, as in version 1.0.0, with a deprecation warning. Supply
-\code{overwrite = TRUE} to replace an existing bundle.}
+\code{\link[=write_qview_csv]{write_qview_csv()}} (nothing but managed CSV files), the bundle is
+replaced with a deprecation warning; supply \code{overwrite = TRUE} to replace
+an existing bundle. When \code{path} is an existing directory that also holds
+other entries, the tables are written beside them with a deprecation
+warning, replacing same-named regular files and removing nothing, as in
+version 1.0.0; use a dedicated directory instead.}
 
 \item{call}{The execution environment of the calling function. Used
 for error reporting; experts only.}
