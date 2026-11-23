@@ -25,7 +25,7 @@
 #'
 #' Only report wells A1 through H12 are supported. Conflicting records,
 #' duplicate analyte identities and conflicting well assignments are refused.
-#' A sample suffix is removed only when it is a recognized positive finite
+#' A sample suffix is removed only when it is a recognised positive finite
 #' dilution of the form `(1:n)`; other parentheses remain part of the ID.
 #'
 #' @param path Character. Path to a Q-View report export (`.csv` or `.xlsx`).
@@ -42,7 +42,7 @@
 #'   censor/missing state and the original statistic label. Numeric censored
 #'   values are bounds, not measured point estimates. Plain reduced estimates
 #'   use `statistic == "reduced"`. `report_csv` retains decoded CSV source
-#'   lines in order; XLSX rows are serialized with valid CSV quoting.
+#'   lines in order; XLSX rows are serialised with valid CSV quoting.
 #'
 #' @examples
 #' path <- system.file("extdata", "example-report.csv",

@@ -177,7 +177,7 @@ is_qview(rep)               # TRUE -- same class as read_qview()
 rep$concentrations          # long-format, with an out-of-range `flag`
 ```
 
-Both readers preserve recognized missing and censored measurements, with
+Both readers preserve recognised missing and censored measurements, with
 `raw_value` and `flag` alongside the numeric value. A `"< 52.50"` cell
 has value 52.50 and flag `<`: it is a bound, not an observed concentration.
 `Incalculable` remains missing and flagged. Numeric plots and summary estimates

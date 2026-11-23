@@ -126,7 +126,7 @@ container and producer export for provenance.
 
 Reports currently support wells A1–H12. Malformed numeric values, ambiguous
 analyte identities, invalid wells and malformed template geometry are errors.
-Recognized missing and censored measurements retain their original decoded
+Recognised missing and censored measurements retain their original decoded
 text and flags. A `<` or `>` concentration is a bound, not an exact observation;
 summary estimates and numeric plots exclude censored and missing values.
 Summary counts distinguish observed, missing and censored records. Flat text
@@ -301,7 +301,7 @@ You can always retrieve the up-to-date entry directly from R:
 citation("qviewparsR")
 ```
 
-## License
+## Licence
 
 MIT (c) 2026 R. Heller and M. Mannes.
 

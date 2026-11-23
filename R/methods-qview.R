@@ -546,7 +546,7 @@ plot.qview <- function(x, type = c("plate_map", "intensity_heatmap",
 
 
 # A censor bound is not an observed value. Older objects without flags retain
-# their numerical behavior, while nonfinite values are never plotted/summarised.
+# their numerical behaviour, while nonfinite values are never plotted/summarised.
 .qv_observed <- function(data, column) {
   finite <- is.finite(data[[column]])
   if (!"flag" %in% names(data)) return(finite)

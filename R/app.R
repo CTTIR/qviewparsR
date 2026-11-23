@@ -406,7 +406,7 @@ table.dataTable tbody tr:hover { background:#f0f0f0 !important; }
         shiny::tags$li("R. Heller (aut, cre, cph)"),
         shiny::tags$li("M. Mannes (aut, cph)")
       ),
-      shiny::h3("License"),
+      shiny::h3("Licence"),
       shiny::p("MIT (c) 2026 R. Heller and M. Mannes. See ",
                shiny::tags$code("LICENSE"), " in the repository."),
       shiny::h3("Project links"),

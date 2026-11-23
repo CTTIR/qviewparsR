@@ -205,7 +205,7 @@ test_that("binary point estimates and summary well lists retain assignments", {
   expect_identical(q$summary_statistics$flag, "missing")
 })
 
-test_that("normalized statistic identities cannot hide conflicting measurements", {
+test_that("normalised statistic identities cannot hide conflicting measurements", {
   rows <- c("S,Pixel Intensity (Replicate 1),A1,,10",
             "S,Pixel Intensity (Replicate 01),A1,,20")
   expect_error(read_qview_report(.integrity_report(rows), verbose = FALSE),

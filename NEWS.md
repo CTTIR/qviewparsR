@@ -17,7 +17,7 @@
   with `read_qview_report()` if a binary report contains ambiguous records.
 * Preserve sample identities and decoded quoting/encoding; reject malformed
   nonblank numbers, unsupported report wells and ambiguous analyte keys.
-* Retain recognized missing/censored measurements and raw values. Summaries
+* Retain recognised missing/censored measurements and raw values. Summaries
   distinguish observed, missing and censored counts; numeric plots exclude
   bounds and missing values. All-missing groups have `NA` estimates.
 * Validate template geometry, unique assignments and positive finite dilution.
@@ -59,7 +59,7 @@ of this patch is implied.
 
 # qviewparsR 1.0.0
 
-* Standardize the named v5 package logo across README, documentation pages
+* Standardise the named v5 package logo across README, documentation pages
   and available application headers, with matching light and dark artwork.
 
 
@@ -92,7 +92,7 @@ H2 database driver, no compiled code.
   boundary (fewer analytes, or a number cut mid-digit) is no longer
   mistaken for the current reading: for each physical
   (well, replicate, analyte) the value occurring most often across the
-  committed page copies wins, breaking ties toward the most complete
+  committed page copies wins, breaking ties towards the most complete
   source row. Per-well pixel intensities now match Q-View's own grid
   exports to 1e-6, and each well appears once in `plate_layout`.
 * `read_qview_template()` auto-detects the field separator, so

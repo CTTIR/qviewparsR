@@ -94,7 +94,7 @@ a backup during replacement and restored if publication fails. If that
 restoration fails, the error names the retained backup. This is not a
 crash-atomic transaction: process termination, filesystem failure, or
 concurrent readers/writers can observe an absent destination or leave
-recovery files. Concurrent writers are not synchronized.
+recovery files. Concurrent writers are not synchronised.
 
 Replacement copies and verifies the existing filesystem permission mode
 before publication, including the CSV directory and each managed CSV file
