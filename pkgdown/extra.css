@@ -103,10 +103,12 @@ html[data-bs-theme="dark"] {
 
 
 /* Scientific figure colours and labels must remain unchanged by theme,
-   in articles (img.r-plt) and in reference examples (pre .r-plt.img img). */
+   in articles (img.r-plt) and in reference examples (pre .r-plt.img img).
+   pkgdown also dims every image inside `pre` to 66 % opacity in dark mode. */
 html[data-bs-theme] img.r-plt,
 html[data-bs-theme] pre .r-plt.img img {
   filter: none !important;
+  opacity: 1 !important;
   background-color: #ffffff;
 }
 
