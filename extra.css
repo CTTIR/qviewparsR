@@ -102,9 +102,13 @@ html[data-bs-theme="dark"] {
 [data-bs-theme="dark"] table tr:hover { background: var(--qv-cap); }
 
 
-/* Scientific figure colours and labels must remain unchanged by theme. */
-html[data-bs-theme] img.r-plt {
+/* Scientific figure colours and labels must remain unchanged by theme,
+   in articles (img.r-plt) and in reference examples (pre .r-plt.img img).
+   pkgdown also dims every image inside `pre` to 66 % opacity in dark mode. */
+html[data-bs-theme] img.r-plt,
+html[data-bs-theme] pre .r-plt.img img {
   filter: none !important;
+  opacity: 1 !important;
   background-color: #ffffff;
 }
 
@@ -127,4 +131,11 @@ html[data-bs-theme="light"] pre code span.kw a {
 }
 html[data-bs-theme] pre code span[style*="color:"] {
   color: var(--cttir-text) !important;
+}
+
+/* The site header already shows the package logo; the logos embedded in the
+   README and vignette are for GitHub and standalone vignette HTML only. */
+.template-home .page-header .cttir-readme-logo,
+.template-article .cttir-vignette-logo {
+  display: none;
 }
