@@ -152,7 +152,8 @@ test_that("summary.qview() returns one row per well_type x analyte", {
   s <- summary(qv)
   expect_s3_class(s, "qview_summary")
   expect_named(s, c("well_type", "analyte", "unit", "n",
-                    "mean", "sd", "cv", "min", "max"))
+                    "mean", "sd", "cv", "min", "max",
+                    "n_observed", "n_missing", "n_censored"))
   expect_true(all(s$n > 0L))
   expect_true(all(s$cv >= 0 | is.na(s$cv)))
 })

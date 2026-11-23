@@ -45,7 +45,7 @@ print.qview <- function(x, ...) {
     "*" = "Image:    {.val {md$image %||% NA}}",
     "*" = "Imager:   {.val {md$imager %||% NA}}",
     "*" = "Product:  {.val {md$product %||% NA}}",
-    "*" = "Software: v{.val {md$qview_version %||% NA}}",
+    "*" = "Software: Q-View {.val {md$qview_version %||% NA}}",
     "*" = "Template: {.val {md$template %||% NA}}",
     "*" = "Created:  {.val {md$report_created %||% NA}}"
   ))

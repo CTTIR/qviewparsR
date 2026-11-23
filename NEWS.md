@@ -23,6 +23,8 @@
 * Validate template geometry, unique assignments and positive finite dilution.
 * Print imported analyte names and units literally, without evaluating
   brace-delimited expressions as diagnostic formatting code.
+* `print.qview()` labels the software line as `Software: Q-View "<version>"`
+  instead of the stray `v"<version>"`.
 
 ## Reader performance and robustness
 
