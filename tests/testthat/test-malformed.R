@@ -26,3 +26,10 @@ test_that("malformed-input error messages are stable", {
   expect_snapshot(read_qview_template(q, verbose = FALSE), error = TRUE,
                   transform = function(x) sub(q, "<tmp>.csv", x, fixed = TRUE))
 })
+
+test_that("readers refuse a directory path before opening it", {
+  d <- withr::local_tempdir()
+  for (reader in list(read_qview, read_qview_report, read_qview_template)) {
+    expect_no_warning(expect_error(reader(d, verbose = FALSE), "is a directory"))
+  }
+})

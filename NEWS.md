@@ -33,6 +33,8 @@
 * Container headers containing bytes that are not valid UTF-8 no longer
   emit locale warnings or cause a valid container to be rejected, and
   non-Q-View binary files fail with the documented error only.
+* `read_qview()`, `read_qview_report()` and `read_qview_template()` refuse a
+  directory path with an informative error instead of a connection error.
 
 ## App and export reliability
 

@@ -39,6 +39,13 @@
       call = call
     )
   }
+  if (dir.exists(path)) {
+    cli::cli_abort(
+      c("{.arg {arg}} must be an existing file.",
+        "x" = "{.path {path}} is a directory."),
+      call = call
+    )
+  }
   invisible(path)
 }
 
