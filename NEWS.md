@@ -9,6 +9,10 @@
 * Align citation metadata: `citation("qviewparsR")` now uses the CRAN DOI,
   `CITATION.cff` uses the Zenodo concept DOI, and all version fields read
   1.1.0.
+* Hand-written citations (README, vignette, `CITATION.cff`, `.zenodo.json`)
+  name the maintainer as "R. Heller" and use the title of
+  `citation("qviewparsR")`.
+* Documentation uses British English (`Language: en-GB`).
 
 ## Measurement integrity
 
