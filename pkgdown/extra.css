@@ -102,8 +102,10 @@ html[data-bs-theme="dark"] {
 [data-bs-theme="dark"] table tr:hover { background: var(--qv-cap); }
 
 
-/* Scientific figure colours and labels must remain unchanged by theme. */
-html[data-bs-theme] img.r-plt {
+/* Scientific figure colours and labels must remain unchanged by theme,
+   in articles (img.r-plt) and in reference examples (pre .r-plt.img img). */
+html[data-bs-theme] img.r-plt,
+html[data-bs-theme] pre .r-plt.img img {
   filter: none !important;
   background-color: #ffffff;
 }
