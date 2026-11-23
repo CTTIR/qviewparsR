@@ -24,6 +24,16 @@
 * Print imported analyte names and units literally, without evaluating
   brace-delimited expressions as diagnostic formatting code.
 
+## Reader performance and robustness
+
+* `read_qview()` scans the container once, classifies bytes in bounded
+  chunks and checks line starts only at candidate positions. A 50 MB
+  container now parses in about 3 s with about 0.3 GB peak memory, instead
+  of about 28 s and 1.3 GB; results are unchanged.
+* Container headers containing bytes that are not valid UTF-8 no longer
+  emit locale warnings or cause a valid container to be rejected, and
+  non-Q-View binary files fail with the documented error only.
+
 ## App and export reliability
 
 * Clear stale results when uploads or parsing options change; bound image

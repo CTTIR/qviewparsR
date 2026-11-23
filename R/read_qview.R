@@ -103,8 +103,9 @@ read_qview <- function(path,
   manifest <- .qv_parse_manifest(raw)
   segments <- .qv_find_h2_segments(raw)
   metadata <- .qv_extract_metadata(raw, path)
-  analytes <- .qv_extract_analyte_panel(raw)
+  # One scan of the container serves both the analyte limits and the rows.
   report_lines <- .qv_extract_report_lines(raw)
+  analytes <- .qv_extract_analyte_panel(raw, report_lines)
   rows <- .qv_parse_report_rows(report_lines, analytes)
 
   pixel_intensities <- rows$replicates
@@ -163,9 +164,7 @@ read_qview <- function(path,
 # --- Magic-byte / manifest validation -----------------------------------------
 
 .qv_check_magic <- function(raw, path, call = rlang::caller_env()) {
-  hdr <- raw[seq_len(min(64L, length(raw)))]
-  hdr[hdr == as.raw(0)] <- charToRaw(" ")
-  txt <- rawToChar(hdr)
+  txt <- .qv_header_text(raw[seq_len(min(64L, length(raw)))], " ")
   if (!grepl("^[0-9]+\\s+Q-View Project", txt, perl = TRUE)) {
     cli::cli_abort(
       c("{.arg path} is not a valid {.field .Q-View} project file.",
@@ -178,12 +177,71 @@ read_qview <- function(path,
 }
 
 
+# Header bytes as a valid string. NUL bytes cannot occur in an R string and
+# are replaced; bytes that are not valid UTF-8 are read as Latin-1, so that
+# regular expressions never see an invalid string in a UTF-8 locale.
+.qv_header_text <- function(bytes, nul) {
+  bytes[bytes == as.raw(0L)] <- charToRaw(nul)
+  txt <- rawToChar(bytes)
+  if (!validUTF8(txt)) txt <- iconv(txt, from = "latin1", to = "UTF-8")
+  txt
+}
+
+
+# Classify each byte as report text (tab, line feed, carriage return or
+# printable ASCII) through a lookup table; this is much faster and lighter
+# than `%in%` on multi-megabyte containers.
+.qv_text_byte_table <- local({
+  table <- logical(256L)
+  table[c(9L, 10L, 13L, 32:126) + 1L] <- TRUE
+  table
+})
+
+.qv_is_text_byte <- function(raw) .qv_text_byte_table[as.integer(raw) + 1L]
+
+
+# Maximal runs of text / non-text bytes, as rle(.qv_is_text_byte(raw)) would
+# report them. The container is classified in fixed-size chunks so that peak
+# memory stays bounded for large image-bearing project files.
+.qv_text_runs <- function(raw, chunk = 8388608L) {
+  n <- length(raw)
+  if (!n) return(list(starts = integer(), ends = integer(), text = logical()))
+  change <- vector("list", ceiling(n / chunk))
+  previous <- NULL
+  k <- 0L
+  for (from in seq.int(1L, n, by = chunk)) {
+    to <- min(n, from + chunk - 1L)
+    is_text <- .qv_is_text_byte(raw[from:to])
+    m <- length(is_text)
+    # Positions p (global) where byte p and byte p + 1 differ in class.
+    within <- if (m > 1L) which(is_text[-1L] != is_text[-m]) + (from - 1L) else integer()
+    if (!is.null(previous) && previous != is_text[[1L]]) within <- c(from - 1L, within)
+    k <- k + 1L
+    change[[k]] <- within
+    previous <- is_text[[m]]
+  }
+  change <- unlist(change, use.names = FALSE)
+  starts <- c(1L, change + 1L)
+  list(starts = starts, ends = c(change, n), text = .qv_is_text_byte(raw[starts]))
+}
+
+
+# TRUE for byte positions that begin a line (the first byte of the container
+# or a byte following a line feed or carriage return). Only the candidate
+# positions are inspected, never the whole container.
+.qv_at_line_start <- function(raw, positions) {
+  previous <- raw[pmax(positions - 1L, 1L)]
+  positions == 1L | previous == as.raw(10L) | previous == as.raw(13L)
+}
+
+
 .qv_parse_manifest <- function(raw) {
   hdr <- raw[seq_len(min(2048L, length(raw)))]
-  hdr[hdr == as.raw(0)] <- charToRaw("\n")
-  txt <- rawToChar(hdr)
   # Cut at the first H2 marker -- the manifest sits before the H2 segments.
-  txt <- strsplit(txt, "-- H2", fixed = TRUE)[[1L]][1L]
+  # Cutting the bytes (not the decoded text) keeps database bytes out.
+  marker <- grepRaw(charToRaw("-- H2"), hdr, fixed = TRUE)
+  if (length(marker)) hdr <- hdr[seq_len(marker[[1L]] - 1L)]
+  txt <- .qv_header_text(hdr, "\n")
   lines <- strsplit(txt, "[\r\n]+")[[1L]]
   lines <- trimws(lines)
   lines <- lines[nzchar(lines)]
@@ -255,22 +313,19 @@ read_qview <- function(path,
     file_path = normalizePath(path, mustWork = FALSE),
     parsed_at = Sys.time()
   )
-  hdr <- raw[seq_len(min(64L, length(raw)))]
-  hdr[hdr == as.raw(0)] <- charToRaw(" ")
-  m <- regmatches(rawToChar(hdr),
-                  regexec("^([0-9]+)", rawToChar(hdr)))[[1L]]
+  hdr <- .qv_header_text(raw[seq_len(min(64L, length(raw)))], " ")
+  m <- regmatches(hdr, regexec("^([0-9]+)", hdr))[[1L]]
   if (length(m) == 2L) metadata$container_version <- m[2L]
 
   prefixes <- c(project = "Project: ", plate = "Plate: ", image = "Image: ",
                 imager = "Imager: ", product = "Product: ", user = "User: ",
                 report_created = "Report Created: ", qview_version = "Q-View Version: ",
                 template = "Well Assignment Template: ")
-  line_starts <- c(1L, which(raw %in% as.raw(c(10L, 13L))) + 1L)
   for (field in names(prefixes)) {
     prefix <- prefixes[[field]]
     positions <- grepRaw(charToRaw(prefix), raw, all = TRUE, fixed = TRUE)
     # A key mentioned inside another value is not a second metadata record.
-    positions <- positions[positions %in% line_starts]
+    positions <- positions[.qv_at_line_start(raw, positions)]
     if (!length(positions)) next
     values <- vapply(positions, function(pos) {
       line <- .qv_binary_line(raw, pos, paste("metadata", field))
@@ -285,11 +340,10 @@ read_qview <- function(path,
 }
 
 
-.qv_extract_analyte_panel <- function(raw) {
+.qv_extract_analyte_panel <- function(raw, lines = .qv_extract_report_lines(raw)) {
   marker <- grepRaw(charToRaw("Well Group,Statistic,Well,Error Codes"),
                     raw, all = TRUE, fixed = TRUE)
-  line_starts <- c(1L, which(raw %in% as.raw(c(10L, 13L))) + 1L)
-  marker <- marker[marker %in% line_starts]
+  marker <- marker[.qv_at_line_start(raw, marker)]
   empty <- tibble::tibble(spot_number = integer(),
                           analyte = character(), unit = character(),
                           lod = numeric(), lloq = numeric(),
@@ -325,7 +379,6 @@ read_qview <- function(path,
   .qv_check_panel(out)
   # Read only intact, observed report lines. No non-ASCII/control byte is
   # discarded to join fragments into a different numeric or identity token.
-  lines <- .qv_extract_report_lines(raw)
   section <- ""
   values <- list()
   source_runs <- attr(lines, "source_runs")
@@ -362,11 +415,10 @@ read_qview <- function(path,
 
 
 .qv_extract_report_lines <- function(raw) {
-  is_text <- raw %in% as.raw(c(9L, 10L, 13L)) |
-    (raw >= as.raw(32L) & raw <= as.raw(126L))
-  runs <- rle(is_text)
-  ends <- cumsum(runs$lengths)
-  starts <- ends - runs$lengths + 1L
+  runs <- .qv_text_runs(raw)
+  starts <- runs$starts
+  ends <- runs$ends
+  run_text <- runs$text
   patterns <- paste0("(?:Pixel Intensity|Reduced Concentration|",
     "Theoretical Concentration|Backfit Concentration|Expected Concentration|",
     "Concentration|Regression Model|Limit of Detection|",
@@ -374,7 +426,7 @@ read_qview <- function(path,
   captured <- character()
   source_spans <- list()
   source_runs <- integer()
-  for (i in which(runs$values & runs$lengths >= 20L)) {
+  for (i in which(run_text & ends - starts + 1L >= 20L)) {
     start <- starts[[i]]
     end <- ends[[i]]
     text <- rawToChar(raw[seq.int(start, end)])
