@@ -26,12 +26,15 @@ jobs:
           - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release'}
           - {os: ubuntu-latest,  r: 'release'}
           - {os: ubuntu-latest,  r: 'oldrel-1'}
-          # S7 1.0.0 needs R >= 4.2, so ggplot2 >= 4.0 cannot be installed on R 4.1.
-          - {os: ubuntu-22.04,   r: '4.1', extra: 'ggplot2@3.5.2'}
+          # Declared minimum R: current releases of several suggested packages
+          # (ggplot2 via S7, Hmisc) need R >= 4.2, so this job checks the package
+          # with its required dependencies only.
+          - {os: ubuntu-22.04,   r: '4.1', minimal: true}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
+      _R_CHECK_FORCE_SUGGESTS_: false
 
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -48,10 +51,12 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
-          extra-packages: ${{ matrix.config.extra && format('any::rcmdcheck, {0}', matrix.config.extra) || 'any::rcmdcheck' }}
+          dependencies: ${{ matrix.config.minimal && '"hard"' || '"all"' }}
+          extra-packages: ${{ matrix.config.minimal && 'any::rcmdcheck, any::testthat' || 'any::rcmdcheck' }}
           needs: check
 
       - uses: r-lib/actions/check-r-package@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
         with:
           upload-snapshots: true
-          args: 'c("--no-manual", "--as-cran")'
+          args: ${{ matrix.config.minimal && 'c("--no-manual", "--ignore-vignettes")' || 'c("--no-manual", "--as-cran")' }}
+          build_args: ${{ matrix.config.minimal && 'c("--no-manual", "--no-build-vignettes")' || 'c("--no-manual", "--compact-vignettes=gs+qpdf")' }}
