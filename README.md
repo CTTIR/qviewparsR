@@ -219,7 +219,7 @@ identifiers internally:
 | `Cal 1` ... `Cal N` | `ICal 1` ... `ICal N` |
 | `Low` | `GLow` |
 | `High` | `HHigh` |
-| `FD24277364`, all-digit IDs | `NFD24277364`, `N1211498458` |
+| `FD00000001`, all-digit IDs | `NFD00000001`, `N1234567890` |
 
 `strip_qview_prefix()` reverses this transformation, and
 `read_qview(path, strip_prefix = TRUE)` applies it across the whole

@@ -180,7 +180,7 @@ systematic and reversible:
 | `Cal 1` ... `Cal N`             | `ICal 1` ... `ICal N`              |
 | `Low`                           | `GLow`                             |
 | `High`                          | `HHigh`                            |
-| `FD24277364`, `1211498458`, ... | `NFD24277364`, `N1211498458`, ...  |
+| `FD00000001`, `1234567890`, ... | `NFD00000001`, `N1234567890`, ...  |
 
 `strip_qview_prefix()` reverses the rewrite. Pass `strip_prefix = TRUE`
 to `read_qview()` to apply it across every sample-id column at once:
@@ -189,7 +189,7 @@ to `read_qview()` to apply it across every sample-id column at once:
 qv <- read_qview(project, strip_prefix = TRUE, verbose = FALSE)
 unique(qv$well_groups$sample_id)
 
-strip_qview_prefix(c("ICal 1", "GLow", "HHigh", "NFD24277364"))
+strip_qview_prefix(c("ICal 1", "GLow", "HHigh", "NFD00000001"))
 ```
 
 ## Coercion and tidy-data idioms

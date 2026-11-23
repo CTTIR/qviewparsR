@@ -3,8 +3,8 @@ test_that("strip_qview_prefix reverses Q-View internal naming", {
   expect_equal(strip_qview_prefix("ICal 6"), "Cal 6")
   expect_equal(strip_qview_prefix("GLow"),   "Low")
   expect_equal(strip_qview_prefix("HHigh"),  "High")
-  expect_equal(strip_qview_prefix("NFD24277364"), "FD24277364")
-  expect_equal(strip_qview_prefix("N1211498458"), "1211498458")
+  expect_equal(strip_qview_prefix("NFD00000001"), "FD00000001")
+  expect_equal(strip_qview_prefix("N1234567890"), "1234567890")
 })
 
 test_that("strip_qview_prefix passes unknown values through unchanged", {
@@ -14,7 +14,7 @@ test_that("strip_qview_prefix passes unknown values through unchanged", {
 })
 
 test_that("strip_qview_prefix is vectorised", {
-  inp <- c("ICal 1", "GLow", "NFD24001", "Plate 1")
+  inp <- c("ICal 1", "GLow", "NFD00000002", "Plate 1")
   out <- strip_qview_prefix(inp)
-  expect_equal(out, c("Cal 1", "Low", "FD24001", "Plate 1"))
+  expect_equal(out, c("Cal 1", "Low", "FD00000002", "Plate 1"))
 })

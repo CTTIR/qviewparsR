@@ -6,7 +6,7 @@ test_that("conflicting complete or truncated page candidates are refused", {
     analyte = c("Ba", "Bb", "C3a"), unit = c("ng/ml", "ug/ml", "ng/ml"))
   lines <- c(
     "Cal 4,Pixel Intensity (Replicate 1),D1,NA,913,31",
-    "3738433602 (1:100),Pixel Intensity (Replicate 1),D1,NA,913,315,482")
+    "9876543210 (1:100),Pixel Intensity (Replicate 1),D1,NA,913,315,482")
   expect_error(.qv_parse_report_rows(lines, analytes), "Incomplete or extra")
 })
 

@@ -2,12 +2,12 @@
 # otherwise they skip cleanly so CI without the file still passes.
 .find_fixture <- function() {
   candidates <- c(
-    file.path(".data", "20230316_ELISA-plate-7_panel-1.Q-View"),
-    file.path("..", "..", ".data", "20230316_ELISA-plate-7_panel-1.Q-View"),
-    file.path(".data", "20230316_ELISA-plate-7_panel-1",
-              "20230316_ELISA-plate-7_panel-1.Q-View"),
-    file.path("..", "..", ".data", "20230316_ELISA-plate-7_panel-1",
-              "20230316_ELISA-plate-7_panel-1.Q-View"),
+    file.path(".data", "20000101_SYN-PLATE-07_panel-1.Q-View"),
+    file.path("..", "..", ".data", "20000101_SYN-PLATE-07_panel-1.Q-View"),
+    file.path(".data", "20000101_SYN-PLATE-07_panel-1",
+              "20000101_SYN-PLATE-07_panel-1.Q-View"),
+    file.path("..", "..", ".data", "20000101_SYN-PLATE-07_panel-1",
+              "20000101_SYN-PLATE-07_panel-1.Q-View"),
     Sys.getenv("QVIEWPARSR_QVIEW_FIXTURE",
                unset = Sys.getenv("COMPARSR_QVIEW_FIXTURE", unset = ""))
   )

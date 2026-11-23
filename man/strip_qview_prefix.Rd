@@ -33,7 +33,7 @@ returned unchanged.
 }
 \examples{
 strip_qview_prefix(c("ICal 1", "GLow", "HHigh",
-                     "NFD24277364", "N1211498458", "Plate 1"))
+                     "NFD00000001", "N1234567890", "Plate 1"))
 
 }
 \seealso{

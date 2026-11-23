@@ -3,7 +3,7 @@
 
 test_that("read_qview rejects a plain CSV report (not a binary container)", {
   p <- withr::local_tempfile(fileext = ".csv")
-  writeLines(c("Project: 20230321_ELISA-plate-8_panel-1,,,",
+  writeLines(c("Project: 20000102_SYN-PLATE-08_panel-1,,,",
                "Plate: Plate 1,,,",
                "Well Group,Statistic,Well,Error Codes,Ba (ng/ml)"), p)
   expect_error(read_qview(p, verbose = FALSE), "not a valid .*Q-View")

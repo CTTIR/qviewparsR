@@ -13,6 +13,7 @@
   name the maintainer as "R. Heller" and use the title of
   `citation("qviewparsR")`.
 * Documentation uses British English (`Language: en-GB`).
+* Example and test identifiers are now synthetic.
 
 ## Measurement integrity
 
